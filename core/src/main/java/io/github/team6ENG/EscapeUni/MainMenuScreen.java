@@ -22,9 +22,11 @@ public class MainMenuScreen implements Screen {
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
         game.batch.begin();
-        //draw text. Remember that x and y are in meters
-        game.font.draw(game.batch, "Basic Main Screen ", 1, 1.5f);
-        game.font.draw(game.batch, "Click to play", 1, 1);
+
+        game.menuFont.draw(game.batch, "Escape York University", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 +1.5f );
+        game.menuFont.draw(game.batch, "Click anywhere to play", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 + 0.5f);
+
+
         game.batch.end();
 
         if (Gdx.input.isTouched()) {
@@ -57,6 +59,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
+
     }
 
 }
