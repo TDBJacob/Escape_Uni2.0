@@ -1,20 +1,50 @@
 package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+/**
+ * GameScreen - main gameplay screen.
+ * 
+ * This is class handle player movement and simple test UI.
+ * The logic is very basic now but can expand later.
+ */
 public class GameScreen implements Screen {
 
-
     private final Main game;
+    private Sprite player;
+    private float speed = 2f;   // move speed, maybe can change later.
 
     public GameScreen(final Main game) {
         this.game = game;
+
+        // load player image, or create fallback if not found
+        try {
+        Texture playerTexture = new Texture(Gdx.files.internal("player.jpg"));
+        player = new Sprite(playerTexture);
+    } catch (Exception e) {
+        System.out.println("Failed to load player.png, creating fallback graphic");
+        
+        // create a new player
+        Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.CYAN); 
+        pixmap.fill();
+        pixmap.setColor(Color.ORANGE); 
+        pixmap.fillCircle(16, 16, 10); 
+        player = new Sprite(new Texture(pixmap));
+        pixmap.dispose();
+    }
+    player.setPosition(100, 100);   // player start position
     }
 
-        @Override
+    @Override
     public void show() {
 
     }
@@ -22,15 +52,41 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
 
-        ScreenUtils.clear(Color.RED);
+        // clean screen
+        ScreenUtils.clear(Color.WHITE);
+
+        // process input each frame
+        handleInput(delta);
 
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
+        // draw player and text
         game.batch.begin();
+        player.draw(game.batch);
 
-        game.menuFont.draw(game.batch, "Main menu screen", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 +1.5f );
-        game.menuFont.draw(game.batch, "Add game :)", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 + 0.5f);
+        float worldWidth = game.viewport.getWorldWidth();
+        float worldHeight = game.viewport.getWorldHeight();
+
+        game.menuFont.draw(game.batch, "Main menu screen", 20, worldHeight - 20);
+        game.menuFont.draw(game.batch, "Add game :)", 20, worldHeight - 50);
+        
+        String line1 = "Use arrow or WASD to move player.";
+        String line2 = "Click mouse to go back to menu (testing only)";
+        
+        // calculate text width
+        GlyphLayout layout1 = new GlyphLayout(game.menuFont, line1);
+        GlyphLayout layout2 = new GlyphLayout(game.menuFont, line2);
+
+        // center alignment
+        float maxWidth = Math.max(layout1.width, layout2.width);
+        float centerX = (worldWidth - maxWidth) / 2;
+        
+        float line1Y = worldHeight * 0.6f;
+        game.menuFont.draw(game.batch, line1, centerX, line1Y);
+        
+        float line2Y = line1Y - layout1.height - 20f;
+        game.menuFont.draw(game.batch, line2, centerX, line2Y);
 
 
         game.batch.end();
@@ -43,9 +99,52 @@ public class GameScreen implements Screen {
         }
     }
 
+    // handle keyboard input and move player
+    private void handleInput(float delta) {
+        float actualSpeed = speed * 60f * delta;
+
+    // move up
+    if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        player.translateY(actualSpeed);
+        System.out.println("Move Up (W or UP)");
+    }
+
+    // move down
+    if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        player.translateY(-actualSpeed);
+        System.out.println("Move Down (S or DOWN)");
+    }
+
+    // move left
+    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        player.translateX(-actualSpeed);
+        System.out.println("Move Left (A or LEFT)");
+    }
+
+    // move right
+    if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        player.translateX(actualSpeed);
+        System.out.println("Move Right (D or RIGHT)");
+    }
+
+    // limit inside screen
+    float worldWidth = game.viewport.getWorldWidth();
+    float worldHeight = game.viewport.getWorldHeight();
+    
+    if (player.getX() < 0) player.setX(0);
+
+    if (player.getY() < 0) player.setY(0);
+
+    if (player.getX() > worldWidth - player.getWidth()) 
+        player.setX(worldWidth - player.getWidth());
+
+    if (player.getY() > worldHeight - player.getHeight()) 
+        player.setY(worldHeight - player.getHeight());
+    }
+
     @Override
     public void resize(int width, int height) {
-
+        game.viewport.update(width, height);
     }
 
     @Override
@@ -65,6 +164,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        // release texture memory
+        if (player.getTexture() != null) {
+            player.getTexture().dispose();
+        }
+        
 
     }
 }

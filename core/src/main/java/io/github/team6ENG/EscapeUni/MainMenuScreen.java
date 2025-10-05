@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 public class MainMenuScreen implements Screen {
 
@@ -23,9 +24,18 @@ public class MainMenuScreen implements Screen {
 
         game.batch.begin();
 
-        game.menuFont.draw(game.batch, "Escape York University", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 +1.5f );
-        game.menuFont.draw(game.batch, "Click anywhere to play", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 + 0.5f);
+        float worldWidth = game.viewport.getWorldWidth();
+        float worldHeight = game.viewport.getWorldHeight();
+    
+        String title = "Escape York University";
+        GlyphLayout layout = new GlyphLayout(game.menuFont, title);
+        float titleX = (worldWidth - layout.width) / 2;
+        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.7f);
 
+        String subtitle = "Click anywhere to play";
+        GlyphLayout subtitleLayout = new GlyphLayout(game.menuFont, subtitle);
+        float subtitleX = (worldWidth - subtitleLayout.width) / 2;
+        game.menuFont.draw(game.batch, subtitle, subtitleX, worldHeight * 0.6f);
 
         game.batch.end();
 
@@ -35,11 +45,11 @@ public class MainMenuScreen implements Screen {
             dispose();
         }
     }
+
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height, true);
     }
-
 
     @Override
     public void show() {
