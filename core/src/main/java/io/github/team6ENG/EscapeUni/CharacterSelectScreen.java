@@ -3,6 +3,7 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -69,8 +70,19 @@ public class CharacterSelectScreen implements Screen {
 
         game.batch.begin();
 
-        game.menuFont.draw(game.batch, "Character selection screen", game.viewport.getScreenWidth()/200 - 2, game.viewport.getScreenHeight()/200 +1.5f );
-        game.menuFont.draw(game.batch, "Display 2 characters to choose from", game.viewport.getScreenWidth()/200 - 3, game.viewport.getScreenHeight()/200 + 0.5f);
+
+        float worldWidth = game.viewport.getWorldWidth();
+        float worldHeight = game.viewport.getWorldHeight();
+
+        String title = "Character select screen";
+        GlyphLayout layout = new GlyphLayout(game.menuFont, title);
+        float titleX = (worldWidth - layout.width) / 2;
+        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.7f);
+
+        String subtitle = "Display 2 characters to choose from";
+        GlyphLayout subtitleLayout = new GlyphLayout(game.menuFont, subtitle);
+        float subtitleX = (worldWidth - subtitleLayout.width) / 2;
+        game.menuFont.draw(game.batch, subtitle, subtitleX, worldHeight * 0.6f);
 
         game.batch.end();
 
