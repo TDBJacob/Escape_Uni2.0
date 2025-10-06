@@ -4,15 +4,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.sun.jdi.event.ExceptionEvent;
 
 /**
  * GameScreen - main gameplay screen.
- * 
+ *
  * This is class handle player movement and simple test UI.
  * The logic is very basic now but can expand later.
  */
@@ -21,6 +27,13 @@ public class GameScreen implements Screen {
     private final Main game;
     private Sprite player;
     private float speed = 2f;   // move speed, maybe can change later.
+
+    OrthogonalTiledMapRenderer mapRenderer;
+    private TiledMap map;
+    private int mapWallsLayer = 0;
+    private int mapWallsId = 90;
+
+    TiledMapTileLayer layer ;
 
     public GameScreen(final Main game) {
         this.game = game;
@@ -31,17 +44,22 @@ public class GameScreen implements Screen {
         player = new Sprite(playerTexture);
     } catch (Exception e) {
         System.out.println("Failed to load player.png, creating fallback graphic");
-        
+
         // create a new player
-        Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.CYAN); 
+        Pixmap pixmap = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.CYAN);
         pixmap.fill();
-        pixmap.setColor(Color.ORANGE); 
-        pixmap.fillCircle(16, 16, 10); 
+        pixmap.setColor(Color.ORANGE);
+        pixmap.fillCircle(8, 8, 5);
         player = new Sprite(new Texture(pixmap));
         pixmap.dispose();
     }
-    player.setPosition(100, 100);   // player start position
+    player.setPosition(300, 450);   // player start position
+
+
+    map = new TmxMapLoader().load("tileMap/testMap.tmx");
+    mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
+    layer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
     }
 
     @Override
@@ -61,19 +79,23 @@ public class GameScreen implements Screen {
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
+        mapRenderer.setView((OrthographicCamera) game.viewport.getCamera());
+        mapRenderer.render();
         // draw player and text
         game.batch.begin();
         player.draw(game.batch);
+
+
 
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
 
         game.menuFont.draw(game.batch, "Main menu screen", 20, worldHeight - 20);
         game.menuFont.draw(game.batch, "Add game :)", 20, worldHeight - 50);
-        
+
         String line1 = "Use arrow or WASD to move player.";
         String line2 = "Click mouse to go back to menu (testing only)";
-        
+
         // calculate text width
         GlyphLayout layout1 = new GlyphLayout(game.menuFont, line1);
         GlyphLayout layout2 = new GlyphLayout(game.menuFont, line2);
@@ -81,16 +103,15 @@ public class GameScreen implements Screen {
         // center alignment
         float maxWidth = Math.max(layout1.width, layout2.width);
         float centerX = (worldWidth - maxWidth) / 2;
-        
+
         float line1Y = worldHeight * 0.6f;
         game.menuFont.draw(game.batch, line1, centerX, line1Y);
-        
+
         float line2Y = line1Y - layout1.height - 20f;
         game.menuFont.draw(game.batch, line2, centerX, line2Y);
 
 
         game.batch.end();
-
         // Cycle through screens for testing, remove later
         if (Gdx.input.justTouched()) {
 
@@ -103,42 +124,55 @@ public class GameScreen implements Screen {
     private void handleInput(float delta) {
         float actualSpeed = speed * 60f * delta;
 
+    int x = (int)(player.getX()+8)/16;
+    int y = (int)(player.getY()+8)/16;
+
+    System.out.println(x+","+y);
+    TiledMapTileLayer.Cell cell;
     // move up
     if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-        player.translateY(actualSpeed);
-        System.out.println("Move Up (W or UP)");
+
+        if(layer.getCell(x,y+1).getTile().getId() !=mapWallsId) {
+            player.translateY(actualSpeed);
+            System.out.println("Move Up (W or UP)");}
     }
 
     // move down
     if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-        player.translateY(-actualSpeed);
-        System.out.println("Move Down (S or DOWN)");
+        if(layer.getCell(x,y-1).getTile().getId() !=mapWallsId) {
+            player.translateY(-actualSpeed);
+            System.out.println("Move Down (S or DOWN)");
+        }
     }
 
     // move left
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-        player.translateX(-actualSpeed);
-        System.out.println("Move Left (A or LEFT)");
+        if(layer.getCell(x-1,y).getTile().getId() !=mapWallsId) {
+            player.translateX(-actualSpeed);
+            System.out.println("Move Left (A or LEFT)");
+        }
     }
 
     // move right
     if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-        player.translateX(actualSpeed);
-        System.out.println("Move Right (D or RIGHT)");
+        if(layer.getCell(x+1,y).getTile().getId() !=mapWallsId) {
+            player.translateX(actualSpeed);
+            System.out.println("Move Right (D or RIGHT)");
+        }
     }
 
     // limit inside screen
     float worldWidth = game.viewport.getWorldWidth();
     float worldHeight = game.viewport.getWorldHeight();
-    
+
     if (player.getX() < 0) player.setX(0);
 
     if (player.getY() < 0) player.setY(0);
 
-    if (player.getX() > worldWidth - player.getWidth()) 
+    if (player.getX() > worldWidth - player.getWidth())
         player.setX(worldWidth - player.getWidth());
 
-    if (player.getY() > worldHeight - player.getHeight()) 
+    if (player.getY() > worldHeight - player.getHeight())
         player.setY(worldHeight - player.getHeight());
     }
 
@@ -168,7 +202,7 @@ public class GameScreen implements Screen {
         if (player.getTexture() != null) {
             player.getTexture().dispose();
         }
-        
+
 
     }
 }
