@@ -19,7 +19,7 @@ public class Main extends Game{
         batch = new SpriteBatch();
         // use libGDX's default font
         menuFont = new BitmapFont(Gdx.files.internal("fonts/menuScreenFont.fnt"));
-        viewport = new FitViewport(800, 600);
+        viewport = new FitViewport(800, 640);
 
         //Scale font to our viewport by ratio of viewport height to screen height
         menuFont.setUseIntegerPositions(false);
