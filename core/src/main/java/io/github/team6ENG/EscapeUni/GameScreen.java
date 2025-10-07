@@ -35,31 +35,39 @@ public class GameScreen implements Screen {
 
     TiledMapTileLayer layer ;
 
+
+    private OrthographicCamera cam;
+
     public GameScreen(final Main game) {
         this.game = game;
 
         // load player image, or create fallback if not found
         try {
-        Texture playerTexture = new Texture(Gdx.files.internal("player.jpg"));
-        player = new Sprite(playerTexture);
-    } catch (Exception e) {
-        System.out.println("Failed to load player.png, creating fallback graphic");
+            Texture playerTexture = new Texture(Gdx.files.internal("player.jpg"));
+            player = new Sprite(playerTexture);
+        } catch (Exception e) {
+            System.out.println("Failed to load player.png, creating fallback graphic");
 
-        // create a new player
-        Pixmap pixmap = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.CYAN);
-        pixmap.fill();
-        pixmap.setColor(Color.ORANGE);
-        pixmap.fillCircle(8, 8, 5);
-        player = new Sprite(new Texture(pixmap));
-        pixmap.dispose();
-    }
-    player.setPosition(300, 450);   // player start position
+            // create a new player
+            Pixmap pixmap = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
+            pixmap.setColor(Color.CYAN);
+            pixmap.fill();
+            pixmap.setColor(Color.ORANGE);
+            pixmap.fillCircle(8, 8, 5);
+            player = new Sprite(new Texture(pixmap));
+            pixmap.dispose();
+        }
+        player.setPosition((game.viewport.getScreenWidth()/2)-8, (game.viewport.getScreenHeight()/2)-8);   // player start position
 
 
-    map = new TmxMapLoader().load("tileMap/testMap.tmx");
-    mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
-    layer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
+        map = new TmxMapLoader().load("tileMap/testMap.tmx");
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
+        layer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
+
+        cam = new OrthographicCamera(400,300);
+        cam.position.set(game.viewport.getScreenWidth() / 2f, game.viewport.getScreenHeight() / 2f, 0);
+
+
     }
 
     @Override
@@ -77,10 +85,20 @@ public class GameScreen implements Screen {
         handleInput(delta);
 
         game.viewport.apply();
-        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        //game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
-        mapRenderer.setView((OrthographicCamera) game.viewport.getCamera());
+
+        cam.update();
+
+        mapRenderer.setView((OrthographicCamera) cam);
         mapRenderer.render();
+
+
+
+        //temp
+        cam.update();
+        game.batch.setProjectionMatrix(cam.combined);
+        //temp
         // draw player and text
         game.batch.begin();
         player.draw(game.batch);
@@ -124,56 +142,60 @@ public class GameScreen implements Screen {
     private void handleInput(float delta) {
         float actualSpeed = speed * 60f * delta;
 
-    int x = (int)(player.getX()+8)/16;
-    int y = (int)(player.getY()+8)/16;
+        int x = (int)(player.getX()+8)/16;
+        int y = (int)(player.getY()+8)/16;
 
-    System.out.println(x+","+y);
-    TiledMapTileLayer.Cell cell;
-    // move up
-    if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        System.out.println(x+","+y);
+        TiledMapTileLayer.Cell cell;
+        // move up
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
-        if(layer.getCell(x,y+1).getTile().getId() !=mapWallsId) {
-            player.translateY(actualSpeed);
-            System.out.println("Move Up (W or UP)");}
-    }
-
-    // move down
-    if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-        if(layer.getCell(x,y-1).getTile().getId() !=mapWallsId) {
-            player.translateY(-actualSpeed);
-            System.out.println("Move Down (S or DOWN)");
+            if(layer.getCell(x,y+1).getTile().getId() !=mapWallsId) {
+                cam.translate(0, actualSpeed, 0);
+                player.translateY(actualSpeed);
+                System.out.println("Move Up (W or UP)");}
         }
-    }
 
-    // move left
-    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-        if(layer.getCell(x-1,y).getTile().getId() !=mapWallsId) {
-            player.translateX(-actualSpeed);
-            System.out.println("Move Left (A or LEFT)");
+        // move down
+        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            if(layer.getCell(x,y-1).getTile().getId() !=mapWallsId) {
+                player.translateY(-actualSpeed);
+                cam.translate(0, -actualSpeed, 0);
+                System.out.println("Move Down (S or DOWN)");
+            }
         }
-    }
 
-    // move right
-    if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-        if(layer.getCell(x+1,y).getTile().getId() !=mapWallsId) {
-            player.translateX(actualSpeed);
-            System.out.println("Move Right (D or RIGHT)");
+        // move left
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            if(layer.getCell(x-1,y).getTile().getId() !=mapWallsId) {
+                player.translateX(-actualSpeed);
+                cam.translate(-actualSpeed, 0, 0);
+                System.out.println("Move Left (A or LEFT)");
+            }
         }
-    }
 
-    // limit inside screen
-    float worldWidth = game.viewport.getWorldWidth();
-    float worldHeight = game.viewport.getWorldHeight();
+        // move right
+        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            if(layer.getCell(x+1,y).getTile().getId() !=mapWallsId) {
+                player.translateX(actualSpeed);
+                cam.translate(actualSpeed, 0, 0);
+                System.out.println("Move Right (D or RIGHT)");
+            }
+        }
 
-    if (player.getX() < 0) player.setX(0);
+        // limit inside screen
+        float worldWidth = game.viewport.getWorldWidth();
+        float worldHeight = game.viewport.getWorldHeight();
 
-    if (player.getY() < 0) player.setY(0);
+        if (player.getX() < 0) player.setX(0);
 
-    if (player.getX() > worldWidth - player.getWidth())
-        player.setX(worldWidth - player.getWidth());
+        if (player.getY() < 0) player.setY(0);
 
-    if (player.getY() > worldHeight - player.getHeight())
-        player.setY(worldHeight - player.getHeight());
+        if (player.getX() > worldWidth - player.getWidth())
+            player.setX(worldWidth - player.getWidth());
+
+        if (player.getY() > worldHeight - player.getHeight())
+            player.setY(worldHeight - player.getHeight());
     }
 
     @Override
