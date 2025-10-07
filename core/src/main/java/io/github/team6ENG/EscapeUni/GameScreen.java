@@ -85,20 +85,16 @@ public class GameScreen implements Screen {
         handleInput(delta);
 
         game.viewport.apply();
-        //game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
-
-
         cam.update();
 
         mapRenderer.setView((OrthographicCamera) cam);
         mapRenderer.render();
 
-
-
-        //temp
         cam.update();
         game.batch.setProjectionMatrix(cam.combined);
-        //temp
+
+
+
         // draw player and text
         game.batch.begin();
         player.draw(game.batch);
