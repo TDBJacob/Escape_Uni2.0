@@ -14,7 +14,6 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.sun.jdi.event.ExceptionEvent;
 
 /**
  * GameScreen - main gameplay screen.
@@ -33,10 +32,12 @@ public class GameScreen implements Screen {
     private int mapWallsLayer = 0;
     private int mapWallsId = 90;
 
-    TiledMapTileLayer layer ;
-
+    TiledMapTileLayer wallsLayer;
 
     private OrthographicCamera cam;
+
+    Goose goose = new Goose();
+    float stateTime;
 
     public GameScreen(final Main game) {
         this.game = game;
@@ -62,12 +63,18 @@ public class GameScreen implements Screen {
 
         map = new TmxMapLoader().load("tileMap/testMap.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
-        layer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
+        wallsLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
 
         cam = new OrthographicCamera(400,300);
         cam.position.set(game.viewport.getScreenWidth() / 2f, game.viewport.getScreenHeight() / 2f, 0);
 
 
+        stateTime = 0f;
+
+        goose.loadGoose(wallsLayer, mapWallsId);
+        goose.x = game.viewport.getScreenWidth() / 2;
+        goose.x += 20;
+        goose.y = game.viewport.getScreenHeight() / 2;
     }
 
     @Override
@@ -83,7 +90,8 @@ public class GameScreen implements Screen {
 
         // process input each frame
         handleInput(delta);
-
+        goose.moveGoose(stateTime, player.getX(),  player.getY());
+        stateTime += Gdx.graphics.getDeltaTime();
         game.viewport.apply();
         cam.update();
 
@@ -101,10 +109,12 @@ public class GameScreen implements Screen {
 
 
 
+        game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
+
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
 
-        game.menuFont.draw(game.batch, "Main menu screen", 20, worldHeight - 20);
+        game.menuFont.draw(game.batch, "Main game screen", 20, worldHeight - 20);
         game.menuFont.draw(game.batch, "Add game :)", 20, worldHeight - 50);
 
         String line1 = "Use arrow or WASD to move player.";
@@ -141,12 +151,11 @@ public class GameScreen implements Screen {
         int x = (int)(player.getX()+8)/16;
         int y = (int)(player.getY()+8)/16;
 
-        System.out.println(x+","+y);
         TiledMapTileLayer.Cell cell;
         // move up
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
 
-            if(layer.getCell(x,y+1).getTile().getId() !=mapWallsId) {
+            if(wallsLayer.getCell(x,y+1).getTile().getId() !=mapWallsId) {
                 cam.translate(0, actualSpeed, 0);
                 player.translateY(actualSpeed);
                 System.out.println("Move Up (W or UP)");}
@@ -154,7 +163,7 @@ public class GameScreen implements Screen {
 
         // move down
         if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            if(layer.getCell(x,y-1).getTile().getId() !=mapWallsId) {
+            if(wallsLayer.getCell(x,y-1).getTile().getId() !=mapWallsId) {
                 player.translateY(-actualSpeed);
                 cam.translate(0, -actualSpeed, 0);
                 System.out.println("Move Down (S or DOWN)");
@@ -163,7 +172,7 @@ public class GameScreen implements Screen {
 
         // move left
         if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            if(layer.getCell(x-1,y).getTile().getId() !=mapWallsId) {
+            if(wallsLayer.getCell(x-1,y).getTile().getId() !=mapWallsId) {
                 player.translateX(-actualSpeed);
                 cam.translate(-actualSpeed, 0, 0);
                 System.out.println("Move Left (A or LEFT)");
@@ -172,7 +181,7 @@ public class GameScreen implements Screen {
 
         // move right
         if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            if(layer.getCell(x+1,y).getTile().getId() !=mapWallsId) {
+            if(wallsLayer.getCell(x+1,y).getTile().getId() !=mapWallsId) {
                 player.translateX(actualSpeed);
                 cam.translate(actualSpeed, 0, 0);
                 System.out.println("Move Right (D or RIGHT)");
