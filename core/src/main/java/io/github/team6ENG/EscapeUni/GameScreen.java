@@ -31,7 +31,6 @@ public class GameScreen implements Screen {
     private TiledMap map;
     private final int mapWallsId = 90;
 
-    TiledMapTileLayer wallsLayer;
 
     Goose goose = new Goose();
     float stateTime;
@@ -48,7 +47,7 @@ public class GameScreen implements Screen {
         initializeLighting();
 
         stateTime = 0f;
-        goose.loadGoose(wallsLayer, mapWallsId);
+        goose.loadGoose(collisionLayer, mapWallsId);
         goose.x = game.viewport.getScreenWidth() / 2;
         goose.x += 20;
         goose.y = game.viewport.getScreenHeight() / 2;
@@ -60,7 +59,6 @@ public class GameScreen implements Screen {
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         int mapWallsLayer = 0;
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
-
     }
 
     // initialize player sprite
@@ -118,6 +116,7 @@ public class GameScreen implements Screen {
 
     // update game logic
     private void update(float delta) {
+
         handleInput(delta);
         updateCamera();
         updateLightPositions();
@@ -173,6 +172,12 @@ public class GameScreen implements Screen {
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
+
+        goose.moveGoose(stateTime, player.getX(),  player.getY());
+        stateTime += Gdx.graphics.getDeltaTime();
+
+        game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
+
         player.draw(game.batch);
         game.batch.end();
 
