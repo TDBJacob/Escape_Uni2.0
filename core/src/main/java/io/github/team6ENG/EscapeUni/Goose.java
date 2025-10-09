@@ -14,8 +14,6 @@ public class Goose extends SpriteAnimations {
     public boolean isFacingLeft = true;
     public TextureRegion currentGooseFrame;
     private float speed = 1;
-    private TiledMapTileLayer wallsLayer;
-    private int mapWallsId;
     private boolean isMoving;
     public Goose() {
 
@@ -28,10 +26,7 @@ public class Goose extends SpriteAnimations {
 
         generateAnimation(animationInfo);
     }
-    public void loadGoose(TiledMapTileLayer walls, int id) {
-        wallsLayer = walls;
-        mapWallsId = id;
-    }
+
 
     public void moveGoose(float stateTime, float playerX, float playerY) {
 

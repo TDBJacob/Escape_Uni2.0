@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -22,6 +23,8 @@ public class SpriteAnimations  {
     private Texture sheet;
 
 
+    protected TiledMapTileLayer wallsLayer;
+    protected int mapWallsId;
 
 
     // Used to generate animations dictionary which contains all animations for that sprite
@@ -30,7 +33,10 @@ public class SpriteAnimations  {
         ROWS = SheetRows;
         sheet= new Texture(Gdx.files.internal(file));
     }
-
+    public void loadSprite(TiledMapTileLayer walls, int id) {
+        wallsLayer = walls;
+        mapWallsId = id;
+    }
     protected void generateAnimation( HashMap<String, Integer[]> animInfo){
         //animInfo [0] = Row of animation, [1] = number of frames
         animationInfo = animInfo;
@@ -47,7 +53,7 @@ public class SpriteAnimations  {
                 frames[i] = tmp[animationInfo.get(key)[0]][i];
                 System.out.println(frames[i]);
             }
-            animations.put(key, new Animation<TextureRegion>(0.5f, frames));
+            animations.put(key, new Animation<TextureRegion>(0.25f, frames));
 
         }
     }

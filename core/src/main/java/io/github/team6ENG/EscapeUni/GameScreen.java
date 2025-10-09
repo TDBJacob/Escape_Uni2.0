@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class GameScreen implements Screen {
 
     private final Main game;
-    private Sprite player;
+    private Player player;
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
     private SimpleLighting lighting;
@@ -44,10 +44,10 @@ public class GameScreen implements Screen {
 
         initializeCamera();
 
-        initializeLighting();
+        //initializeLighting();
 
         stateTime = 0f;
-        goose.loadGoose(collisionLayer, mapWallsId);
+        goose.loadSprite(collisionLayer, mapWallsId);
         goose.x = game.viewport.getScreenWidth() / 2;
         goose.x += 20;
         goose.y = game.viewport.getScreenHeight() / 2;
@@ -64,22 +64,8 @@ public class GameScreen implements Screen {
     // initialize player sprite
     private void initializePlayer() {
         // load player image, or create fallback if not found
-        try {
-            Texture playerTexture = new Texture(Gdx.files.internal("player.jpg"));
-            player = new Sprite(playerTexture);
-        } catch (Exception e) {
-            System.out.println("Failed to load player.png, creating fallback graphic");
-
-            // create a new player
-            Pixmap pixmap = new Pixmap(16, 16, Pixmap.Format.RGBA8888);
-            pixmap.setColor(Color.CYAN);
-            pixmap.fill();
-            pixmap.setColor(Color.ORANGE);
-            pixmap.fillCircle(8, 8, 5);
-            player = new Sprite(new Texture(pixmap));
-            pixmap.dispose();
-        }
-        player.setPosition((game.viewport.getScreenWidth()/2)-8, (game.viewport.getScreenHeight()/2)-8);   // player start position
+        player = new Player(game.activeSpritePath);
+        player.sprite.setPosition((game.viewport.getScreenWidth()/2)-8, (game.viewport.getScreenHeight()/2)-8);   // player start position
 
     }
 
@@ -87,8 +73,8 @@ public class GameScreen implements Screen {
     private void initializeCamera() {
         camera = new OrthographicCamera(400,300);
         camera.position.set(
-            player.getX() + player.getWidth() / 2,
-            player.getY() + player.getHeight() / 2,
+            player.sprite.getX() + player.sprite.getWidth() / 2,
+            player.sprite.getY() + player.sprite.getHeight() / 2,
             0);
         camera.update();
     }
@@ -98,8 +84,8 @@ public class GameScreen implements Screen {
         lighting = new SimpleLighting();
 
         // add a light centered on player
-        float playerCenterX = player.getX() + player.getWidth() / 2;
-        float playerCenterY = player.getY() + player.getHeight() / 2;
+        float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
+        float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
 
         lighting.addLight(
             playerCenterX,
@@ -119,21 +105,21 @@ public class GameScreen implements Screen {
 
         handleInput(delta);
         updateCamera();
-        updateLightPositions();
+        //updateLightPositions();
 
     }
 
     // move camera with player
     private void updateCamera() {
         camera.position.set(
-            player.getX() + player.getWidth() / 2,
-            player.getY() + player.getHeight() / 2,
+            player.sprite.getX() + player.sprite.getWidth() / 2,
+            player.sprite.getY() + player.sprite.getHeight() / 2,
             0);
         camera.update();
 
         System.out.println("Camera updated - Player center: (" +
-            (player.getX() + player.getWidth() / 2) + ", " +
-            (player.getY() + player.getHeight() / 2) + ")");
+            (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
+            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
 
     }
 
@@ -142,8 +128,8 @@ public class GameScreen implements Screen {
         // renew player lighting position
         if (lighting != null && !lighting.getLights().isEmpty()) {
             SimpleLighting.LightSource playerLight = lighting.getLights().get(0);
-            float playerCenterX = player.getX() + player.getWidth() / 2;
-            float playerCenterY = player.getY() + player.getHeight() / 2;
+            float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
+            float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
 
             playerLight.x = playerCenterX;
             playerLight.y = playerCenterY;
@@ -173,12 +159,15 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        goose.moveGoose(stateTime, player.getX(),  player.getY());
+        goose.moveGoose(stateTime, player.sprite.getX(),  player.sprite.getY());
+
+        player.updatePlayer(stateTime);
         stateTime += Gdx.graphics.getDeltaTime();
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
-        player.draw(game.batch);
+        player.sprite.draw(game.batch);
+
         game.batch.end();
 
         updateLightPositions();
@@ -201,20 +190,25 @@ public class GameScreen implements Screen {
         float actualSpeed = speed * 60f * delta;
 
         TiledMapTileLayer.Cell cell;
-        int x = (int)(player.getX()+8)/16;
-        int y = (int)(player.getY()+8)/16;
+        int x = (int)(player.sprite.getX()+(player.sprite.getWidth()/2))/16;
+        int y = (int)(player.sprite.getY()+(player.sprite.getHeight()/2))/16;
         int mapWidth = collisionLayer.getWidth();
         int mapHeight = collisionLayer.getHeight();
 
         System.out.println(x + " , " + y);
 
-
+        player.isMoving = false;
+        player.isFacingLeft = false;
+        player.isFacingUp = false;
+        player.isMovingHorizontally = false;
         // move up
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             if (y + 1 < mapHeight) {
                 cell = collisionLayer.getCell(x, y + 1);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.translateY(actualSpeed);
+                    player.sprite.translateY(actualSpeed);
+                    player.isMoving = true;
+                    player.isFacingUp = true;
                 }
             }
                 System.out.println("Move Up (W or UP)");
@@ -223,9 +217,11 @@ public class GameScreen implements Screen {
         // move down
         if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             if (y - 1 >= 0) {
-                cell = collisionLayer.getCell(x, y - 1);
+                cell = collisionLayer.getCell(x, y -1);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.translateY(-actualSpeed);
+                    player.sprite.translateY(-actualSpeed);
+                    player.isMoving = true;
+                    player.isFacingUp = false;
                 }
             }
                 System.out.println("Move Down (S or DOWN)");
@@ -234,9 +230,12 @@ public class GameScreen implements Screen {
         // move left
         if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             if (x - 1 >= 0) {
-                cell = collisionLayer.getCell(x - 1, y);
+                cell = collisionLayer.getCell(x -1 , y);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.translateX(-actualSpeed);
+                    player.sprite.translateX(-actualSpeed);
+                    player.isMoving = true;
+                    player.isFacingLeft = true;
+                    player.isMovingHorizontally = true;
                 }
             }
                 System.out.println("Move Left (A or LEFT)");
@@ -248,13 +247,15 @@ public class GameScreen implements Screen {
             if (x + 1 < mapWidth) {
                 cell = collisionLayer.getCell(x + 1, y);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.translateX(actualSpeed);
+                    player.sprite.translateX(actualSpeed);
+                    player.isMoving = true;
+                    player.isFacingLeft = false;
+                    player.isMovingHorizontally = true;
                 }
             }
                 System.out.println("Move Right (D or RIGHT)");
 
         }
-
         // check boundary
         keepPlayerInBounds();
 
@@ -267,15 +268,15 @@ public class GameScreen implements Screen {
         float worldWidth = game.viewport.getWorldWidth() * tileSize;
         float worldHeight = game.viewport.getWorldHeight() * tileSize;
 
-        if (player.getX() < 0) player.setX(0);
+        if (player.sprite.getX() < 0) player.sprite.setX(0);
 
-        if (player.getY() < 0) player.setY(0);
+        if (player.sprite.getY() < 0) player.sprite.setY(0);
 
-        if (player.getX() > worldWidth - player.getWidth())
-            player.setX(worldWidth - player.getWidth());
+        if (player.sprite.getX() > worldWidth - player.sprite.getWidth())
+            player.sprite.setX(worldWidth - player.sprite.getWidth());
 
-        if (player.getY() > worldHeight - player.getHeight())
-            player.setY(worldHeight - player.getHeight());
+        if (player.sprite.getY() > worldHeight - player.sprite.getHeight())
+            player.sprite.setY(worldHeight - player.sprite.getHeight());
     }
 
     private void renderUI() {
@@ -289,7 +290,7 @@ public class GameScreen implements Screen {
         game.menuFont.draw(game.batch, "Main menu screen", 20, worldHeight - 20);
         game.menuFont.draw(game.batch, "Add game :)", 20, worldHeight - 50);
 
-        String positionText = String.format("Position: (%.1f, %.1f)", player.getX(), player.getY());
+        String positionText = String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY());
         game.menuFont.draw(game.batch, positionText, 20, worldHeight - 80);
 
         String line1 = "Use arrow or WASD to move player.";
@@ -335,8 +336,8 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         // release texture memory
-        if (player.getTexture() != null) {
-            player.getTexture().dispose();
+        if (player.sprite.getTexture() != null) {
+            player.sprite.getTexture().dispose();
         }
 
         if (map != null) {
