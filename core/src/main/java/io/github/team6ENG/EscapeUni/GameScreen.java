@@ -3,10 +3,7 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -32,11 +29,10 @@ public class GameScreen implements Screen {
 
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
-    private int mapWallsLayer = 0;
-    private int mapWallsId = 90;
+    private final int mapWallsId = 90;
 
     TiledMapTileLayer wallsLayer;
-    
+
     Goose goose = new Goose();
     float stateTime;
 
@@ -46,11 +42,11 @@ public class GameScreen implements Screen {
         initializeMap();
 
         initializePlayer();
-        
+
         initializeCamera();
 
         initializeLighting();
-        
+
         stateTime = 0f;
         goose.loadGoose(wallsLayer, mapWallsId);
         goose.x = game.viewport.getScreenWidth() / 2;
@@ -62,6 +58,7 @@ public class GameScreen implements Screen {
     private void initializeMap() {
         map = new TmxMapLoader().load("tileMap/testMap.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
+        int mapWallsLayer = 0;
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
 
     }
@@ -105,18 +102,18 @@ public class GameScreen implements Screen {
         // add a light centered on player
         float playerCenterX = player.getX() + player.getWidth() / 2;
         float playerCenterY = player.getY() + player.getHeight() / 2;
-        
+
         lighting.addLight(
             playerCenterX,
             playerCenterY,
-            50f, 
+            200f,
             new Color(1f, 1f, 1f, 0.91f)
         );
 
          System.out.println("Lighting initialized at player center: (" + playerCenterX + ", " + playerCenterY + ")");
-        
+
         // environment lighting null
-        
+
     }
 
     // update game logic
@@ -135,8 +132,8 @@ public class GameScreen implements Screen {
             0);
         camera.update();
 
-        System.out.println("Camera updated - Player center: (" + 
-            (player.getX() + player.getWidth() / 2) + ", " + 
+        System.out.println("Camera updated - Player center: (" +
+            (player.getX() + player.getWidth() / 2) + ", " +
             (player.getY() + player.getHeight() / 2) + ")");
 
     }
@@ -179,27 +176,21 @@ public class GameScreen implements Screen {
         player.draw(game.batch);
         game.batch.end();
 
+        updateLightPositions();
         if (lighting != null) {
-      
-        if (!lighting.getLights().isEmpty()) {
-            SimpleLighting.LightSource playerLight = lighting.getLights().get(0);
-            playerLight.x = player.getX() + player.getWidth() / 2;
-            playerLight.y = player.getY() + player.getHeight() / 2;
+            lighting.render(camera);
         }
 
-        lighting.render(camera);
-    }
+        renderUI();
 
-    renderUI();
+        // Cycle through screens for testing, remove later
+        if (Gdx.input.justTouched()) {
+            game.setScreen(new MainMenuScreen(game));
+            dispose();
+        }
 
-    // Cycle through screens for testing, remove later
-    if (Gdx.input.justTouched()) {
-        game.setScreen(new MainMenuScreen(game));
-        dispose();
-    }
-    
-}    
-    
+}
+
     // handle keyboard input and move player
     private void handleInput(float delta) {
         float actualSpeed = speed * 60f * delta;
@@ -211,15 +202,15 @@ public class GameScreen implements Screen {
         int mapHeight = collisionLayer.getHeight();
 
         System.out.println(x + " , " + y);
-        
-        
+
+
         // move up
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             if (y + 1 < mapHeight) {
                 cell = collisionLayer.getCell(x, y + 1);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
                     player.translateY(actualSpeed);
-                }    
+                }
             }
                 System.out.println("Move Up (W or UP)");
         }
@@ -230,7 +221,7 @@ public class GameScreen implements Screen {
                 cell = collisionLayer.getCell(x, y - 1);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
                     player.translateY(-actualSpeed);
-                }    
+                }
             }
                 System.out.println("Move Down (S or DOWN)");
         }
@@ -241,10 +232,10 @@ public class GameScreen implements Screen {
                 cell = collisionLayer.getCell(x - 1, y);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
                     player.translateX(-actualSpeed);
-                }    
+                }
             }
                 System.out.println("Move Left (A or LEFT)");
-            
+
         }
 
         // move right
@@ -253,7 +244,7 @@ public class GameScreen implements Screen {
                 cell = collisionLayer.getCell(x + 1, y);
                 if (cell == null || cell.getTile().getId() != mapWallsId) {
                     player.translateX(actualSpeed);
-                }    
+                }
             }
                 System.out.println("Move Right (D or RIGHT)");
 
@@ -295,7 +286,7 @@ public class GameScreen implements Screen {
 
         String positionText = String.format("Position: (%.1f, %.1f)", player.getX(), player.getY());
         game.menuFont.draw(game.batch, positionText, 20, worldHeight - 80);
-        
+
         String line1 = "Use arrow or WASD to move player.";
         String line2 = "Click mouse to go back to menu (testing only)";
 
@@ -314,11 +305,6 @@ public class GameScreen implements Screen {
         game.menuFont.draw(game.batch, line2, centerX, line2Y);
 
         game.batch.end();
-    }
-
-    @Override
-    public void show() {
-
     }
 
     @Override
