@@ -43,6 +43,7 @@ public class CharacterSelectScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 //TODO: Set sprite here
+                game.activeSpritePath = "sprites/femaleSprite.png";
                 game.setScreen(new GameScreen(game));
                 dispose();
             } });
@@ -50,6 +51,7 @@ public class CharacterSelectScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 //TODO: Set sprite here
+                game.activeSpritePath = "sprites/maleSprite.png";
                 game.setScreen(new GameScreen(game));
                 dispose();
             }

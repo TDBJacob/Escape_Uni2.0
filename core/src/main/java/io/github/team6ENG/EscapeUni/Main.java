@@ -15,10 +15,10 @@ public class Main extends Game{
     public BitmapFont menuFont;
     public FitViewport viewport;
     public Skin buttonSkin;
-
+    public String activeSpritePath;
     public void create() {
         batch = new SpriteBatch();
-        // use libGDX's default font
+
         menuFont = new BitmapFont(Gdx.files.internal("fonts/menuScreenFont.fnt"));
         viewport = new FitViewport(800, 640);
 
