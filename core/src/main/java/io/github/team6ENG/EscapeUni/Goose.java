@@ -13,7 +13,7 @@ public class Goose extends SpriteAnimations {
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
     public TextureRegion currentGooseFrame;
-    private float speed = 1;
+    private float speed = 0.75f;
     private boolean isMoving;
     public Goose() {
 
@@ -28,7 +28,7 @@ public class Goose extends SpriteAnimations {
     }
 
 
-    public void moveGoose(float stateTime, float playerX, float playerY) {
+    public void moveGoose(float stateTime, float playerX, float playerY, boolean isPlayerMoving) {
 
 
         int tileX = (int)(x+8)/16;
@@ -36,7 +36,7 @@ public class Goose extends SpriteAnimations {
 
 
         // If player is in range, idle
-        if(abs(x-playerX) + abs(y-playerY) <= 50){
+        if(abs(x-playerX) + abs(y-playerY) <= 50 && !isPlayerMoving){
             if(isFacingLeft){
                 currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
             }

@@ -63,15 +63,16 @@ public class GameScreen implements Screen {
 
     // initialize player sprite
     private void initializePlayer() {
-        // load player image, or create fallback if not found
-        player = new Player(game.activeSpritePath);
+
+        player = new Player(game);
+        player.loadSprite(collisionLayer, mapWallsId);
         player.sprite.setPosition((game.viewport.getScreenWidth()/2)-8, (game.viewport.getScreenHeight()/2)-8);   // player start position
 
     }
 
     // initialize camera to follow player
     private void initializeCamera() {
-        camera = new OrthographicCamera(400,300);
+        camera = new OrthographicCamera(400,225);
         camera.position.set(
             player.sprite.getX() + player.sprite.getWidth() / 2,
             player.sprite.getY() + player.sprite.getHeight() / 2,
@@ -103,7 +104,7 @@ public class GameScreen implements Screen {
     // update game logic
     private void update(float delta) {
 
-        handleInput(delta);
+        player.handleInput(delta);
         updateCamera();
         //updateLightPositions();
 
@@ -159,7 +160,9 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        goose.moveGoose(stateTime, player.sprite.getX(),  player.sprite.getY());
+        goose.moveGoose(stateTime, player.sprite.getX() +(player.sprite.getWidth()/2)-20,
+            player.sprite.getY() +(player.sprite.getHeight()/2),
+            player.isMoving);
 
         player.updatePlayer(stateTime);
         stateTime += Gdx.graphics.getDeltaTime();
@@ -185,99 +188,7 @@ public class GameScreen implements Screen {
 
 }
 
-    // handle keyboard input and move player
-    private void handleInput(float delta) {
-        float actualSpeed = speed * 60f * delta;
 
-        TiledMapTileLayer.Cell cell;
-        int x = (int)(player.sprite.getX()+(player.sprite.getWidth()/2))/16;
-        int y = (int)(player.sprite.getY()+(player.sprite.getHeight()/2))/16;
-        int mapWidth = collisionLayer.getWidth();
-        int mapHeight = collisionLayer.getHeight();
-
-        System.out.println(x + " , " + y);
-
-        player.isMoving = false;
-        player.isFacingLeft = false;
-        player.isFacingUp = false;
-        player.isMovingHorizontally = false;
-        // move up
-        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            if (y + 1 < mapHeight) {
-                cell = collisionLayer.getCell(x, y + 1);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.sprite.translateY(actualSpeed);
-                    player.isMoving = true;
-                    player.isFacingUp = true;
-                }
-            }
-                System.out.println("Move Up (W or UP)");
-        }
-
-        // move down
-        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            if (y - 1 >= 0) {
-                cell = collisionLayer.getCell(x, y -1);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.sprite.translateY(-actualSpeed);
-                    player.isMoving = true;
-                    player.isFacingUp = false;
-                }
-            }
-                System.out.println("Move Down (S or DOWN)");
-        }
-
-        // move left
-        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            if (x - 1 >= 0) {
-                cell = collisionLayer.getCell(x -1 , y);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.sprite.translateX(-actualSpeed);
-                    player.isMoving = true;
-                    player.isFacingLeft = true;
-                    player.isMovingHorizontally = true;
-                }
-            }
-                System.out.println("Move Left (A or LEFT)");
-
-        }
-
-        // move right
-        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            if (x + 1 < mapWidth) {
-                cell = collisionLayer.getCell(x + 1, y);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
-                    player.sprite.translateX(actualSpeed);
-                    player.isMoving = true;
-                    player.isFacingLeft = false;
-                    player.isMovingHorizontally = true;
-                }
-            }
-                System.out.println("Move Right (D or RIGHT)");
-
-        }
-        // check boundary
-        keepPlayerInBounds();
-
-    }
-
-    // limit inside screen
-    private void keepPlayerInBounds() {
-        float tileSize = 16f;
-
-        float worldWidth = game.viewport.getWorldWidth() * tileSize;
-        float worldHeight = game.viewport.getWorldHeight() * tileSize;
-
-        if (player.sprite.getX() < 0) player.sprite.setX(0);
-
-        if (player.sprite.getY() < 0) player.sprite.setY(0);
-
-        if (player.sprite.getX() > worldWidth - player.sprite.getWidth())
-            player.sprite.setX(worldWidth - player.sprite.getWidth());
-
-        if (player.sprite.getY() > worldHeight - player.sprite.getHeight())
-            player.sprite.setY(worldHeight - player.sprite.getHeight());
-    }
 
     private void renderUI() {
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
