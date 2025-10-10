@@ -16,16 +16,6 @@ public class Player extends SpriteAnimations{
     final Main game;
 
     public Sprite sprite;
-    public enum state {
-        idle,
-        walkForward,
-        walkBackward,
-        walkLeftForward,
-        walkLeftBackward,
-        walkRightForward,
-        walkRightBackward
-    }
-    public state currentState = state.idle;
 
     public boolean isFacingUp = false;
     public boolean isFacingLeft = false;

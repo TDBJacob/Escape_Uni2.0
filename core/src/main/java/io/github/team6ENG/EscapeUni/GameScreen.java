@@ -170,17 +170,16 @@ public class GameScreen implements Screen {
 
     // update game logic
     private void update(float delta) {
-        player.handleInput(delta);
         updateCamera();
 
-        goose.checkAndStealTorch(this, player.getX(), player.getY());
+        goose.checkAndStealTorch(this, player.sprite.getX(), player.sprite.getY());
 
 
         if(!isPaused) {
             player.handleInput(delta);
             player.updatePlayer(stateTime);
             updateCamera();
-            //updateLightPositions();
+            updateLightPositions();
             goose.moveGoose(stateTime, player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
                 player.sprite.getY() + (player.sprite.getHeight() / 2),
                 player.isMoving);
@@ -314,8 +313,8 @@ public class GameScreen implements Screen {
         float actualSpeed = speed * 60f * delta;
 
         TiledMapTileLayer.Cell cell;
-        int x = (int)(player.sprite.getX()+8)/16;
-        int y = (int)(player.sprite.getY()+8)/16;
+        int x = (int) (player.sprite.getX() + 8) / 16;
+        int y = (int) (player.sprite.getY() + 8) / 16;
         int mapWidth = collisionLayer.getWidth();
         int mapHeight = collisionLayer.getHeight();
 
@@ -325,7 +324,7 @@ public class GameScreen implements Screen {
                 gainTorch();
             }
         }
-        }
+    }
 
     private void renderUI() {
     SpriteBatch batch = game.batch;
@@ -339,8 +338,6 @@ public class GameScreen implements Screen {
     float y = worldHeight - 20f;
     float lineSpacing = 25f;
 
-        String positionText = String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY());
-        game.menuFont.draw(game.batch, positionText, 20, worldHeight - 80);
     // game title & basic information
     drawText(font, "Main Menu Screen", Color.WHITE, 20, y);
     y -= lineSpacing;
@@ -348,7 +345,7 @@ public class GameScreen implements Screen {
     y -= lineSpacing;
 
     // player coordinates
-    drawText(font, String.format("Position: (%.1f, %.1f)", player.getX(), player.getY()), Color.LIGHT_GRAY, 20, y);
+    drawText(font, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
     y -= lineSpacing;
 
     // player's torch status
@@ -362,7 +359,7 @@ public class GameScreen implements Screen {
 
     // distance between player and goosen (only shown whenplayer has torch)
     if (hasTorch && !goose.hasStolenTorch()) {
-        float distance = (float) Math.hypot(goose.x - player.getX(), goose.y - player.getY());
+        float distance = (float) Math.hypot(goose.x - player.sprite.getX(), goose.y - player.sprite.getY());
         drawText(font, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
         y -= lineSpacing;
     }
@@ -377,7 +374,6 @@ public class GameScreen implements Screen {
             game.menuFont.draw(game.batch, "PAUSED", game.viewport.getScreenWidth()/ 2, worldHeight - 100);
         }
         game.batch.end();
-    batch.end();
 }
 
     /**

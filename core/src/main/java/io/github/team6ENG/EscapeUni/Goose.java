@@ -14,6 +14,7 @@ public class Goose extends SpriteAnimations {
     private float speed = 0.75f;
     private boolean isMoving;
     private TiledMapTileLayer.Cell cell;
+    private boolean isPlayerMoving = false;
 
     public Goose() {
         super("sprites/goose.png", 15, 17);
@@ -27,12 +28,7 @@ public class Goose extends SpriteAnimations {
     }
 
 
-    public void moveGoose(float stateTime, float playerX, float playerY, boolean isPlayerMoving) {
 
-
-        int tileX = (int)(x+8)/16;
-        int tileY = (int)(y+8)/16;
-}
     public boolean hasStolenTorch() {
         return hasStolenTorch;
     }
@@ -53,7 +49,7 @@ public class Goose extends SpriteAnimations {
 
     }
 
-    public void moveGoose(float stateTime, float playerX, float playerY) {
+    public void moveGoose(float stateTime, float playerX, float playerY, boolean isPlayerMoving) {
         int tileX = (int)(x+ getWidth() / 2) / 16;
         int tileY = (int)(y+ getHeight() / 2) / 16;
 
