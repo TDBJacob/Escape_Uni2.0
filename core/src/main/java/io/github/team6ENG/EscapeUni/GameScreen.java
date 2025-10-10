@@ -293,16 +293,6 @@ public class GameScreen implements Screen {
 
         renderUI();
 
-        // Cycle through screens for testing, remove later
-        if (Gdx.input.justTouched()) {
-
-            game.setScreen(new MainMenuScreen(game));
-            dispose();
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            isPaused = !isPaused;
-        }
-
 }
 
     private void handleInput(float delta) {
@@ -313,6 +303,15 @@ public class GameScreen implements Screen {
             if (!hasTorch) {
                 gainTorch();
             }
+        }
+        // Cycle through screens for testing, remove later
+        if (Gdx.input.justTouched()) {
+
+            game.setScreen(new MainMenuScreen(game));
+            dispose();
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = !isPaused;
         }
     }
 
