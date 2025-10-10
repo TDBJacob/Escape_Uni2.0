@@ -105,9 +105,9 @@ public class GameScreen implements Screen {
 
         stateTime = 0f;
         goose.loadSprite(collisionLayer, mapWallsId);
-        goose.x = game.viewport.getScreenWidth() / 2;
+        goose.x = 310;
         goose.x += 20;
-        goose.y = game.viewport.getScreenHeight() / 2;
+        goose.y = 310;
     }
 
     // load map and collision layer
@@ -123,7 +123,7 @@ public class GameScreen implements Screen {
 
         player = new Player(game);
         player.loadSprite(collisionLayer, mapWallsId);
-        player.sprite.setPosition((game.viewport.getScreenWidth()/2)-8, (game.viewport.getScreenHeight()/2)-8);   // player start position
+        player.sprite.setPosition(300, 300);   // player start position
 
     }
 

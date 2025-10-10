@@ -116,7 +116,7 @@ public class Goose extends SpriteAnimations {
             float dy = y - playerY;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 20f) {
+            if (distance < 30f) {
                 hasStolenTorch = true;
                 game.onGooseStealTorch();
                 System.out.println("Goose touched player and stole the torch!");
