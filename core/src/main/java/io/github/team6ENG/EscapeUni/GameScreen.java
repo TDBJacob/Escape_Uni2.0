@@ -27,6 +27,7 @@ public class GameScreen implements Screen {
     private SimpleLighting lighting;
     private float speed = 2f;   // move speed, maybe can change later.
 
+    private boolean isPaused = false;
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
     private final int mapWallsId = 90;
@@ -104,10 +105,15 @@ public class GameScreen implements Screen {
     // update game logic
     private void update(float delta) {
 
-        player.handleInput(delta);
-        updateCamera();
-        //updateLightPositions();
-
+        if(!isPaused) {
+            player.handleInput(delta);
+            player.updatePlayer(stateTime);
+            updateCamera();
+            //updateLightPositions();
+            goose.moveGoose(stateTime, player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
+                player.sprite.getY() + (player.sprite.getHeight() / 2),
+                player.isMoving);
+        }
     }
 
     // move camera with player
@@ -151,7 +157,6 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        camera.update();
         game.viewport.apply();
 
         mapRenderer.setView(camera);
@@ -160,11 +165,7 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        goose.moveGoose(stateTime, player.sprite.getX() +(player.sprite.getWidth()/2)-20,
-            player.sprite.getY() +(player.sprite.getHeight()/2),
-            player.isMoving);
 
-        player.updatePlayer(stateTime);
         stateTime += Gdx.graphics.getDeltaTime();
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
@@ -182,8 +183,12 @@ public class GameScreen implements Screen {
 
         // Cycle through screens for testing, remove later
         if (Gdx.input.justTouched()) {
+
             game.setScreen(new MainMenuScreen(game));
             dispose();
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = !isPaused;
         }
 
 }
@@ -221,6 +226,10 @@ public class GameScreen implements Screen {
         float line2Y = line1Y - layout1.height - 10f;
         game.menuFont.draw(game.batch, line2, centerX, line2Y);
 
+        if(isPaused) {
+
+            game.menuFont.draw(game.batch, "PAUSED", game.viewport.getScreenWidth()/ 2, worldHeight - 100);
+        }
         game.batch.end();
     }
 
