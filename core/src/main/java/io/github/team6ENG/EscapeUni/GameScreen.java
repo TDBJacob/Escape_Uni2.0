@@ -4,21 +4,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 /**
- * GameScreen - main gameplay screen.
+ * GameScreen - main gameplay screen
  *
  * This is class handle player movement and simple test UI.
- * The logic is very basic now but can expand later.
+ *
  */
 public class GameScreen implements Screen {
+
+    private static final boolean DEBUG = false;
 
     private final Main game;
     private Player player;
@@ -34,7 +36,63 @@ public class GameScreen implements Screen {
 
 
     Goose goose = new Goose();
+    private int gooseLightIndex = -1;
     float stateTime;
+
+    private boolean hasTorch = false;   // torch status
+    private int playerLightIndex = -1;  // index of player with torch
+
+    public boolean hasTorch() {
+        return hasTorch;
+    }
+
+    public void onGooseStealTorch() {
+    if (hasTorch) {
+        if (DEBUG) System.out.println("Goose stole the torch! Transferring light...");
+
+        // player loses the torch
+        setHasTorch(false);
+
+        // goose stole the torch
+        if (lighting != null) {
+            float gooseCenterX = goose.x + goose.getWidth() / 2f;
+            float gooseCenterY = goose.y + goose.getHeight() / 2f;
+
+            // purple light
+            Color purple = new Color(0.7f, 0.3f, 1f, 0.9f);
+            lighting.addLight(gooseCenterX, gooseCenterY, 35f, purple);
+            gooseLightIndex = lighting.getLights().size() - 1;
+
+            if (DEBUG) System.out.println("💜 Purple goose light created at (" + gooseCenterX + ", " + gooseCenterY + ")");
+        }
+    }
+}
+
+    private float gooseFlickerTime = 0f;
+
+    /**
+     * Updates the goose light position
+     *
+     */
+    private void updateGooseLightPosition() {
+        if (goose.hasStolenTorch() && lighting != null && gooseLightIndex != -1) {
+            if (!lighting.getLights().isEmpty()) {
+                SimpleLighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
+
+                // center light on goose
+                float gooseCenterX = goose.x + goose.getWidth() / 2f;
+                float gooseCenterY = goose.y + goose.getHeight() / 2f;
+
+                gooseLight.x = gooseCenterX;
+                gooseLight.y = gooseCenterY;
+
+                // apply flickering effect
+                gooseFlickerTime += Gdx.graphics.getDeltaTime();
+                float flicker = 1f + 0.12f * (float) Math.sin(gooseFlickerTime * 8);
+                gooseLight.radius = 50f * flicker;
+            }
+        }
+    }
 
     public GameScreen(final Main game) {
         this.game = game;
@@ -45,7 +103,7 @@ public class GameScreen implements Screen {
 
         initializeCamera();
 
-        //initializeLighting();
+        initializeLighting();
 
         stateTime = 0f;
         goose.loadSprite(collisionLayer, mapWallsId);
@@ -88,22 +146,35 @@ public class GameScreen implements Screen {
         // add a light centered on player
         float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
         float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
+        // req1: remove the light for the start of the game
+        // hasTorch = false
 
-        lighting.addLight(
-            playerCenterX,
-            playerCenterY,
-            200f,
-            new Color(1f, 1f, 1f, 0.91f)
-        );
+        if (DEBUG) System.out.println("Lighting initialized - No light at game start");
 
-         System.out.println("Lighting initialized at player center: (" + playerCenterX + ", " + playerCenterY + ")");
+    }
 
-        // environment lighting null
+    // add a light centered on player
+    private void addPlayerLight() {
+        if (lighting != null && hasTorch) {
+            float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
+            float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
 
+            Color dark = new Color(1f, 1f, 1f, 0.85f);
+            lighting.addLight(playerCenterX, playerCenterY, 80f, dark);
+
+            playerLightIndex = lighting.getLights().size() - 1;
+
+            if (DEBUG) System.out.println("Player light added at: (" + playerCenterX + ", " + playerCenterY + ")");
+        }
     }
 
     // update game logic
     private void update(float delta) {
+        player.handleInput(delta);
+        updateCamera();
+
+        goose.checkAndStealTorch(this, player.getX(), player.getY());
+
 
         if(!isPaused) {
             player.handleInput(delta);
@@ -127,21 +198,68 @@ public class GameScreen implements Screen {
         System.out.println("Camera updated - Player center: (" +
             (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
             (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
+        if (DEBUG) System.out.println("Camera updated - Player center: (" +
+            (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
+            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
 
     }
 
     // keep light centered on player
     private void updateLightPositions() {
         // renew player lighting position
-        if (lighting != null && !lighting.getLights().isEmpty()) {
-            SimpleLighting.LightSource playerLight = lighting.getLights().get(0);
+        if (hasTorch && lighting != null && !lighting.getLights().isEmpty()) {
+
+            SimpleLighting.LightSource playerLight = lighting.getLights().get(playerLightIndex);
+
             float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
             float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
 
             playerLight.x = playerCenterX;
             playerLight.y = playerCenterY;
 
-            System.out.println("Light at player center: (" + playerCenterX + ", " + playerCenterY + ")");
+            if (DEBUG) System.out.println("Light updated at player center: (" + playerCenterX + ", " + playerCenterY + ")");
+        }
+           // update goose light position
+            updateGooseLightPosition();
+
+    }
+
+    public SimpleLighting getLighting() {
+        return lighting;
+    }
+
+    public void gainTorch() {
+        if (!hasTorch) {
+            hasTorch = true;
+            addPlayerLight();
+            if (lighting != null && gooseLightIndex != -1 && gooseLightIndex < lighting.getLights().size()) {
+                lighting.getLights().remove(gooseLightIndex);
+                gooseLightIndex = -1;
+            }
+            if (DEBUG) System.out.println("Torch acquired! Goose light removed.");
+        }
+    }
+
+    public void loseTorch() {
+        if (hasTorch) {
+            hasTorch = false;
+            if (lighting != null && playerLightIndex != -1 && playerLightIndex < lighting.getLights().size()) {
+                lighting.getLights().remove(playerLightIndex);
+                playerLightIndex = -1;
+                System.out.println("Torch lost! Light removed.");
+            }
+        }
+    }
+
+    public void setHasTorch(boolean value) {
+        hasTorch = value;
+        if (!value) {
+            // remove player's light source
+            if (lighting != null && playerLightIndex != -1 && playerLightIndex < lighting.getLights().size()) {
+                lighting.getLights().remove(playerLightIndex);
+                playerLightIndex = -1;
+                if (DEBUG) System.out.println("Player torch removed due to goose steal.");
+            }
         }
     }
 
@@ -174,7 +292,6 @@ public class GameScreen implements Screen {
 
         game.batch.end();
 
-        updateLightPositions();
         if (lighting != null) {
             lighting.render(camera);
         }
@@ -193,44 +310,87 @@ public class GameScreen implements Screen {
 
 }
 
+    private void handleInput(float delta) {
+        float actualSpeed = speed * 60f * delta;
 
+        TiledMapTileLayer.Cell cell;
+        int x = (int)(player.sprite.getX()+8)/16;
+        int y = (int)(player.sprite.getY()+8)/16;
+        int mapWidth = collisionLayer.getWidth();
+        int mapHeight = collisionLayer.getHeight();
+
+        // req2: Toggle the torch with CTRL key
+        if (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)) {
+            if (!hasTorch) {
+                gainTorch();
+            }
+        }
+        }
 
     private void renderUI() {
-        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
-        game.batch.begin();
+    SpriteBatch batch = game.batch;
+    BitmapFont font = game.menuFont;
+    float worldHeight = game.viewport.getWorldHeight();
 
-        float worldWidth = game.viewport.getWorldWidth();
-        float worldHeight = game.viewport.getWorldHeight();
+    batch.setProjectionMatrix(game.viewport.getCamera().combined);
+    batch.begin();
 
-        game.menuFont.setColor(Color.WHITE);
-        game.menuFont.draw(game.batch, "Main menu screen", 20, worldHeight - 20);
-        game.menuFont.draw(game.batch, "Add game :)", 20, worldHeight - 50);
+    // === Section 1: game status display ===
+    float y = worldHeight - 20f;
+    float lineSpacing = 25f;
 
         String positionText = String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY());
         game.menuFont.draw(game.batch, positionText, 20, worldHeight - 80);
+    // game title & basic information
+    drawText(font, "Main Menu Screen", Color.WHITE, 20, y);
+    y -= lineSpacing;
+    drawText(font, "Add game :)", Color.WHITE, 20, y);
+    y -= lineSpacing;
 
-        String line1 = "Use arrow or WASD to move player.";
-        String line2 = "Click mouse to go back to menu (testing only)";
+    // player coordinates
+    drawText(font, String.format("Position: (%.1f, %.1f)", player.getX(), player.getY()), Color.LIGHT_GRAY, 20, y);
+    y -= lineSpacing;
 
-        // calculate text width
-        GlyphLayout layout1 = new GlyphLayout(game.menuFont, line1);
-        GlyphLayout layout2 = new GlyphLayout(game.menuFont, line2);
+    // player's torch status
+    drawText(font, "Torch: " + (hasTorch ? "ON" : "OFF"), hasTorch ? Color.YELLOW : Color.WHITE, 20, y);
+    y -= lineSpacing;
 
-        // center alignment
-        float maxWidth = Math.max(layout1.width, layout2.width);
-        float centerX = (worldWidth - maxWidth) / 2;
+    // goose's torch status
+    drawText(font, "Goose has torch: " + (goose.hasStolenTorch() ? "YES" : "NO"),
+            goose.hasStolenTorch() ? Color.CYAN : Color.WHITE, 20, y);
+    y -= lineSpacing;
 
-        float line1Y = 80f;
-        game.menuFont.draw(game.batch, line1, centerX, line1Y);
+    // distance between player and goosen (only shown whenplayer has torch)
+    if (hasTorch && !goose.hasStolenTorch()) {
+        float distance = (float) Math.hypot(goose.x - player.getX(), goose.y - player.getY());
+        drawText(font, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
+        y -= lineSpacing;
+    }
 
-        float line2Y = line1Y - layout1.height - 10f;
-        game.menuFont.draw(game.batch, line2, centerX, line2Y);
+    // === Section 2: control instructions ===
+    drawText(font, "Press CTRL to pick up torch", Color.ORANGE, 20, 80);
+    drawText(font, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
+    drawText(font, "Click mouse to return to Menu", Color.GRAY, 20, 30);
 
         if(isPaused) {
 
             game.menuFont.draw(game.batch, "PAUSED", game.viewport.getScreenWidth()/ 2, worldHeight - 100);
         }
         game.batch.end();
+    batch.end();
+}
+
+    /**
+     * Helper method: Unified text rendering logic to avoid repeated setColor() calls
+     * @param font  The BitmapFont to use for rendering
+     * @param text  The text string to display
+     * @param color The color of the text
+     * @param x     The x-coordinate for text position
+     * @param y     The y-coordinate for text position
+     */
+    private void drawText(BitmapFont font, String text, Color color, float x, float y) {
+        font.setColor(color);
+        font.draw(game.batch, text, x, y);
     }
 
     @Override

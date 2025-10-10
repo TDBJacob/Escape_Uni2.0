@@ -2,7 +2,6 @@ package io.github.team6ENG.EscapeUni;
 
 import java.util.List;
 import java.util.ArrayList;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -68,6 +67,16 @@ public class SimpleLighting {
         return texture;
     }
 
+    /** Updates the position of the first (main) light — e.g., the player's torch. */
+    public void setLightPosition(float x, float y) {
+        if (!lights.isEmpty()) {
+            LightSource mainLight = lights.get(0);
+            mainLight.x = x;
+            mainLight.y = y;
+        }
+    }
+
+
     /**
      * Creates a full-screen semi-transparent dark texture
      * used to simulate nighttime or low-light environments.
@@ -77,7 +86,7 @@ public class SimpleLighting {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 
         // Alpha controls the darkness intensity (0 = transparent, 1 = fully black)
-        pixmap.setColor(0, 0, 0, 0.94f);
+        pixmap.setColor(0.1f, 0.05f, 0, 0.94f);
         pixmap.drawPixel(0, 0);
 
         Texture texture = new Texture(pixmap);

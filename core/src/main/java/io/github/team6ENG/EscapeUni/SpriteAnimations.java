@@ -1,10 +1,8 @@
 package io.github.team6ENG.EscapeUni;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
@@ -14,10 +12,10 @@ import java.util.HashMap;
 
 public class SpriteAnimations  {
 
-    public HashMap<String, Animation<TextureRegion>> animations = new HashMap<String, Animation<TextureRegion>>();
+    public HashMap<String, Animation<TextureRegion>> animations = new HashMap<>();
     public float x;
     public float y;
-    private HashMap<String, Integer[]> animationInfo;
+    private HashMap<String, Integer[]> animationInfo = new HashMap<>();
     private int COLUMNS;
     private int ROWS;
     private Texture sheet;
@@ -53,9 +51,16 @@ public class SpriteAnimations  {
                 frames[i] = tmp[animationInfo.get(key)[0]][i];
                 System.out.println(frames[i]);
             }
-            animations.put(key, new Animation<TextureRegion>(0.25f, frames));
+            animations.put(key, new Animation<>(0.5f, frames));
 
         }
     }
+
+     public void dispose() {
+        if (sheet != null) {
+            sheet.dispose();
+        }
+    }
+
 
 }

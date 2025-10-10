@@ -1,22 +1,21 @@
 package io.github.team6ENG.EscapeUni;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-
 import java.util.HashMap;
-
 import static java.lang.Math.abs;
 
 public class Goose extends SpriteAnimations {
-
-
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
+    private boolean hasStolenTorch = false;
     public TextureRegion currentGooseFrame;
     private float speed = 0.75f;
     private boolean isMoving;
-    public Goose() {
+    private TiledMapTileLayer.Cell cell;
 
+    public Goose() {
         super("sprites/goose.png", 15, 17);
 
         animationInfo.put("walkLeft", new Integer[]{5,4});
@@ -33,7 +32,30 @@ public class Goose extends SpriteAnimations {
 
         int tileX = (int)(x+8)/16;
         int tileY = (int)(y+8)/16;
+}
+    public boolean hasStolenTorch() {
+        return hasStolenTorch;
+    }
 
+    private boolean isMoveAllowed(int tileX, int tileY) {
+        // check map boundaries
+        if (tileX < 0 || tileY < 0 || tileX >= wallsLayer.getWidth() || tileY >= wallsLayer.getHeight()) {
+            return false;
+        }
+
+        // check if tile is empty (null) or contains a wall
+        cell = wallsLayer.getCell(tileX, tileY);
+        if (cell == null || cell.getTile() == null) {
+            return true;
+        }
+
+        return cell.getTile().getId() != mapWallsId;
+
+    }
+
+    public void moveGoose(float stateTime, float playerX, float playerY) {
+        int tileX = (int)(x+ getWidth() / 2) / 16;
+        int tileY = (int)(y+ getHeight() / 2) / 16;
 
         // If player is in range, idle
         if(abs(x-playerX) + abs(y-playerY) <= 50 && !isPlayerMoving){
@@ -46,29 +68,26 @@ public class Goose extends SpriteAnimations {
         }
         else{
             isMoving = false;
-            if(x > playerX +5 && wallsLayer.getCell(tileX-1,tileY).getTile().getId() !=mapWallsId){
+            if (x > playerX +5 && isMoveAllowed(tileX-1,tileY)) {
                 isFacingLeft = true;
                 currentGooseFrame = animations.get("walkLeft").getKeyFrame(stateTime, true);
                 x -= speed;
                 isMoving = true;
             }
-            else if(x <= playerX -5&& wallsLayer.getCell(tileX+1,tileY).getTile().getId() !=mapWallsId){
+            else if(x <= playerX -5 && isMoveAllowed(tileX+1,tileY)) {
                 isFacingLeft = false;
                 currentGooseFrame = animations.get("walkRight").getKeyFrame(stateTime, true);
                 x += speed;
                 isMoving = true;
-                System.out.println(2);
             }
 
-            if(y > playerY +5 && wallsLayer.getCell(tileX,tileY-1).getTile().getId() !=mapWallsId){
+            if(y > playerY +5 && isMoveAllowed(tileX,tileY-1)) {
                 y -= speed;
                 isMoving = true;
-                System.out.println(3);
             }
-            else if (y <= playerY -5 && wallsLayer.getCell(tileX ,tileY+1).getTile().getId() !=mapWallsId){
+            else if (y <= playerY -5 && isMoveAllowed(tileX ,tileY+1)) {
                 y += speed;
                 isMoving = true;
-                System.out.println(4);
             }
 
             if(!isMoving){
@@ -78,11 +97,63 @@ public class Goose extends SpriteAnimations {
                 else{
                     currentGooseFrame = animations.get("idleRight").getKeyFrame(stateTime, true);
                 }
-                System.out.println(5);
             }
         }
-
-
-
     }
+
+    public float getWidth() {
+        return currentGooseFrame != null ? currentGooseFrame.getRegionWidth() : 16f; // default value
+    }
+
+    public float getHeight() {
+        return currentGooseFrame != null ? currentGooseFrame.getRegionHeight() : 16f;
+    }
+
+    /**
+     * Checks and executes torch stealing logic
+     * @param game The game screen instance
+     * @param playerX Player's X coordinate
+     * @param playerY Player's Y coordinate
+     */
+    public void checkAndStealTorch(GameScreen game, float playerX, float playerY) {
+        if (!hasStolenTorch && game.hasTorch()) {
+            float dx = x - playerX;
+            float dy = y - playerY;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 20f) {
+                hasStolenTorch = true;
+                game.onGooseStealTorch();
+                System.out.println("Goose touched player and stole the torch!");
+            }
+        }
+    }
+
+    /**
+     * Allows the goose to steal the torch from the player
+     */
+    public void stealTorch(GameScreen game) {
+        if (!hasStolenTorch) {
+            hasStolenTorch = true;
+
+        float gooseCenterX = this.x + this.getWidth() / 2f;
+        float gooseCenterY = this.y + this.getHeight() / 2f;
+
+        // acquire lighting system and create goose light effect
+        SimpleLighting lighting = game.getLighting();
+        if (lighting != null) {
+            Color orange = new Color(1f, 0.3f, 0.1f, 0.9f);
+            lighting.addLight(gooseCenterX, gooseCenterY, 30f, orange);
+            System.out.println("Goose stole the torch! Light created at (" + gooseCenterX + ", " + gooseCenterY + ")");
+        }
+
+        // notify game screen to handle torch transfer logic
+        if (game != null) {
+            game.onGooseStealTorch();
+        }
+    }
+}
+
+
+
 }
