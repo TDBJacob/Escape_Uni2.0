@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -27,7 +26,6 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
     private SimpleLighting lighting;
-    private float speed = 2f;   // move speed, maybe can change later.
 
     private boolean isPaused = false;
     OrthogonalTiledMapRenderer mapRenderer;
@@ -143,9 +141,6 @@ public class GameScreen implements Screen {
     private void initializeLighting() {
         lighting = new SimpleLighting();
 
-        // add a light centered on player
-        float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
-        float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
         // req1: remove the light for the start of the game
         // hasTorch = false
 
@@ -176,6 +171,7 @@ public class GameScreen implements Screen {
 
 
         if(!isPaused) {
+            handleInput(delta);
             player.handleInput(delta);
             player.updatePlayer(stateTime);
             updateCamera();
@@ -310,13 +306,7 @@ public class GameScreen implements Screen {
 }
 
     private void handleInput(float delta) {
-        float actualSpeed = speed * 60f * delta;
 
-        TiledMapTileLayer.Cell cell;
-        int x = (int) (player.sprite.getX() + 8) / 16;
-        int y = (int) (player.sprite.getY() + 8) / 16;
-        int mapWidth = collisionLayer.getWidth();
-        int mapHeight = collisionLayer.getHeight();
 
         // req2: Toggle the torch with CTRL key
         if (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)) {

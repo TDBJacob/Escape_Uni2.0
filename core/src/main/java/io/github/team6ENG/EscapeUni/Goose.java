@@ -14,7 +14,6 @@ public class Goose extends SpriteAnimations {
     private float speed = 0.75f;
     private boolean isMoving;
     private TiledMapTileLayer.Cell cell;
-    private boolean isPlayerMoving = false;
 
     public Goose() {
         super("sprites/goose.png", 15, 17);
