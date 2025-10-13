@@ -28,6 +28,7 @@ public class GameScreen implements Screen {
     private TiledMapTileLayer collisionLayer;
     private SimpleLighting lighting;
 
+    private float gameTimer = 300f;
     private boolean isPaused = false;
     private boolean isCtrl = true;
     private boolean exitConfirm = false;
@@ -44,6 +45,22 @@ public class GameScreen implements Screen {
     private int playerLightIndex = -1;  // index of player with torch
 
     private final Object lightLock = new Object();
+
+
+    public GameScreen(final Main game) {
+        this.game = game;
+
+        initializeMap();
+
+        initializePlayer();
+
+        initializeCamera();
+
+        initializeLighting();
+
+        initiliseGoose();
+        stateTime = 0f;
+    }
 
     public boolean hasTorch() {
         synchronized (lightLock) {
@@ -102,21 +119,6 @@ public class GameScreen implements Screen {
             }
         }
 
-    }
-
-    public GameScreen(final Main game) {
-        this.game = game;
-
-        initializeMap();
-
-        initializePlayer();
-
-        initializeCamera();
-
-        initializeLighting();
-
-        initiliseGoose();
-        stateTime = 0f;
     }
 
     // load map and collision layer
@@ -197,6 +199,7 @@ public class GameScreen implements Screen {
 
     // update game logic
     private void update(float delta) {
+
         updateCamera();
 
         float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
@@ -208,6 +211,7 @@ public class GameScreen implements Screen {
         goose.checkAndStealTorch(this, player.sprite.getX(), player.sprite.getY());
 
         if(!isPaused) {
+            gameTimer -= delta;
             handleInput(delta);
             player.handleInput(delta);
             player.updatePlayer(stateTime);
@@ -217,6 +221,10 @@ public class GameScreen implements Screen {
                             player.sprite.getY() + (player.sprite.getHeight() / 2),
                             player.isMoving);
 
+        }
+
+        if(gameTimer <= 0) {
+            game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
@@ -476,7 +484,7 @@ public class GameScreen implements Screen {
         // game title & basic information
         drawText(font, "Main Menu Screen", Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(font, "Add game :)", Color.WHITE, 20, y);
+        drawText(font, String.format("%d minutes and %d seconds remaining", (int)gameTimer/60, (int)gameTimer % 60), Color.WHITE, 20, y);
         y -= lineSpacing;
 
         // player coordinates
