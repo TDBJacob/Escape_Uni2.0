@@ -29,6 +29,15 @@ public class GameScreen implements Screen {
     private SimpleLighting lighting;
 
     private float gameTimer = 300f;
+
+    private int totalNegativeEvents = 1;
+    private int totalPositiveEvents = 1;
+    private int totalHiddenEvents = 1;
+
+    private int foundNegativeEvents = 0;
+    private int foundPositiveEvents = 0;
+    private int foundHiddenEvents = 0;
+
     private boolean isPaused = false;
     private boolean isCtrl = true;
     private boolean exitConfirm = false;
@@ -471,53 +480,59 @@ public class GameScreen implements Screen {
     }
 
     private void renderUI() {
-        BitmapFont font = game.menuFont;
+
+        BitmapFont smallFont = game.gameFont;
+        BitmapFont bigFont = game.menuFont;
         float worldHeight = game.viewport.getWorldHeight();
+        float worldWidth = game.viewport.getWorldWidth();
 
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
 
         // === Section 1: game status display ===
         float y = worldHeight - 20f;
-        float lineSpacing = 25f;
+        float lineSpacing = 15f;
 
         // game title & basic information
-        drawText(font, "Main Menu Screen", Color.WHITE, 20, y);
+        drawText(smallFont, String.format("Negative Events: %d/%d", foundNegativeEvents, totalNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(font, String.format("%d minutes and %d seconds remaining", (int)gameTimer/60, (int)gameTimer % 60), Color.WHITE, 20, y);
+        drawText(smallFont, String.format("Positive Events: %d/%d", foundPositiveEvents, totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
+        drawText(smallFont, String.format("Hidden Events:   %d/%d", foundHiddenEvents, totalHiddenEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(bigFont, String.format("%d:%d ", (int)gameTimer/60, (int)gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
 
         // player coordinates
-        drawText(font, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
+        drawText(smallFont, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
         y -= lineSpacing;
 
         // player's torch status
-        drawText(font, "Torch: " + (hasTorch ? "ON" : "OFF"), hasTorch ? Color.YELLOW : Color.WHITE, 20, y);
+        drawText(smallFont, "Torch: " + (hasTorch ? "ON" : "OFF"), hasTorch ? Color.YELLOW : Color.WHITE, 20, y);
         y -= lineSpacing;
 
         // goose's torch status
-        drawText(font, "Goose has torch: " + (goose.hasStolenTorch() ? "YES" : "NO"),
+        drawText(smallFont, "Goose has torch: " + (goose.hasStolenTorch() ? "YES" : "NO"),
         goose.hasStolenTorch() ? Color.CYAN : Color.WHITE, 20, y);
         y -= lineSpacing;
 
         // distance between player and goosen (only shown whenplayer has torch)
         if (hasTorch && !goose.hasStolenTorch()) {
             float distance = (float) Math.hypot(goose.x - player.sprite.getX(), goose.y - player.sprite.getY());
-            drawText(font, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
+            drawText(smallFont, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
             y -= lineSpacing;
         }
 
         // === Section 2: control instructions ===
-        drawText(font, "Press CTRL to pick up torch", Color.ORANGE, 20, 80);
-        drawText(font, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
-        drawText(font, "Click mouse to return to Menu", Color.GRAY, 20, 30);
+        drawText(bigFont, "Press CTRL to pick up torch", Color.ORANGE, 20, 80);
+        drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
+        drawText(bigFont, "Click mouse to return to Menu", Color.GRAY, 20, 30);
 
         if(isPaused) {
-            font.draw(game.batch, "PAUSED", game.viewport.getScreenWidth()/ 2, worldHeight - 100);
+            smallFont.draw(game.batch, "PAUSED", game.viewport.getScreenWidth()/ 2, worldHeight - 100);
         }
 
         if (exitConfirm) {
-            drawText(font, "Press ESC again to quit", Color.RED, 20, 150);
+            drawText(smallFont, "Press ESC again to quit", Color.RED, 20, 150);
         }
 
         game.batch.end();
