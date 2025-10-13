@@ -13,6 +13,7 @@ public class Main extends Game{
 
     public SpriteBatch batch;
     public BitmapFont menuFont;
+    public BitmapFont gameFont;
     public FitViewport viewport;
     public Skin buttonSkin;
     public String activeSpritePath;
@@ -26,6 +27,10 @@ public class Main extends Game{
         menuFont.setUseIntegerPositions(false);
         menuFont.getData().setScale(0.8f);
         menuFont.setColor(Color.valueOf("4287f5FF"));
+
+        gameFont = new BitmapFont(Gdx.files.internal("fonts/menuScreenFont.fnt"));
+        gameFont.getData().setScale(0.4f);
+        gameFont.setColor(Color.valueOf("4287f5FF"));
 
         buttonSkin = new Skin(Gdx.files.internal("skins/uiskin.json"));
 
