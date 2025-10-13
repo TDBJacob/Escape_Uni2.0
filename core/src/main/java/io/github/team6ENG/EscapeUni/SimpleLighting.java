@@ -2,6 +2,9 @@ package io.github.team6ENG.EscapeUni;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -20,16 +23,44 @@ import com.badlogic.gdx.graphics.GL20;
  *  - Additive blending for light sources
  */
 public class SimpleLighting {
+    private static final boolean DEBUG = false;
     private final SpriteBatch batch;
     private final Texture lightTexture;     // Texture representing a soft radial light
     private final Texture darknessTexture;  // Semi-transparent dark overlay
+
     private final List<LightSource> lights; // Active light sources
+    private final List<Integer> lightsToReMove;
 
     public SimpleLighting() {
         this.batch = new SpriteBatch();
         this.lights = new ArrayList<>();
         this.lightTexture = createLightTexture();
         this.darknessTexture = createDarknessTexture();
+        this.lightsToReMove = new ArrayList<>();
+    }
+
+    public void safeRemoveLight(int index) {
+        synchronized (this) {
+            if (index >= 0 && index < lights.size()) {
+                lights.remove(index);
+                if (DEBUG) System.out.println("❌ removeLight -> total lights: " + lights.size());
+            }
+        }
+    }    
+
+    public void updateLights() {
+        synchronized (lights) {
+            if (!lightsToReMove.isEmpty()) {
+                lightsToReMove.sort(Collections.reverseOrder());
+                for (int index : lightsToReMove) {
+                    if (index >= 0 && index < lights.size()) {
+                        lights.remove(index); 
+                    }
+                }    
+
+                lightsToReMove.clear();
+            }  
+        }     
     }
 
     /**
@@ -39,32 +70,33 @@ public class SimpleLighting {
     private Texture createLightTexture() {
         int size = 256;
         Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+        try {
+            int center = size / 2;
+            float maxRadius = center;
 
-        int center = size / 2;
-        float maxRadius = center;
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    float distance = (float) Math.sqrt(
+                        Math.pow(x - center, 2) + Math.pow(y - center, 2)
+                    );
 
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                float distance = (float) Math.sqrt(
-                    Math.pow(x - center, 2) + Math.pow(y - center, 2)
-                );
+                    if (distance <= maxRadius) {
+                        // Light intensity decreases with distance
+                        float intensity = 1.0f - (distance / maxRadius);
+                        intensity = (float) Math.pow(intensity, 2.5f);
 
-                if (distance <= maxRadius) {
-                    // Light intensity decreases with distance
-                    float intensity = 1.0f - (distance / maxRadius);
-                    intensity = (float) Math.pow(intensity, 2.5f);
-
-                    pixmap.setColor(1, 1, 1, intensity);
-                } else {
-                    pixmap.setColor(0, 0, 0, 0);
+                        pixmap.setColor(1, 1, 1, intensity);
+                    } else {
+                        pixmap.setColor(0, 0, 0, 0);
+                    }
+                    pixmap.drawPixel(x, y);
                 }
-                pixmap.drawPixel(x, y);
             }
-        }
+            return new Texture(pixmap);
+        } finally {
+            pixmap.dispose();
 
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
+        }
     }
 
     /** Updates the position of the first (main) light — e.g., the player's torch. */
@@ -76,7 +108,6 @@ public class SimpleLighting {
         }
     }
 
-
     /**
      * Creates a full-screen semi-transparent dark texture
      * used to simulate nighttime or low-light environments.
@@ -86,7 +117,7 @@ public class SimpleLighting {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 
         // Alpha controls the darkness intensity (0 = transparent, 1 = fully black)
-        pixmap.setColor(0.1f, 0.05f, 0, 0.94f);
+        pixmap.setColor(0f, 0f, 0, 0.90f);
         pixmap.drawPixel(0, 0);
 
         Texture texture = new Texture(pixmap);
@@ -102,7 +133,10 @@ public class SimpleLighting {
      * @param color  Color (including intensity via alpha)
      */
     public void addLight(float x, float y, float radius, Color color) {
-        lights.add(new LightSource(x, y, radius, color));
+        synchronized (lights) {
+            lights.add(new LightSource(x, y, radius, color));
+            if (DEBUG) System.out.println("✅ addLight -> total lights: " + lights.size());
+        }      
     }
 
     /**
@@ -112,66 +146,72 @@ public class SimpleLighting {
      * 
      * @param camera The camera for correct projection
      */
+    private SpriteBatch lightingBatch = new SpriteBatch();
+
     public void render(OrthographicCamera camera) {
         if (lights.isEmpty()) return;
 
-        System.out.println("=== LIGHTING DEBUG ===");
-        System.out.println("Camera center: " + camera.position.x + ", " + camera.position.y);
-        System.out.println("Camera viewport: " + camera.viewportWidth + "x" + camera.viewportHeight);
-    
-        for (LightSource light : lights) {
-            System.out.println("Light position: " + light.x + ", " + light.y + " (radius: " + light.radius + ")");
-        }
+        try {
+            lightingBatch.setProjectionMatrix(camera.combined);
 
-        batch.setProjectionMatrix(camera.combined);
+            // Step 1️: Draw semi-transparent darkness layer
+            lightingBatch.begin();
+            lightingBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            lightingBatch.setColor(1, 1, 1, 1);
 
-        // Step 1️: Draw semi-transparent darkness layer
-        batch.begin();
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.setColor(1, 1, 1, 1);
+            float darknessWidth = camera.viewportWidth * 3f;
+            float darknessHeight = camera.viewportHeight * 3f;
 
-        float darknessWidth = camera.viewportWidth * 3f;
-        float darknessHeight = camera.viewportHeight * 3f;
-
-        batch.draw(
-            darknessTexture,
-            camera.position.x - darknessWidth / 2,
-            camera.position.y - darknessHeight / 2,
-            darknessWidth,
-            darknessHeight
-        );
-        batch.end();
-
-        // Step 2️: Draw light sources (additive blending)
-        batch.setProjectionMatrix(camera.combined);
-
-        batch.begin();
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-        for (LightSource light : lights) {
-            batch.setColor(light.color);
-            batch.draw(
-                lightTexture,
-                light.x - light.radius,
-                light.y - light.radius,
-                light.radius * 2,
-                light.radius * 2
+            lightingBatch.draw(
+                darknessTexture,
+                camera.position.x - darknessWidth / 2,
+                camera.position.y - darknessHeight / 2,
+                darknessWidth,
+                darknessHeight
             );
+            lightingBatch.end();
+
+            lightingBatch.begin();
+            lightingBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+            for (LightSource light : lights) {
+                lightingBatch.setColor(light.color);
+                lightingBatch.draw(
+                    lightTexture,
+                    light.x - light.radius,
+                    light.y - light.radius,
+                    light.radius * 2,
+                    light.radius * 2
+                );
+            }
+            lightingBatch.end();
+
+            Gdx.gl.glFlush();
+
+        } catch (Exception e) {
+            Gdx.app.error("Lighting", "Lighting render failed", e);
+
         }
-        batch.end();
+    
 
         // Step 3️: Reset blending to default (optional)
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        System.out.println("=== LIGHTING COMPLETE ===");
+        lightingBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        if (DEBUG) System.out.println("=== LIGHTING COMPLETE ===");
     }
 
     /** Returns all active lights. */
     public List<LightSource> getLights() {
-        return lights;
+        synchronized (lights) {
+            return Collections.unmodifiableList(lights);
+        }
     }
 
     /** Removes all lights from the scene. */
     public void clearLights() {
-        lights.clear();
+        synchronized (lights) {
+            lights.clear();
+            lightsToReMove.clear();
+        }
+    
     }
 
     /** Frees GPU resources. */

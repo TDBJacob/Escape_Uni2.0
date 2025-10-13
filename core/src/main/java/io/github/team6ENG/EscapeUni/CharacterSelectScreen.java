@@ -3,11 +3,13 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -27,12 +29,21 @@ public class CharacterSelectScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
+        table.bottom();
+        table.defaults().pad(20).fillX().uniformX();
+
+        // 动态字体大
+        BitmapFont buttonFont = new BitmapFont(); // 如果使用 TTF 用 FreeTypeFontGenerator
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.font = buttonFont;
 
         //placeholder buttons, maybe change to image button when we have sprites
-        final TextButton characterButton1 = new TextButton("Character 1", game.buttonSkin);
-        table.add(characterButton1).expand().bottom().width(300).height(100).pad(20);
+        TextButton characterButton1 = new TextButton("Character 1", game.buttonSkin);
         TextButton characterButton2 = new TextButton("Character 2", game.buttonSkin);
-        table.add(characterButton2).expand().bottom().width(300).height(100).pad(20);
+        
+        table.add(characterButton1).height(Value.percentHeight(0.15f, table)).expandX();
+        
+        table.add(characterButton2).height(Value.percentHeight(0.15f, table)).expandX();
 
 
         characterButton1.addListener(new ClickListener(){
@@ -92,6 +103,7 @@ public class CharacterSelectScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
 
     }
 
