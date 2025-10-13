@@ -66,12 +66,12 @@ public class GameScreen implements Screen {
             synchronized (lighting) {
                 lighting.addLight(gooseCenterX, gooseCenterY, 35f, purple);
                 gooseLightIndex = lighting.getLights().size() - 1;
-            }   
-                        
+            }
+
             goose.setStolenTorch(true);
 
-            if (DEBUG) System.out.println("Purple goose light created at (" + gooseCenterX + ", " + gooseCenterY + ")");                
-    
+            if (DEBUG) System.out.println("Purple goose light created at (" + gooseCenterX + ", " + gooseCenterY + ")");
+
         }
     }
 
@@ -99,7 +99,7 @@ public class GameScreen implements Screen {
                 gooseLight.radius = 50f * flicker;
             }
         }
-        
+
     }
 
     public GameScreen(final Main game) {
@@ -175,7 +175,7 @@ public class GameScreen implements Screen {
 
                 if (DEBUG) System.out.println("Player light added at: (" + playerCenterX + ", " + playerCenterY + ")");
             }
-        }    
+        }
     }
 
     private boolean isLightIndexValid(int index) {
@@ -206,11 +206,15 @@ public class GameScreen implements Screen {
             player.handleInput(delta);
             player.updatePlayer(stateTime);
             updateLightPositions();
-            goose.moveGoose(stateTime, 
+            goose.moveGoose(stateTime,
                             player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
-                            player.sprite.getY() + (player.sprite.getHeight() / 2), 
+                            player.sprite.getY() + (player.sprite.getHeight() / 2),
                             player.isMoving);
-            
+
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = !isPaused;
         }
 
         player.sprite.setX(Math.max(0, Math.min(player.sprite.getX(), mapWidth - player.sprite.getWidth())));
@@ -243,7 +247,7 @@ public class GameScreen implements Screen {
         if (mapWidth > camera.viewportWidth) {
             camera.position.x = Math.max(halfWidth, Math.min(camera.position.x, mapWidth - halfWidth));
         } else {
-        
+
             camera.position.x = mapWidth / 2f;
         }
 
@@ -257,7 +261,7 @@ public class GameScreen implements Screen {
 
         if (DEBUG) System.out.println("Camera updated - Player center: (" +
             (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
-            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");  
+            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
 
         if (DEBUG) System.out.println("Camera updated - Player center: (" +
             (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
@@ -283,26 +287,26 @@ public class GameScreen implements Screen {
                 playerLight.y = playerCenterY;
                 playerLight.radius = 60f;
 
-                if (DEBUG) 
+                if (DEBUG)
                     System.out.println("Light updated at player center: (" + playerCenterX + ", " + playerCenterY + ")");
-                }  
+                }
                 else if (!hasTorch && goose.hasStolenTorch() && isLightIndexValid(gooseLightIndex)) {
                     SimpleLighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
 
                     float gooseCenterX = goose.x + goose.getWidth() / 2f;
                     float gooseCenterY = goose.y + goose.getHeight() / 2f;
-                        
+
                     gooseLight.x = gooseCenterX;
                     gooseLight.y = gooseCenterY;
-                    
+
                     if (DEBUG) System.out.println(" Player light index invalid, reset to -1");
-                                   
-                  
+
+
             }
             // update goose light position
             updateGooseLightPosition();
         }
-    }    
+    }
 
     public SimpleLighting getLighting() {
         return lighting;
@@ -323,7 +327,7 @@ public class GameScreen implements Screen {
                 isCtrl = true;
                 if (DEBUG) System.out.println("Torch acquired! Goose light removed.");
             }
-        }    
+        }
     }
 
     public void loseTorch() {
@@ -336,7 +340,7 @@ public class GameScreen implements Screen {
                     if (DEBUG) System.out.println("Torch lost! Light removed.");
                 }
             }
-        }    
+        }
     }
 
     private synchronized void setHasTorch(boolean value) {
@@ -350,7 +354,7 @@ public class GameScreen implements Screen {
                 if (DEBUG) System.out.println("Player torch removed due to goose steal.");
             }
         }
-    }    
+    }
 
 
     synchronized boolean getHasTorch() {
@@ -424,8 +428,8 @@ public class GameScreen implements Screen {
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Render error: " + e.getMessage(), e);
         }
-        
-    }    
+
+    }
 
     private void handleInput(float delta) {
 
@@ -434,12 +438,9 @@ public class GameScreen implements Screen {
                     exitConfirm = true;
                 } else {
                     Gdx.app.exit();
-                }  
+                }
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            isPaused = !isPaused;
-        }
 
         // req2: Toggle the torch with CTRL key
         if (isCtrl && (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT))) {
@@ -452,7 +453,7 @@ public class GameScreen implements Screen {
         if (!isPaused && Gdx.input.justTouched()) {
             game.setScreen(new MainMenuScreen(game));
         }
-        
+
     }
 
     private void renderUI() {
@@ -564,4 +565,4 @@ public class GameScreen implements Screen {
             mapRenderer.dispose();
         }
     }
-} 
+}
