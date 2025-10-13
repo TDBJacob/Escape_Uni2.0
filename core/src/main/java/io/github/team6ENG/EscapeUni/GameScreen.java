@@ -10,6 +10,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
+import static java.lang.Math.abs;
+
 /**
  * GameScreen - main gameplay screen
  *
@@ -113,10 +115,8 @@ public class GameScreen implements Screen {
 
         initializeLighting();
 
+        initiliseGoose();
         stateTime = 0f;
-        goose.loadSprite(collisionLayer, mapWallsId);
-        goose.x = 330;
-        goose.y = 310;
     }
 
     // load map and collision layer
@@ -143,6 +143,12 @@ public class GameScreen implements Screen {
             player.sprite.getY() + player.sprite.getHeight() / 2,
             0);
         camera.update();
+    }
+    private void initiliseGoose(){
+
+        goose.loadSprite(collisionLayer, mapWallsId);
+        goose.x = 330;
+        goose.y = 310;
     }
 
     // setup lighting system
