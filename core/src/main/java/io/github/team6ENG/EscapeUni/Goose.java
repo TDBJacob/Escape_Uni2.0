@@ -1,12 +1,12 @@
 package io.github.team6ENG.EscapeUni;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.HashMap;
 import static java.lang.Math.abs;
 
 public class Goose extends SpriteAnimations {
+    private static final boolean DEBUG = false;
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
     private boolean hasStolenTorch = false;
@@ -26,10 +26,12 @@ public class Goose extends SpriteAnimations {
         generateAnimation(animationInfo);
     }
 
+    public synchronized void setStolenTorch(boolean value) {
+        this.hasStolenTorch = value;
+    }
 
-
-    public boolean hasStolenTorch() {
-        return hasStolenTorch;
+    public synchronized boolean hasStolenTorch() {
+        return this.hasStolenTorch;
     }
 
     private boolean isMoveAllowed(int tileX, int tileY) {
@@ -119,36 +121,10 @@ public class Goose extends SpriteAnimations {
             if (distance < 30f) {
                 hasStolenTorch = true;
                 game.onGooseStealTorch();
-                System.out.println("Goose touched player and stole the torch!");
+                if (DEBUG) System.out.println("Goose touched player and stole the torch!");
             }
         }
     }
-
-    /**
-     * Allows the goose to steal the torch from the player
-     */
-    public void stealTorch(GameScreen game) {
-        if (!hasStolenTorch) {
-            hasStolenTorch = true;
-
-        float gooseCenterX = this.x + this.getWidth() / 2f;
-        float gooseCenterY = this.y + this.getHeight() / 2f;
-
-        // acquire lighting system and create goose light effect
-        SimpleLighting lighting = game.getLighting();
-        if (lighting != null) {
-            Color orange = new Color(1f, 0.3f, 0.1f, 0.9f);
-            lighting.addLight(gooseCenterX, gooseCenterY, 30f, orange);
-            System.out.println("Goose stole the torch! Light created at (" + gooseCenterX + ", " + gooseCenterY + ")");
-        }
-
-        // notify game screen to handle torch transfer logic
-        if (game != null) {
-            game.onGooseStealTorch();
-        }
-    }
 }
 
 
-
-}

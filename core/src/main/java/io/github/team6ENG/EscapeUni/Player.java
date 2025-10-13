@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 import java.util.HashMap;
 
@@ -16,6 +15,8 @@ public class Player extends SpriteAnimations{
     final Main game;
 
     public Sprite sprite;
+
+    private static final boolean DEBUG = false; 
 
     public boolean isFacingUp = false;
     public boolean isFacingLeft = false;
@@ -51,7 +52,7 @@ public class Player extends SpriteAnimations{
         int mapWidth = wallsLayer.getWidth();
         int mapHeight = wallsLayer.getHeight();
 
-        System.out.println(x + " , " + y);
+        if (DEBUG) System.out.println(x + " , " + y);
 
         isMoving = false;
         isFacingLeft = false;
@@ -67,7 +68,7 @@ public class Player extends SpriteAnimations{
                     isFacingUp = true;
                 }
             }
-            System.out.println("Move Up (W or UP)");
+            if (DEBUG) System.out.println("Move Up (W or UP)");
         }
 
         // move down
@@ -80,7 +81,7 @@ public class Player extends SpriteAnimations{
                     isFacingUp = false;
                 }
             }
-            System.out.println("Move Down (S or DOWN)");
+            if (DEBUG) System.out.println("Move Down (S or DOWN)");
         }
 
         // move left
@@ -94,7 +95,7 @@ public class Player extends SpriteAnimations{
                     isMovingHorizontally = true;
                 }
             }
-            System.out.println("Move Left (A or LEFT)");
+            if (DEBUG) System.out.println("Move Left (A or LEFT)");
 
         }
 
@@ -109,7 +110,7 @@ public class Player extends SpriteAnimations{
                     isMovingHorizontally = true;
                 }
             }
-            System.out.println("Move Right (D or RIGHT)");
+           if (DEBUG) System.out.println("Move Right (D or RIGHT)");
 
         }
         // check boundary
