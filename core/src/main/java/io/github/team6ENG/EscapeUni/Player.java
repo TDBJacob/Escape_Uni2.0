@@ -2,9 +2,11 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import java.util.HashMap;
 
@@ -15,8 +17,9 @@ public class Player extends SpriteAnimations{
     final Main game;
 
     public Sprite sprite;
-
-    private static final boolean DEBUG = false; 
+    private Texture torchTexture;
+    public Image torch;
+    private static final boolean DEBUG = false;
 
     public boolean isFacingUp = false;
     public boolean isFacingLeft = false;
@@ -40,6 +43,13 @@ public class Player extends SpriteAnimations{
 
         sprite = new Sprite(animations.get("walkLeftForwards").getKeyFrame(0, true));
         sprite.setBounds(sprite.getX(), sprite.getY(), 48, 64);
+
+        torchTexture = new Texture("items/torch.png");
+        torch = new Image(torchTexture);
+        torch.setPosition(sprite.getX(), sprite.getY());
+        torch.setScale(0.03f);
+        torch.setScaleX(-0.03f);
+
     }
 
     // handle keyboard input and move player

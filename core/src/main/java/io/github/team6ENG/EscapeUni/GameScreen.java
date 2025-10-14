@@ -26,7 +26,7 @@ public class GameScreen implements Screen {
     private Player player;
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
-    private SimpleLighting lighting;
+    private Lighting lighting;
 
     private float gameTimer = 300f;
 
@@ -112,7 +112,7 @@ public class GameScreen implements Screen {
     private void updateGooseLightPosition() {
         synchronized (lightLock) {
             if (goose.hasStolenTorch() && lighting != null && isLightIndexValid(gooseLightIndex)) {
-                SimpleLighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
+                Lighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
 
                 // center light on goose
                 float gooseCenterX = goose.x + goose.getWidth() / 2f;
@@ -164,7 +164,7 @@ public class GameScreen implements Screen {
 
     // setup lighting system
     private void initializeLighting() {
-        lighting = new SimpleLighting();
+        lighting = new Lighting();
 
         // req1: remove the light for the start of the game
         // hasTorch = false
@@ -214,10 +214,13 @@ public class GameScreen implements Screen {
         float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
         float mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
+
         goose.x = Math.max(0, Math.min(goose.x, mapWidth - goose.getWidth()));
         goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
 
         goose.checkAndStealTorch(this, player.sprite.getX(), player.sprite.getY());
+
+        player.torch.setPosition(player.sprite.getX() + 22, player.sprite.getY() + 20);
 
         if(!isPaused) {
             gameTimer -= delta;
@@ -301,20 +304,20 @@ public class GameScreen implements Screen {
         synchronized (lightLock) {
             // renew player lighting position
             if (hasTorch && isLightIndexValid(playerLightIndex)) {
-                SimpleLighting.LightSource playerLight = lighting.getLights().get(playerLightIndex);
+                Lighting.LightSource playerLight = lighting.getLights().get(playerLightIndex);
 
                 float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2f;
                 float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
 
                 playerLight.x = playerCenterX;
                 playerLight.y = playerCenterY;
-                playerLight.radius = 60f;
+                playerLight.radius = 100f;
 
                 if (DEBUG)
                     System.out.println("Light updated at player center: (" + playerCenterX + ", " + playerCenterY + ")");
                 }
                 else if (!hasTorch && goose.hasStolenTorch() && isLightIndexValid(gooseLightIndex)) {
-                    SimpleLighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
+                    Lighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
 
                     float gooseCenterX = goose.x + goose.getWidth() / 2f;
                     float gooseCenterY = goose.y + goose.getHeight() / 2f;
@@ -331,7 +334,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    public SimpleLighting getLighting() {
+    public Lighting getLighting() {
         return lighting;
     }
 
@@ -433,6 +436,7 @@ public class GameScreen implements Screen {
                 player.sprite.draw(game.batch);
 
             }
+            player.torch.draw(game.batch, 1);
 
             game.batch.end();
 
