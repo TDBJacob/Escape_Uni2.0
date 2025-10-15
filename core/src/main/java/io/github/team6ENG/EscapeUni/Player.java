@@ -47,8 +47,8 @@ public class Player extends SpriteAnimations{
         torchTexture = new Texture("items/torch.png");
         torch = new Image(torchTexture);
         torch.setPosition(sprite.getX(), sprite.getY());
-        torch.setScale(0.03f);
-        torch.setScaleX(-0.03f);
+        torch.setScale(0.02f);
+        torch.setRotation(180);
 
     }
 
@@ -148,32 +148,43 @@ public class Player extends SpriteAnimations{
 
     public void updatePlayer(float stateTime){
 
-        currentPlayerFrame = animations.get("walkBackwards").getKeyFrame(stateTime, true);
 
         if (isMoving){
             if(isFacingUp){
                 if(isMovingHorizontally) {
                     if (isFacingLeft) {
                         currentPlayerFrame = animations.get("walkLeftBackwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(150);
+                        torch.setPosition(sprite.getX() + 22, sprite.getY() + 30);
                     } else {
                         currentPlayerFrame = animations.get("walkRightBackwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(30);
+                        torch.setPosition(sprite.getX() + 26, sprite.getY() + 25);
                     }
                 }
                 else{
 
                     currentPlayerFrame = animations.get("walkBackwards").getKeyFrame(stateTime, true);
+                    torch.setRotation(120);
+                    torch.setPosition(sprite.getX() + 22, sprite.getY() + 30);
                 }
             }
             else{
                 if(isMovingHorizontally) {
                     if (isFacingLeft) {
                         currentPlayerFrame = animations.get("walkLeftForwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(180);
+                        torch.setPosition(sprite.getX() + 24, sprite.getY() + 30);
                     } else {
                         currentPlayerFrame = animations.get("walkRightForwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(0);
+                        torch.setPosition(sprite.getX() + 26, sprite.getY() + 25);
                     }
                 }
                 else{
                     currentPlayerFrame = animations.get("walkForwards").getKeyFrame(stateTime, true);
+                    torch.setRotation(-90);
+                    torch.setPosition(sprite.getX() + 20, sprite.getY() + 25);
                 }
             }
 
@@ -181,8 +192,11 @@ public class Player extends SpriteAnimations{
         else{
 
             currentPlayerFrame = animations.get("idle").getKeyFrame(stateTime, true);
+            torch.setRotation(-60);
+            torch.setPosition(sprite.getX() + 22, sprite.getY() + 26);
         }
         sprite.setRegion(currentPlayerFrame);
+
     }
 
 }

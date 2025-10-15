@@ -220,7 +220,6 @@ public class GameScreen implements Screen {
 
         goose.checkAndStealTorch(this, player.sprite.getX(), player.sprite.getY());
 
-        player.torch.setPosition(player.sprite.getX() + 22, player.sprite.getY() + 20);
 
         if(!isPaused) {
             gameTimer -= delta;
@@ -436,7 +435,10 @@ public class GameScreen implements Screen {
                 player.sprite.draw(game.batch);
 
             }
-            player.torch.draw(game.batch, 1);
+            if(hasTorch){
+
+                player.torch.draw(game.batch, 1);
+            }
 
             game.batch.end();
 
