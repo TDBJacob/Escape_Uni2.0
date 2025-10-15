@@ -14,53 +14,53 @@ import com.badlogic.gdx.graphics.GL20;
 
 /**
  * SimpleLighting system for LibGDX.
- * 
+ *
  * This class renders a dark overlay and adds light sources (soft circles)
  * to simulate simple 2D lighting effects.
- * 
+ *
  * It uses two blend modes:
  *  - Normal alpha blending for the dark overlay
  *  - Additive blending for light sources
  */
-public class SimpleLighting {
+public class Lighting {
     private static final boolean DEBUG = false;
     private final SpriteBatch batch;
     private final Texture lightTexture;     // Texture representing a soft radial light
     private final Texture darknessTexture;  // Semi-transparent dark overlay
 
     private final List<LightSource> lights; // Active light sources
-    private final List<Integer> lightsToReMove;
+    private final List<Integer> lightsToRemove;
 
-    public SimpleLighting() {
+    public Lighting() {
         this.batch = new SpriteBatch();
-        this.lights = new ArrayList<>();
+        this.lights = new ArrayList<LightSource>();
         this.lightTexture = createLightTexture();
         this.darknessTexture = createDarknessTexture();
-        this.lightsToReMove = new ArrayList<>();
+        this.lightsToRemove = new ArrayList<Integer>();
     }
 
     public void safeRemoveLight(int index) {
         synchronized (this) {
             if (index >= 0 && index < lights.size()) {
                 lights.remove(index);
-                if (DEBUG) System.out.println("❌ removeLight -> total lights: " + lights.size());
+                if (DEBUG) System.out.println("removeLight -> total lights: " + lights.size());
             }
         }
-    }    
+    }
 
     public void updateLights() {
         synchronized (lights) {
-            if (!lightsToReMove.isEmpty()) {
-                lightsToReMove.sort(Collections.reverseOrder());
-                for (int index : lightsToReMove) {
+            if (!lightsToRemove.isEmpty()) {
+                lightsToRemove.sort(Collections.reverseOrder());
+                for (int index : lightsToRemove) {
                     if (index >= 0 && index < lights.size()) {
-                        lights.remove(index); 
+                        lights.remove(index);
                     }
-                }    
+                }
 
-                lightsToReMove.clear();
-            }  
-        }     
+                lightsToRemove.clear();
+            }
+        }
     }
 
     /**
@@ -113,7 +113,7 @@ public class SimpleLighting {
      * used to simulate nighttime or low-light environments.
      */
     private Texture createDarknessTexture() {
-        
+
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 
         // Alpha controls the darkness intensity (0 = transparent, 1 = fully black)
@@ -135,15 +135,15 @@ public class SimpleLighting {
     public void addLight(float x, float y, float radius, Color color) {
         synchronized (lights) {
             lights.add(new LightSource(x, y, radius, color));
-            if (DEBUG) System.out.println("✅ addLight -> total lights: " + lights.size());
-        }      
+            if (DEBUG) System.out.println(" addLight -> total lights: " + lights.size());
+        }
     }
 
     /**
      * Renders the lighting system:
      * 1. Draws a dark overlay
      * 2. Adds light sources using additive blending
-     * 
+     *
      * @param camera The camera for correct projection
      */
     private SpriteBatch lightingBatch = new SpriteBatch();
@@ -191,7 +191,7 @@ public class SimpleLighting {
             Gdx.app.error("Lighting", "Lighting render failed", e);
 
         }
-    
+
 
         // Step 3️: Reset blending to default (optional)
         lightingBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -209,9 +209,9 @@ public class SimpleLighting {
     public void clearLights() {
         synchronized (lights) {
             lights.clear();
-            lightsToReMove.clear();
+            lightsToRemove.clear();
         }
-    
+
     }
 
     /** Frees GPU resources. */

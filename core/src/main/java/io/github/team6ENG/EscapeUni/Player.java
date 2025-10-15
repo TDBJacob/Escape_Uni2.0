@@ -2,9 +2,11 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import java.util.HashMap;
 
@@ -15,8 +17,9 @@ public class Player extends SpriteAnimations{
     final Main game;
 
     public Sprite sprite;
-
-    private static final boolean DEBUG = false; 
+    private Texture torchTexture;
+    public Image torch;
+    private static final boolean DEBUG = false;
 
     public boolean isFacingUp = false;
     public boolean isFacingLeft = false;
@@ -40,6 +43,13 @@ public class Player extends SpriteAnimations{
 
         sprite = new Sprite(animations.get("walkLeftForwards").getKeyFrame(0, true));
         sprite.setBounds(sprite.getX(), sprite.getY(), 48, 64);
+
+        torchTexture = new Texture("items/torch.png");
+        torch = new Image(torchTexture);
+        torch.setPosition(sprite.getX(), sprite.getY());
+        torch.setScale(0.02f);
+        torch.setRotation(180);
+
     }
 
     // handle keyboard input and move player
@@ -138,32 +148,43 @@ public class Player extends SpriteAnimations{
 
     public void updatePlayer(float stateTime){
 
-        currentPlayerFrame = animations.get("walkBackwards").getKeyFrame(stateTime, true);
 
         if (isMoving){
             if(isFacingUp){
                 if(isMovingHorizontally) {
                     if (isFacingLeft) {
                         currentPlayerFrame = animations.get("walkLeftBackwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(150);
+                        torch.setPosition(sprite.getX() + 22, sprite.getY() + 30);
                     } else {
                         currentPlayerFrame = animations.get("walkRightBackwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(30);
+                        torch.setPosition(sprite.getX() + 26, sprite.getY() + 25);
                     }
                 }
                 else{
 
                     currentPlayerFrame = animations.get("walkBackwards").getKeyFrame(stateTime, true);
+                    torch.setRotation(120);
+                    torch.setPosition(sprite.getX() + 22, sprite.getY() + 30);
                 }
             }
             else{
                 if(isMovingHorizontally) {
                     if (isFacingLeft) {
                         currentPlayerFrame = animations.get("walkLeftForwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(180);
+                        torch.setPosition(sprite.getX() + 24, sprite.getY() + 30);
                     } else {
                         currentPlayerFrame = animations.get("walkRightForwards").getKeyFrame(stateTime, true);
+                        torch.setRotation(0);
+                        torch.setPosition(sprite.getX() + 26, sprite.getY() + 25);
                     }
                 }
                 else{
                     currentPlayerFrame = animations.get("walkForwards").getKeyFrame(stateTime, true);
+                    torch.setRotation(-90);
+                    torch.setPosition(sprite.getX() + 20, sprite.getY() + 25);
                 }
             }
 
@@ -171,8 +192,11 @@ public class Player extends SpriteAnimations{
         else{
 
             currentPlayerFrame = animations.get("idle").getKeyFrame(stateTime, true);
+            torch.setRotation(-60);
+            torch.setPosition(sprite.getX() + 22, sprite.getY() + 26);
         }
         sprite.setRegion(currentPlayerFrame);
+
     }
 
 }
