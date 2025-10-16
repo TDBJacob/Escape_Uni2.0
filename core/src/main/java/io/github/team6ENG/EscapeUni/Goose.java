@@ -9,7 +9,7 @@ public class Goose extends SpriteAnimations {
     private static final boolean DEBUG = false;
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
-    private boolean hasStolenTorch = false;
+    public boolean hasStolenTorch = false;
     public TextureRegion currentGooseFrame;
     private float speed = 0.75f;
     private boolean isMoving;
@@ -26,13 +26,6 @@ public class Goose extends SpriteAnimations {
         generateAnimation(animationInfo);
     }
 
-    public synchronized void setStolenTorch(boolean value) {
-        this.hasStolenTorch = value;
-    }
-
-    public synchronized boolean hasStolenTorch() {
-        return this.hasStolenTorch;
-    }
 
     private boolean isMoveAllowed(int tileX, int tileY) {
         // check map boundaries
@@ -104,26 +97,6 @@ public class Goose extends SpriteAnimations {
 
     public float getHeight() {
         return currentGooseFrame != null ? currentGooseFrame.getRegionHeight() : 16f;
-    }
-
-    /**
-     * Checks and executes torch stealing logic
-     * @param game The game screen instance
-     * @param playerX Player's X coordinate
-     * @param playerY Player's Y coordinate
-     */
-    public void checkAndStealTorch(GameScreen game, float playerX, float playerY) {
-        if (!hasStolenTorch && game.hasTorch()) {
-            float dx = x - playerX;
-            float dy = y - playerY;
-            float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 30f) {
-                hasStolenTorch = true;
-                game.onGooseStealTorch();
-                if (DEBUG) System.out.println("Goose touched player and stole the torch!");
-            }
-        }
     }
 }
 

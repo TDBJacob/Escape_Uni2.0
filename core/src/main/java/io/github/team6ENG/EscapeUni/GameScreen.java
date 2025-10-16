@@ -27,7 +27,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
     private Lighting lighting;
-
+    private boolean isDark = false;
     private float gameTimer = 300f;
 
     private int totalNegativeEvents = 1;
@@ -47,13 +47,10 @@ public class GameScreen implements Screen {
 
 
     Goose goose = new Goose();
-    private int gooseLightIndex = -1;
     float stateTime;
 
-    private boolean hasTorch = false;   // torch status
-    private int playerLightIndex = -1;  // index of player with torch
+    private boolean hasTorch = false;
 
-    private final Object lightLock = new Object();
 
 
     public GameScreen(final Main game) {
@@ -71,64 +68,13 @@ public class GameScreen implements Screen {
         stateTime = 0f;
     }
 
-    public boolean hasTorch() {
-        synchronized (lightLock) {
-            return hasTorch;
-        }
-    }
 
-    public void onGooseStealTorch() {
-        synchronized (lightLock) {
-            if (!hasTorch) return;
-            if (DEBUG) System.out.println("Goose stole the torch! Transferring light...");
 
-            // player loses the torch
-            setHasTorch(false);
-            isCtrl = false;
-
-            float gooseCenterX = goose.x + goose.getWidth() / 2f;
-            float gooseCenterY = goose.y + goose.getHeight() / 2f;
-
-            // purple light
-            Color purple = new Color(0.7f, 0.3f, 1f, 0.9f);
-            synchronized (lighting) {
-                lighting.addLight(gooseCenterX, gooseCenterY, 35f, purple);
-                gooseLightIndex = lighting.getLights().size() - 1;
-            }
-
-            goose.setStolenTorch(true);
-
-            if (DEBUG) System.out.println("Purple goose light created at (" + gooseCenterX + ", " + gooseCenterY + ")");
-
-        }
-    }
-
-    private float gooseFlickerTime = 0f;
 
     /**
      * Updates the goose light position
      *
      */
-    private void updateGooseLightPosition() {
-        synchronized (lightLock) {
-            if (goose.hasStolenTorch() && lighting != null && isLightIndexValid(gooseLightIndex)) {
-                Lighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
-
-                // center light on goose
-                float gooseCenterX = goose.x + goose.getWidth() / 2f;
-                float gooseCenterY = goose.y + goose.getHeight() / 2f;
-
-                gooseLight.x = gooseCenterX;
-                gooseLight.y = gooseCenterY;
-
-                // apply flickering effect
-                gooseFlickerTime += Gdx.graphics.getDeltaTime();
-                float flicker = 1f + 0.12f * (float) Math.sin(gooseFlickerTime * 8);
-                gooseLight.radius = 50f * flicker;
-            }
-        }
-
-    }
 
     // load map and collision layer
     private void initializeMap() {
@@ -166,45 +112,8 @@ public class GameScreen implements Screen {
     private void initializeLighting() {
         lighting = new Lighting();
 
-        // req1: remove the light for the start of the game
-        // hasTorch = false
-
-        if (DEBUG) System.out.println("Lighting initialized - No light at game start");
-
     }
 
-    // add a light centered on player
-    private void addPlayerLight() {
-        synchronized (lightLock) {
-            if (lighting != null && hasTorch) {
-                if (isLightIndexValid(playerLightIndex)) {
-                    lighting.safeRemoveLight(playerLightIndex);
-                    playerLightIndex = -1;
-                }
-
-                float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2;
-                float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2;
-
-                Color white = new Color(1f, 1f, 1f, 0.85f);
-                lighting.addLight(playerCenterX, playerCenterY, 80f, white);
-
-                playerLightIndex = lighting.getLights().size() - 1;
-
-                if (DEBUG) System.out.println("Player light added at: (" + playerCenterX + ", " + playerCenterY + ")");
-            }
-        }
-    }
-
-    private boolean isLightIndexValid(int index) {
-        if (lighting == null) {
-            return false;
-        }
-
-        if (index == -1) {
-            return false;
-        }
-        return lighting != null && index != -1 && index >= 0 && index < lighting.getLights().size();
-    }
 
     // update game logic
     private void update(float delta) {
@@ -218,22 +127,42 @@ public class GameScreen implements Screen {
         goose.x = Math.max(0, Math.min(goose.x, mapWidth - goose.getWidth()));
         goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
 
-        goose.checkAndStealTorch(this, player.sprite.getX(), player.sprite.getY());
 
+        //If goose has not yet stolen torch, check if goose can steal torch
+        if(!goose.hasStolenTorch && hasTorch){
+            float dx = goose.x - player.sprite.getX();
+            float dy = goose.y - player.sprite.getY();
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
+            if (distance < 30f) {
+                goose.hasStolenTorch = true;
+                hasTorch = false;
+                lighting.removeLightSource("playerTorch");
+                lighting.addLightSource("gooseTorch",goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2), new Color(1,0.4f,0.1f,0.4f), 30);
+            }
+
+        }
+        // Update light positions
+        if(hasTorch) {
+            lighting.updateLightSource("playerTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
+        }
+        if(goose.hasStolenTorch){
+            lighting.updateLightSource("gooseTorch", goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2));
+
+        }
+        // Move if not paused
         if(!isPaused) {
             gameTimer -= delta;
             handleInput(delta);
             player.handleInput(delta);
             player.updatePlayer(stateTime);
-            updateLightPositions();
             goose.moveGoose(stateTime,
                             player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
                             player.sprite.getY() + (player.sprite.getHeight() / 2),
                             player.isMoving);
 
         }
-
+        // If time up
         if(gameTimer <= 0) {
             game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
         }
@@ -294,113 +223,9 @@ public class GameScreen implements Screen {
 
         }
 
-    // keep light centered on player
-    private void updateLightPositions() {
-        if (lighting == null) return;
-
-        lighting.updateLights();
-
-        synchronized (lightLock) {
-            // renew player lighting position
-            if (hasTorch && isLightIndexValid(playerLightIndex)) {
-                Lighting.LightSource playerLight = lighting.getLights().get(playerLightIndex);
-
-                float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2f;
-                float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
-
-                playerLight.x = playerCenterX;
-                playerLight.y = playerCenterY;
-                playerLight.radius = 100f;
-
-                if (DEBUG)
-                    System.out.println("Light updated at player center: (" + playerCenterX + ", " + playerCenterY + ")");
-                }
-                else if (!hasTorch && goose.hasStolenTorch() && isLightIndexValid(gooseLightIndex)) {
-                    Lighting.LightSource gooseLight = lighting.getLights().get(gooseLightIndex);
-
-                    float gooseCenterX = goose.x + goose.getWidth() / 2f;
-                    float gooseCenterY = goose.y + goose.getHeight() / 2f;
-
-                    gooseLight.x = gooseCenterX;
-                    gooseLight.y = gooseCenterY;
-
-                    if (DEBUG) System.out.println(" Player light index invalid, reset to -1");
 
 
-            }
-            // update goose light position
-            updateGooseLightPosition();
-        }
-    }
 
-    public Lighting getLighting() {
-        return lighting;
-    }
-
-    public void gainTorch() {
-        synchronized (lightLock) {
-            if (!hasTorch) {
-                hasTorch = true;
-
-                if (lighting != null && gooseLightIndex != -1 && gooseLightIndex < lighting.getLights().size()) {
-                    lighting.safeRemoveLight(gooseLightIndex);
-                    gooseLightIndex = -1;
-                }
-
-                // TODO
-                addPlayerLight();
-                isCtrl = true;
-                if (DEBUG) System.out.println("Torch acquired! Goose light removed.");
-            }
-        }
-    }
-
-    public void loseTorch() {
-        synchronized (lightLock) {
-            if (hasTorch) {
-                hasTorch = false;
-                if (lighting != null && playerLightIndex != -1 && playerLightIndex < lighting.getLights().size()) {
-                    lighting.safeRemoveLight(playerLightIndex);
-                    playerLightIndex = -1;
-                    if (DEBUG) System.out.println("Torch lost! Light removed.");
-                }
-            }
-        }
-    }
-
-    private synchronized void setHasTorch(boolean value) {
-        synchronized (lightLock) {
-            this.hasTorch = value;
-
-            if (!value && isLightIndexValid(playerLightIndex)) {
-                lighting.safeRemoveLight(playerLightIndex);
-                playerLightIndex = -1;
-                lighting.updateLights();
-                if (DEBUG) System.out.println("Player torch removed due to goose steal.");
-            }
-        }
-    }
-
-
-    synchronized boolean getHasTorch() {
-        return this.hasTorch;
-    }
-
-    synchronized void setPlayerLightIndex(int index) {
-        this.playerLightIndex = index;
-    }
-
-    synchronized int getPlayerLightIndex() {
-        return this.playerLightIndex;
-    }
-
-    synchronized void setGooseLightIndex(int index) {
-        this.gooseLightIndex = index;
-    }
-
-    synchronized int getGooseLightIndex() {
-        return this.gooseLightIndex;
-    }
 
     @Override
     public void show() {
@@ -435,22 +260,13 @@ public class GameScreen implements Screen {
                 player.sprite.draw(game.batch);
 
             }
-            if(hasTorch){
-
-                player.torch.draw(game.batch, 1);
+            int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
+            int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
+            if(isDark) {
+                game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
             }
-
             game.batch.end();
 
-            try {
-
-                if (lighting != null) {
-                    lighting.render(camera);
-                    Gdx.gl.glFlush();
-                }
-            } catch (Exception e) {
-                Gdx.app.error("Lighting", "Lighting render failed", e);
-            }
 
             renderUI();
 
@@ -473,9 +289,17 @@ public class GameScreen implements Screen {
 
         // req2: Toggle the torch with CTRL key
         if (isCtrl && (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT))) {
-            if (!hasTorch) {
-                gainTorch();
-            }
+            isDark = !isDark;
+            lighting.clearLightSources();
+            goose.hasStolenTorch = false;
+            hasTorch = true;
+
+            lighting.addLightSource("playerTorch",
+                player.sprite.getX() + (player.sprite.getWidth()/2),
+                player.sprite.getY() + (player.sprite.getHeight()/2),
+                new Color(0,0,0,0),
+                50);
+
         }
 
         // Cycle through screens for testing, remove later
@@ -517,12 +341,12 @@ public class GameScreen implements Screen {
         y -= lineSpacing;
 
         // goose's torch status
-        drawText(smallFont, "Goose has torch: " + (goose.hasStolenTorch() ? "YES" : "NO"),
-        goose.hasStolenTorch() ? Color.CYAN : Color.WHITE, 20, y);
+        drawText(smallFont, "Goose has torch: " + (goose.hasStolenTorch ? "YES" : "NO"),
+        goose.hasStolenTorch ? Color.CYAN : Color.WHITE, 20, y);
         y -= lineSpacing;
 
         // distance between player and goosen (only shown whenplayer has torch)
-        if (hasTorch && !goose.hasStolenTorch()) {
+        if (hasTorch && !goose.hasStolenTorch) {
             float distance = (float) Math.hypot(goose.x - player.sprite.getX(), goose.y - player.sprite.getY());
             drawText(smallFont, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
             y -= lineSpacing;
@@ -592,9 +416,6 @@ public class GameScreen implements Screen {
             map.dispose();
         }
 
-        if (lighting != null) {
-            lighting.dispose();
-        }
 
         if (mapRenderer != null) {
             mapRenderer.dispose();
