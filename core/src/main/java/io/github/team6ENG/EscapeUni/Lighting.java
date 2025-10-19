@@ -29,18 +29,18 @@ public class Lighting {
         float circleY;
         Color colour;
         int radius;
+        boolean isVisible;
         protected LightSource(float circleX, float circleY, Color colour, int radius){
             this.circleX = circleX;
             this.circleY = circleY;
             this.colour = colour;
             this.radius = radius;
-
+            isVisible = true;
         }
     }
 
     public void addLightSource(String lightName, float circleX, float circleY, Color colour, int radius){
         lights.put(lightName, new LightSource(circleX, circleY, colour, radius));
-
     }
     public void removeLightSource(String lightName){
         lights.remove(lightName);
@@ -52,6 +52,12 @@ public class Lighting {
         lights.get(lightName).circleX = circleX;
         lights.get(lightName).circleY = circleY;
 
+    }
+    public void adjustRadius(String lightName, int radius){
+        lights.get(lightName).radius = radius;
+    }
+    public void isVisible(String lightName, boolean isVisible){
+        lights.get(lightName).isVisible = isVisible;
     }
 
     /**
@@ -75,9 +81,10 @@ public class Lighting {
         pixmap.setBlending(Pixmap.Blending.None);
 
         for(String l : lights.keySet()) {
-            pixmap.setColor(lights.get(l).colour);
-            pixmap.fillCircle((int) (lights.get(l).circleX), mapHeight - (int) (lights.get(l).circleY), lights.get(l).radius);
-
+            if(lights.get(l).isVisible) {
+                pixmap.setColor(lights.get(l).colour);
+                pixmap.fillCircle((int) (lights.get(l).circleX), mapHeight - (int) (lights.get(l).circleY), lights.get(l).radius);
+            }
         }
         Texture texture = new Texture(pixmap);
 
