@@ -6,14 +6,15 @@ import java.util.HashMap;
 import static java.lang.Math.abs;
 
 public class Goose extends SpriteAnimations {
-    private static final boolean DEBUG = false;
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
     public boolean hasStolenTorch = false;
     public TextureRegion currentGooseFrame;
     private float speed = 0.75f;
-    private boolean isMoving;
+    public boolean isMoving;
     private TiledMapTileLayer.Cell cell;
+
+    public Goose baby = null;
 
     public Goose() {
         super("sprites/goose.png", 15, 17);
@@ -43,12 +44,12 @@ public class Goose extends SpriteAnimations {
 
     }
 
-    public void moveGoose(float stateTime, float playerX, float playerY, boolean isPlayerMoving) {
+    public void moveGoose(float stateTime, float followX, float followY, boolean isFollowMoving) {
         int tileX = (int)(x+ getWidth() / 2) / 16;
         int tileY = (int)(y+ getHeight() / 2) / 16;
 
         // If player is in range, idle
-        if(abs(x-playerX) + abs(y-playerY) <= 50 && !isPlayerMoving){
+        if(abs(x-followX) + abs(y-followY) <= 50 && !isFollowMoving){
             if(isFacingLeft){
                 currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
             }
@@ -58,24 +59,24 @@ public class Goose extends SpriteAnimations {
         }
         else{
             isMoving = false;
-            if (x > playerX +5 && isMoveAllowed(tileX-1,tileY)) {
+            if (x > followX +5 && isMoveAllowed(tileX-1,tileY)) {
                 isFacingLeft = true;
                 currentGooseFrame = animations.get("walkLeft").getKeyFrame(stateTime, true);
                 x -= speed;
                 isMoving = true;
             }
-            else if(x <= playerX -5 && isMoveAllowed(tileX+1,tileY)) {
+            else if(x <= followX -5 && isMoveAllowed(tileX+1,tileY)) {
                 isFacingLeft = false;
                 currentGooseFrame = animations.get("walkRight").getKeyFrame(stateTime, true);
                 x += speed;
                 isMoving = true;
             }
 
-            if(y > playerY +5 && isMoveAllowed(tileX,tileY-1)) {
+            if(y > followY +5 && isMoveAllowed(tileX,tileY-1)) {
                 y -= speed;
                 isMoving = true;
             }
-            else if (y <= playerY -5 && isMoveAllowed(tileX ,tileY+1)) {
+            else if (y <= followY -5 && isMoveAllowed(tileX ,tileY+1)) {
                 y += speed;
                 isMoving = true;
             }
@@ -96,7 +97,22 @@ public class Goose extends SpriteAnimations {
     }
 
     public float getHeight() {
+
         return currentGooseFrame != null ? currentGooseFrame.getRegionHeight() : 16f;
+    }
+
+    public void loadBabyGoose(int gooseIndex){
+        if (gooseIndex < 5) {
+            baby = new Goose();
+
+            baby.loadSprite(wallsLayer, mapWallsId);
+            baby.x = x;
+            baby.y = y;
+            baby.speed = speed*0.9f;
+
+            baby.loadBabyGoose(gooseIndex + 1);
+
+        }
     }
 }
 
