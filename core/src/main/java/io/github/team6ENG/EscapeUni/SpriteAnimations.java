@@ -5,20 +5,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 public class SpriteAnimations  {
 
-    public HashMap<String, Animation<TextureRegion>> animations = new HashMap<>();
+    public HashMap<String, Animation<TextureRegion>> animations = new HashMap<String, Animation<TextureRegion>>();
     public float x;
     public float y;
-    private HashMap<String, Integer[]> animationInfo = new HashMap<>();
-    private int COLUMNS;
-    private int ROWS;
-    private Texture sheet;
+    private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
+    private final int COLUMNS;
+    private final int ROWS;
+    private final Texture sheet;
 
 
     protected TiledMapTileLayer wallsLayer;
@@ -49,9 +46,8 @@ public class SpriteAnimations  {
             frames = new TextureRegion[animationInfo.get(key)[1]];
             for (int i = 0; i < animationInfo.get(key)[1]; i++ ){
                 frames[i] = tmp[animationInfo.get(key)[0]][i];
-                System.out.println(frames[i]);
             }
-            animations.put(key, new Animation<>(0.5f, frames));
+            animations.put(key, new Animation<TextureRegion>(0.5f, frames));
 
         }
     }
