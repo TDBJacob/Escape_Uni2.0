@@ -137,6 +137,10 @@ public class GameScreen implements Screen {
 
     }
 
+    /**
+     * Load collectable items into items class
+     * They will then appear on screen and allow the player to pick them up
+     */
     private void initiliseItems() {
         //items = new Collectable[]{new Collectable(game, "items/torch.png", 300, 200, 0.1f),
                                   //  new Collectable(game, "items/torch.png", 350, 250, 0.2f),};
