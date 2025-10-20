@@ -6,15 +6,26 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
+/**
+ * Represents main menu screen
+ */
 public class MainMenuScreen implements Screen {
 
     final Main game;
 
+    /**
+     *
+     * @param game instance of Main
+     */
     public MainMenuScreen(final Main game) {
 
         this.game = game;
     }
 
+    /**
+     * Draw UI
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
@@ -26,7 +37,7 @@ public class MainMenuScreen implements Screen {
 
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
-    
+
         String title = "Escape York University";
         GlyphLayout layout = new GlyphLayout(game.menuFont, title);
         float titleX = (worldWidth - layout.width) / 2;

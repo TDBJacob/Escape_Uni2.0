@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.HashMap;
 
+/**
+ * Cuts sprite sheets up into animations
+ */
 public class SpriteAnimations  {
 
     public HashMap<String, Animation<TextureRegion>> animations = new HashMap<String, Animation<TextureRegion>>();
@@ -22,18 +25,36 @@ public class SpriteAnimations  {
     protected int mapWallsId;
 
 
-    // Used to generate animations dictionary which contains all animations for that sprite
+
+    /**
+     * Loads sprite sheet
+     * @param file path of sprite sheet
+     * @param SheetCols Number of columns in sheet
+     * @param SheetRows Number of rows in sheet
+     */
     public SpriteAnimations(String file, int SheetCols, int SheetRows) {
         COLUMNS = SheetCols;
         ROWS = SheetRows;
         sheet= new Texture(Gdx.files.internal(file));
     }
+
+    /**
+     * Stores map info for later boundary detection
+     * @param walls tilemap of game walls
+     * @param id tilemap layer which represents the walls
+     */
     public void loadSprite(TiledMapTileLayer walls, int id) {
         wallsLayer = walls;
         mapWallsId = id;
     }
+
+    /**
+     * Cuts the sprite sheet up
+     * Stores resulting animations into animations dictionary
+     * @param animInfo dictionary of sprite sheet layout
+     */
     protected void generateAnimation( HashMap<String, Integer[]> animInfo){
-        //animInfo [0] = Row of animation, [1] = number of frames
+        //animationInfo [0] = Row of animation, [1] = number of frames
         animationInfo = animInfo;
 
         TextureRegion[][] tmp = TextureRegion.split(sheet,

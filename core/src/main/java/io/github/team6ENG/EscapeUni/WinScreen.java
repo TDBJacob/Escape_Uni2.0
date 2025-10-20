@@ -14,12 +14,19 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+/**
+ * Represents win screen
+ */
 public class WinScreen implements Screen {
 
 
     private final Main game;
     private Stage stage;
 
+    /**
+     *
+     * @param game instance of Main
+     */
     public WinScreen(final Main game) {
         this.game = game;
 
@@ -33,6 +40,10 @@ public class WinScreen implements Screen {
 
     }
 
+    /**
+     * Draw UI
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
 

@@ -9,6 +9,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+/**
+ * Main class initialises the game
+ */
 public class Main extends Game{
 
     public SpriteBatch batch;
@@ -17,6 +20,10 @@ public class Main extends Game{
     public FitViewport viewport;
     public Skin buttonSkin;
     public String activeSpritePath;
+
+    /**
+     * Initialise global game variables
+     */
     public void create() {
         batch = new SpriteBatch();
 
