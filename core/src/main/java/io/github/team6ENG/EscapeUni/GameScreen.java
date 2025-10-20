@@ -23,6 +23,8 @@ public class GameScreen implements Screen {
 
     private final Main game;
     private Player player;
+    private BuildingManager buildingManager;
+
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
     private Lighting lighting;
@@ -73,6 +75,8 @@ public class GameScreen implements Screen {
         initialiseGoose(330,310);
 
         initialiseItems();
+
+        buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
     }
 
@@ -264,6 +268,8 @@ public class GameScreen implements Screen {
             isPaused = !isPaused;
         }
 
+        buildingManager.update(delta);
+
 
 
     }
@@ -344,6 +350,7 @@ public class GameScreen implements Screen {
             mapRenderer.render();
             Gdx.gl.glFlush();
         }
+        buildingManager.renderBuildingMap(camera);
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
@@ -522,6 +529,7 @@ public class GameScreen implements Screen {
             drawText(smallFont, "Press ESC again to quit", Color.RED, 20, 150);
         }
 
+        buildingManager.renderUI(game.batch, smallFont, bigFont, worldWidth, worldHeight);
         game.batch.end();
     }
 
@@ -595,6 +603,10 @@ public class GameScreen implements Screen {
 
         if (mapRenderer != null) {
             mapRenderer.dispose();
+        }
+
+        if (buildingManager != null) {
+            buildingManager.dispose();
         }
     }
 }
