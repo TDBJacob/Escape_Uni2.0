@@ -10,6 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import java.util.HashMap;
 
+/**
+ * Represents and controls the main player character
+ */
 public class Player extends SpriteAnimations{
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public TextureRegion currentPlayerFrame;
@@ -26,11 +29,17 @@ public class Player extends SpriteAnimations{
     public boolean isMoving;
     public boolean isMovingHorizontally;
 
+    /**
+     * Initialises the player and its animations
+     * @param g current instance of Main
+     */
     public Player(final Main g){
-
         super(g.activeSpritePath, 8, 7);
 
         game = g;
+        // HashMap<String, Integer[]> animationInfo:
+        //      key - Name of animation
+        //      Value - Array representing row of animation on sprite sheet and number of frames it contains
         animationInfo.put("idle", new Integer[]{0,8});
         animationInfo.put("walkForwards", new Integer[]{1,8});
         animationInfo.put("walkLeftForwards", new Integer[]{2,8});
@@ -52,7 +61,10 @@ public class Player extends SpriteAnimations{
 
     }
 
-    // handle keyboard input and move player
+    /**
+     * Check for keyboard input and move player
+     * @param delta time in seconds since last frame
+     */
     public void handleInput(float delta) {
         float actualSpeed = speed * 60f * delta;
 
@@ -61,8 +73,6 @@ public class Player extends SpriteAnimations{
         int y = (int)(sprite.getY()+(sprite.getHeight()/2))/16;
         int mapWidth = wallsLayer.getWidth();
         int mapHeight = wallsLayer.getHeight();
-
-        if (DEBUG) System.out.println(x + " , " + y);
 
         isMoving = false;
         isFacingLeft = false;
@@ -78,7 +88,6 @@ public class Player extends SpriteAnimations{
                     isFacingUp = true;
                 }
             }
-            if (DEBUG) System.out.println("Move Up (W or UP)");
         }
 
         // move down
@@ -91,7 +100,6 @@ public class Player extends SpriteAnimations{
                     isFacingUp = false;
                 }
             }
-            if (DEBUG) System.out.println("Move Down (S or DOWN)");
         }
 
         // move left
@@ -105,7 +113,6 @@ public class Player extends SpriteAnimations{
                     isMovingHorizontally = true;
                 }
             }
-            if (DEBUG) System.out.println("Move Left (A or LEFT)");
 
         }
 
@@ -120,7 +127,6 @@ public class Player extends SpriteAnimations{
                     isMovingHorizontally = true;
                 }
             }
-           if (DEBUG) System.out.println("Move Right (D or RIGHT)");
 
         }
         // check boundary
@@ -128,7 +134,9 @@ public class Player extends SpriteAnimations{
 
     }
 
-    // limit inside screen
+    /**
+     * Ensure player can't leave the map
+     */
     private void keepPlayerInBounds() {
         float tileSize = 16f;
 
@@ -146,6 +154,10 @@ public class Player extends SpriteAnimations{
             sprite.setY(worldHeight - sprite.getHeight());
     }
 
+    /**
+     * Update player animation and torch position
+     * @param stateTime time in seconds since last frame
+     */
     public void updatePlayer(float stateTime){
 
 

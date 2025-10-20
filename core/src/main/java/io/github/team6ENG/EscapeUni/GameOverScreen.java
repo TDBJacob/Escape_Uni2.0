@@ -8,12 +8,21 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+/**
+ * Represnts game over screen
+ */
 public class GameOverScreen implements Screen {
 
 
     private final Main game;
     private Stage stage;
     private String deathMessage;
+
+    /**
+     * Initialse scene
+     * @param game instance of Main
+     * @param deathMsg reason of game over
+     */
     public GameOverScreen(final Main game, String deathMsg) {
         this.game = game;
         deathMessage = deathMsg;
@@ -27,6 +36,10 @@ public class GameOverScreen implements Screen {
 
     }
 
+    /**
+     * Draw screen
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
 

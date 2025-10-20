@@ -14,9 +14,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.GL20;
 
 /**
- *
- * This class renders a dark overlay and adds light sources (circles)
- * to simulate 2D lighting effects.
+ * Stores light sources and renders a dark overlay with
+ * light sources (circles) to simulate 2D lighting effects.
  *
  */
 public class Lighting {
@@ -24,12 +23,24 @@ public class Lighting {
 
     public Lighting() {
     }
+
+    /**
+     * Represents a single light source
+     */
     static class LightSource{
         float circleX;
         float circleY;
         Color colour;
         int radius;
         boolean isVisible;
+
+        /**
+         * Initialises single light source
+         * @param circleX
+         * @param circleY
+         * @param colour
+         * @param radius
+         */
         protected LightSource(float circleX, float circleY, Color colour, int radius){
             this.circleX = circleX;
             this.circleY = circleY;
@@ -39,23 +50,55 @@ public class Lighting {
         }
     }
 
+    /**
+     * create new light source and add to list of lights
+     * @param lightName
+     * @param circleX
+     * @param circleY
+     * @param colour
+     * @param radius
+     */
     public void addLightSource(String lightName, float circleX, float circleY, Color colour, int radius){
         lights.put(lightName, new LightSource(circleX, circleY, colour, radius));
     }
+
+    /**
+     * Remove a light source from lights
+     * @param lightName
+     */
     public void removeLightSource(String lightName){
         lights.remove(lightName);
     }
+    /**
+     * Reset list of lights
+     */
     public void clearLightSources(){
         lights.clear();
     }
+
+    /**
+     * Reposition light source
+     */
     public void updateLightSource(String lightName, float circleX, float circleY){
         lights.get(lightName).circleX = circleX;
         lights.get(lightName).circleY = circleY;
 
     }
+
+    /**
+     * Adjust radius of a light source
+     * @param lightName
+     * @param radius
+     */
     public void adjustRadius(String lightName, int radius){
         lights.get(lightName).radius = radius;
     }
+
+    /**
+     * Set visibility of light source
+     * @param lightName
+     * @param isVisible
+     */
     public void isVisible(String lightName, boolean isVisible){
         lights.get(lightName).isVisible = isVisible;
     }
@@ -63,11 +106,13 @@ public class Lighting {
     /**
      * Renders the lighting system:
      * 1. Draws a dark overlay
-     * 2. Adds transparent circle
+     * 2. Adds transparent circles
      *
      * @param camera The camera
      * @param mapWidth Dimensions of world map for drawing darkness
      * @param mapHeight Dimensions of world map for drawing darkness
+     *
+     * @return Texture representing the darkness and lights
      */
 
     public Texture render(OrthographicCamera camera, int mapWidth, int mapHeight) {

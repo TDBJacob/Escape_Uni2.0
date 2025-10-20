@@ -14,12 +14,19 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
+/**
+ * Represents character select screen
+ */
 public class CharacterSelectScreen implements Screen {
 
 
     private final Main game;
     private Stage stage;
 
+    /**
+     * Initialises scene
+     * @param game instance of Main
+     */
     public CharacterSelectScreen(final Main game) {
         this.game = game;
 
@@ -32,17 +39,17 @@ public class CharacterSelectScreen implements Screen {
         table.bottom();
         table.defaults().pad(20).fillX().uniformX();
 
-        // 动态字体大
-        BitmapFont buttonFont = new BitmapFont(); // 如果使用 TTF 用 FreeTypeFontGenerator
+
+        BitmapFont buttonFont = new BitmapFont();
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = buttonFont;
 
         //placeholder buttons, maybe change to image button when we have sprites
         TextButton characterButton1 = new TextButton("Character 1", game.buttonSkin);
         TextButton characterButton2 = new TextButton("Character 2", game.buttonSkin);
-        
+
         table.add(characterButton1).height(Value.percentHeight(0.15f, table)).expandX();
-        
+
         table.add(characterButton2).height(Value.percentHeight(0.15f, table)).expandX();
 
 
@@ -70,6 +77,10 @@ public class CharacterSelectScreen implements Screen {
 
     }
 
+    /**
+     * Render screen
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
 

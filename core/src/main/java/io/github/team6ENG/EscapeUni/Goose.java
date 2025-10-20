@@ -5,6 +5,9 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.HashMap;
 import static java.lang.Math.abs;
 
+/**
+ * Represents and controls a goose
+ */
 public class Goose extends SpriteAnimations {
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
@@ -16,9 +19,15 @@ public class Goose extends SpriteAnimations {
 
     public Goose baby = null;
 
+    /**
+     * Generate goose and its animations
+     */
     public Goose() {
         super("sprites/goose.png", 15, 17);
 
+        // HashMap<String, Integer[]> animationInfo:
+        //      key - Name of animation
+        //      Value - Array representing row of animation on sprite sheet and number of frames it contains
         animationInfo.put("walkLeft", new Integer[]{5,4});
         animationInfo.put("walkRight", new Integer[]{6,4});
         animationInfo.put("idleLeft", new Integer[]{16,5});
@@ -27,7 +36,12 @@ public class Goose extends SpriteAnimations {
         generateAnimation(animationInfo);
     }
 
-
+    /**
+     * Check if goose is obstructed
+     * @param tileX y position of tile approaching
+     * @param tileY y position of tile approaching
+     * @return true if goose can move, else false
+     */
     private boolean isMoveAllowed(int tileX, int tileY) {
         // check map boundaries
         if (tileX < 0 || tileY < 0 || tileX >= wallsLayer.getWidth() || tileY >= wallsLayer.getHeight()) {
@@ -44,12 +58,20 @@ public class Goose extends SpriteAnimations {
 
     }
 
-    public void moveGoose(float stateTime, float followX, float followY, boolean isFollowMoving) {
+    /**
+     * Move goose towards target and update animations
+     * @param stateTime time in seconds since last frame
+     * @param followX x of target
+     * @param followY y of target
+     * @param isPlayerMoving is player moving
+     */
+    public void moveGoose(float stateTime, float followX, float followY, boolean isPlayerMoving) {
         int tileX = (int)(x+ getWidth() / 2) / 16;
         int tileY = (int)(y+ getHeight() / 2) / 16;
 
-        // If player is in range, idle
-        if(abs(x-followX) + abs(y-followY) <= 50 && !isFollowMoving){
+        float distance = (float) Math.sqrt(((x-followX) * (x-followX)) + ((y-followY)*(y-followY)));
+        // If target is in range, idle
+        if( distance <= 20 && !isPlayerMoving){
             if(isFacingLeft){
                 currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
             }
@@ -92,15 +114,29 @@ public class Goose extends SpriteAnimations {
         }
     }
 
+    /**
+     *
+     * @return width of goose
+     */
     public float getWidth() {
         return currentGooseFrame != null ? currentGooseFrame.getRegionWidth() : 16f; // default value
     }
 
+    /**
+     *
+     * @return height of goose
+     */
     public float getHeight() {
 
         return currentGooseFrame != null ? currentGooseFrame.getRegionHeight() : 16f;
     }
 
+    /**
+     * Recursively generate a trail of baby geese
+     * Each goose points to the next baby goose
+     * Base case: Goose index, only generate 5 geese
+     * @param gooseIndex number of current goose in the trail
+     */
     public void loadBabyGoose(int gooseIndex){
         if (gooseIndex < 5) {
             baby = new Goose();

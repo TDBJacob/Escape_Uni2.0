@@ -12,9 +12,9 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import java.util.HashMap;
 
+
 /**
  * GameScreen - main gameplay screen
- * This is class handle player movement and simple test UI.
  *
  */
 public class GameScreen implements Screen {
@@ -52,22 +52,25 @@ public class GameScreen implements Screen {
     private boolean isCamOnGoose = false;
     boolean hasGooseFood = false;
 
-    //private ArrayList<Collectable> items = new ArrayList<Collectable>();
     private final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     private int numOfInventoryItems = 0;
 
+    /**
+     * Initialise the game elements
+     * @param game - Instance of Main
+     */
     public GameScreen(final Main game) {
         this.game = game;
 
-        initializeMap();
+        initializeMap(0);
 
-        initializePlayer();
+        initializePlayer(300,300);
 
         initializeCamera();
 
         initializeLighting();
 
-        initialiseGoose();
+        initialiseGoose(330,310);
 
         initialiseItems();
         stateTime = 0f;
@@ -75,29 +78,29 @@ public class GameScreen implements Screen {
 
 
 
-
     /**
-     * Updates the goose light position
-     *
+     * Load map and collision layer
      */
-
-    // load map and collision layer
-    private void initializeMap() {
+    private void initializeMap(int wallLayer) {
         map = new TmxMapLoader().load("tileMap/testMap.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
-        int mapWallsLayer = 0;
+        int mapWallsLayer = wallLayer;
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
     }
 
-    // initialize player sprite
-    private void initializePlayer() {
+    /**
+     * Initialise player and set its position
+     */
+    private void initializePlayer(int x, int y) {
         player = new Player(game);
         player.loadSprite(collisionLayer, mapWallsId);
-        player.sprite.setPosition(300, 300);   // player start position
+        player.sprite.setPosition(x, y);
 
     }
 
-    // initialize camera to follow player
+    /**
+     * Initialise camera and set to position of player
+     */
     private void initializeCamera() {
         camera = new OrthographicCamera(400,225);
         camera.position.set(
@@ -106,14 +109,20 @@ public class GameScreen implements Screen {
             0);
         camera.update();
     }
-    private void initialiseGoose(){
+
+    /**
+     * Initialise goose and set its position
+     */
+    private void initialiseGoose(int x, int y){
 
         goose.loadSprite(collisionLayer, mapWallsId);
-        goose.x = 330;
-        goose.y = 310;
+        goose.x = x;
+        goose.y = y;
     }
 
-    // setup lighting system
+    /**
+    * Add and hide light circles for player and goose
+     */
     private void initializeLighting() {
         lighting = new Lighting();
 
@@ -144,65 +153,73 @@ public class GameScreen implements Screen {
         items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f));
         numOfInventoryItems = items.size();
     }
-    // update game logic
+
+    /**
+     * Call every frame to update game state
+     * @param delta - Time since last frame
+     */
     private void update(float delta) {
 
-        updateCamera();
-
-        float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
-        float mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
-
-
-        /*
-        //If goose has not yet stolen torch, check if goose can steal torch
-        if(!goose.hasStolenTorch && hasTorch){
-            float dx = goose.x - player.sprite.getX();
-            float dy = goose.y - player.sprite.getY();
-            float distance = (float) Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 30f) {
-                goose.hasStolenTorch = true;
-                hasTorch = false;
-                isCamOnGoose = true;
-                lighting.isVisible("gooseTorch", true);
-                lighting.isVisible("playerTorch", false);
-                lighting.isVisible("playerNoTorch", true);
-            }
-
-        }
-
-         */
-        // Update light positions
-
-        lighting.updateLightSource("playerTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
-        lighting.updateLightSource("playerNoTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
-
-        if(goose.hasStolenTorch){
-            lighting.updateLightSource("gooseTorch", goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2));
-
-        }
-        // Move if not paused
         if(!isPaused) {
+            updateCamera();
+
             gameTimer -= delta;
             handleInput(delta);
             player.handleInput(delta);
+            float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
+            float mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
+
+
+            /*
+            //If goose has not yet stolen torch, check if goose can steal torch
+            if(!goose.hasStolenTorch && hasTorch){
+                float dx = goose.x - player.sprite.getX();
+                float dy = goose.y - player.sprite.getY();
+                float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 30f) {
+                    goose.hasStolenTorch = true;
+                    hasTorch = false;
+                    isCamOnGoose = true;
+                    lighting.isVisible("gooseTorch", true);
+                    lighting.isVisible("playerTorch", false);
+                    lighting.isVisible("playerNoTorch", true);
+                }
+
+            }
+
+             */
+
+            // Update light positions
+            lighting.updateLightSource("playerTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
+            lighting.updateLightSource("playerNoTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
+
+            if(goose.hasStolenTorch){
+                lighting.updateLightSource("gooseTorch", goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2));
+
+            }
+
             player.updatePlayer(stateTime);
+
+            // Goose follow player
             goose.moveGoose(stateTime,
                             player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
                             player.sprite.getY() + (player.sprite.getHeight() / 2),
                             player.isMoving);
 
+            // If there are baby geese, they follow the goose directly in front of them
             Goose trail = goose;
-            float stateOffset = 0.05f;
+            float stateOffset = 0.075f;
             while (trail.baby != null) {
                 trail.baby.moveGoose(stateTime - stateOffset,
-                    trail.x     ,
-                    trail.y ,
-                    trail.isMoving);
-                stateOffset += 0.05f;
+                    trail.x,
+                    trail.y,
+                    player.isMoving);
+                stateOffset += 0.075f;
                 trail = trail.baby;
             }
 
+            // Check if player can pick up items
             for(String key: items.keySet()){
                 if(!items.get(key).playerHas){
                     if (items.get(key).checkInRange(player.sprite.getX(), player.sprite.getY()) && isEPressed){
@@ -215,9 +232,11 @@ public class GameScreen implements Screen {
                     }
                 }
             }
-            // Feed goose
-            float dx = goose.x - player.sprite.getX();
-            float dy = goose.y - player.sprite.getY();
+
+            // Feed goose if player has food and in range
+            float dx = (goose.x + (goose.getWidth())/2) - (player.sprite.getX()+ (player.sprite.getWidth()/2));
+            float dy = (goose.y + (goose.getHeight()/2)) - (player.sprite.getY() + (player.sprite.getHeight()/2));
+
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
             if (distance < 30f && hasGooseFood && isEPressed) {
 
@@ -228,7 +247,14 @@ public class GameScreen implements Screen {
 
             isEPressed = false;
 
-        }
+            // Keep sprites in map boundary
+            player.sprite.setX(Math.max(0, Math.min(player.sprite.getX(), mapWidth - player.sprite.getWidth())));
+            player.sprite.setY(Math.max(0, Math.min(player.sprite.getY(), mapHeight - player.sprite.getHeight())));
+            goose.x = Math.max(0, Math.min(goose.x, mapWidth - goose.getWidth()));
+            goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
+
+        } // End isPaused
+
         // If time up
         if(gameTimer <= 0) {
             game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
@@ -238,17 +264,13 @@ public class GameScreen implements Screen {
             isPaused = !isPaused;
         }
 
-        player.sprite.setX(Math.max(0, Math.min(player.sprite.getX(), mapWidth - player.sprite.getWidth())));
-        player.sprite.setY(Math.max(0, Math.min(player.sprite.getY(), mapHeight - player.sprite.getHeight())));
-
-
-        goose.x = Math.max(0, Math.min(goose.x, mapWidth - goose.getWidth()));
-        goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
 
 
     }
 
-    // move camera with player
+    /**
+     * Make camera follow player
+     */
     private void updateCamera() {
 
         float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
@@ -294,16 +316,7 @@ public class GameScreen implements Screen {
         }
 
         camera.update();
-
-        if (DEBUG) System.out.println("Camera updated - Player center: (" +
-            (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
-            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
-
-        if (DEBUG) System.out.println("Camera updated - Player center: (" +
-            (player.sprite.getX() + player.sprite.getWidth() / 2) + ", " +
-            (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
-
-        }
+}
 
 
 
@@ -313,9 +326,14 @@ public class GameScreen implements Screen {
     public void show() {
     }
 
+    /**
+     * Calls every frame to draw game screen
+     *
+     * @param delta The time in seconds since the last render.
+     */
     @Override
     public void render(float delta) {
-          update(delta);
+        update(delta);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -324,13 +342,13 @@ public class GameScreen implements Screen {
             game.viewport.apply();
             mapRenderer.setView(camera);
             mapRenderer.render();
-            Gdx.gl.glFlush();   // follow the status
+            Gdx.gl.glFlush();
         }
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        stateTime += Gdx.graphics.getDeltaTime();
+        stateTime += delta;
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
@@ -344,8 +362,11 @@ public class GameScreen implements Screen {
                 game.batch.draw(trail.currentGooseFrame, trail.x, trail.y, 16f, 16f);
 
             }
+
         }
         game.batch.setColor(Color.WHITE);
+
+        // Draw uncollected items in game
         for(String key: items.keySet()){
             if(!items.get(key).playerHas){
                 items.get(key).img.draw(game.batch, 1);
@@ -361,6 +382,7 @@ public class GameScreen implements Screen {
 
         int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
         int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
+
         if(isDark) {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
@@ -369,12 +391,15 @@ public class GameScreen implements Screen {
 
         game.batch.end();
 
-
         renderUI();
 
 
     }
 
+    /**
+     * Check for keyboard input
+     * @param delta time in seconds since last frame
+     */
     private void handleInput(float delta) {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -389,8 +414,9 @@ public class GameScreen implements Screen {
         }
 
 
-        // req2: Toggle the torch with CTRL key
+        // Toggle the torch with CTRL key
         if ((Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT))) {
+
             isDark = !isDark;
             goose.hasStolenTorch = false;
             isCamOnGoose = false;
@@ -411,6 +437,9 @@ public class GameScreen implements Screen {
 
     }
 
+    /**
+     * Draw UI on screen
+     */
     private void renderUI() {
 
         BitmapFont smallFont = game.gameFont;
@@ -421,44 +450,37 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
 
+        // Draw collected items in inventory bar
+        // Display instructions if an item can be used or collected
         float itemXPos = (worldWidth - (numOfInventoryItems * 32))/2;
-
+        String instructions= "";
         for(String key:items.keySet()) {
             if (items.get(key).playerHas){
-
                 items.get(key).img.setPosition(itemXPos, worldHeight * 0.9f);
-
                 items.get(key).img.draw(game.batch, 1);
                 itemXPos += 32;
+                instructions = getInstructions(key);
 
-                if(key.equals("gooseFood")) {
-
-                    float dx = (goose.x + (goose.getWidth())/2) - (player.sprite.getX()+ (player.sprite.getWidth()/2));
-                    float dy = (goose.y + (goose.getHeight()/2)) - (player.sprite.getY() + (player.sprite.getHeight()/2));
-
-                    float distance = (float) Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 30f) {
-                        String text = "Press 'e' to feed seeds to goose";
-                        GlyphLayout layout = new GlyphLayout(game.menuFont, text);
-                        float textX = (worldWidth - layout.width) / 2;
-                        drawText(bigFont, text,Color.BLACK, textX, worldHeight* 0.75f);
-
-                    }
-                }
             }
             else if (items.get(key).checkInRange(player.sprite.getX(), player.sprite.getY())) {
-                String text = "Press 'e' to collect";
-                GlyphLayout layout = new GlyphLayout(game.menuFont, text);
-                float textX = (worldWidth - layout.width) / 2;
-                drawText(bigFont, text,Color.BLACK, textX, worldHeight* 0.7f);
+                instructions = "Press 'e' to collect";
 
             }
         }
+        //Draw instructions
+        GlyphLayout layout = new GlyphLayout(game.menuFont, instructions);
+        float textX = (worldWidth - layout.width) / 2;
+        if(isDark){
+            drawText(bigFont, instructions,Color.WHITE, textX, worldHeight* 0.75f);
 
-        // === Section 1: game status display ===
+        }else {
+            drawText(bigFont, instructions, Color.BLACK, textX, worldHeight * 0.75f);
+        }
+
         float y = worldHeight - 20f;
         float lineSpacing = 15f;
 
+        // Requirements: Events tracker and game timer
         drawText(smallFont, String.format("Negative Events: %d/%d", foundNegativeEvents, totalNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         drawText(smallFont, String.format("Positive Events: %d/%d", foundPositiveEvents, totalPositiveEvents), Color.WHITE, 20, y);
@@ -487,13 +509,13 @@ public class GameScreen implements Screen {
 
         }
 
-        // === Section 2: control instructions ===
+        // Game instructions
         drawText(bigFont, "Press CTRL to pick up torch", Color.ORANGE, 20, 80);
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
         drawText(bigFont, "Click mouse to return to Menu", Color.GRAY, 20, 30);
 
         if(isPaused) {
-            smallFont.draw(game.batch, "PAUSED", (float) game.viewport.getScreenWidth() / 2, worldHeight - 100);
+            smallFont.draw(game.batch, "PAUSED", (float) worldWidth / 2, worldHeight - 100);
         }
 
         if (exitConfirm) {
@@ -504,15 +526,34 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Helper method: Unified text rendering logic to avoid repeated setColor() calls
+     * Checks if inventory item can be used
+     * @param key item being checked
+     * @return String of instructions to display
+     */
+    private String getInstructions(String key) {
+        if(key.equals("gooseFood")) {
+
+            float dx = (goose.x + (goose.getWidth())/2) - (player.sprite.getX()+ (player.sprite.getWidth()/2));
+            float dy = (goose.y + (goose.getHeight()/2)) - (player.sprite.getY() + (player.sprite.getHeight()/2));
+
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+            if (distance < 30f) {
+                return "Press 'e' to feed seeds to goose";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Helper method: text rendering logic to avoid repeated setColor() calls
      * @param font  The BitmapFont to use for rendering
      * @param text  The text string to display
-     * @param color The color of the text
+     * @param colour The colour of the text
      * @param x     The x-coordinate for text position
      * @param y     The y-coordinate for text position
      */
-    private void drawText(BitmapFont font, String text, Color color, float x, float y) {
-        font.setColor(color);
+    private void drawText(BitmapFont font, String text, Color colour, float x, float y) {
+        font.setColor(colour);
         font.draw(game.batch, text, x, y);
     }
 

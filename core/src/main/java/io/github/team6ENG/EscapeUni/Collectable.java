@@ -2,6 +2,9 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
+/**
+ * Represents collectable game items
+ */
 public class Collectable {
     Main game;
     public boolean playerHas = false;
@@ -18,7 +21,12 @@ public class Collectable {
 
     }
 
-
+    /**
+     * Check if player is in range
+     * @param playerX
+     * @param playerY
+     * @return true if in range
+     */
     public boolean checkInRange(float playerX, float playerY){
 
         if(!playerHas) {
@@ -33,12 +41,16 @@ public class Collectable {
         return false;
     }
 
+    /**
+     * Mark as collected and scale to inventory bar size
+     */
     public void Collect(){
 
         playerHas = true;
         img.setScale(1f, 1f);
         img.setWidth(30);
         img.setHeight(30);
+
 
     }
 
