@@ -38,7 +38,7 @@ public class GameScreen implements Screen {
     private int foundPositiveEvents = 0;
     private int foundHiddenEvents = 0;
 
-    private boolean isPaused = false;
+    public boolean isPaused = false;
     private boolean isCtrl = true;
     private boolean exitConfirm = false;
     OrthogonalTiledMapRenderer mapRenderer;
@@ -222,8 +222,6 @@ public class GameScreen implements Screen {
             (player.sprite.getY() + player.sprite.getHeight() / 2) + ")");
 
         }
-
-
 
 
 

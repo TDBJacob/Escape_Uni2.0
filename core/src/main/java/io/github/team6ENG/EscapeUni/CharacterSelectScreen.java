@@ -3,127 +3,200 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class CharacterSelectScreen implements Screen {
 
-
     private final Main game;
-    private Stage stage;
+    private final Stage stage;
+    private final Skin skin;
+    private final Texture background;
+    private final GlyphLayout layout;
+    private final ImageButton character1;
+    private final ImageButton character2;
+    private final TextButton backButton;
+
+    private static final String TITLE_TEXT = "Select Your Character";
 
     public CharacterSelectScreen(final Main game) {
         this.game = game;
+        this.layout = new GlyphLayout();
 
-        stage = new Stage(new ExtendViewport(Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+
+        // background image same as main menu for now
+        if (Gdx.files.internal("mainMenu/menuBackground.png").exists()) {
+            background = new Texture(Gdx.files.internal("mainMenu/menuBackground.png"));
+        } else {
+            background = null;
+        }
+
+        stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        skin = game.buttonSkin;
 
-        Table table = new Table();
-        table.setFillParent(true);
-        stage.addActor(table);
-        table.bottom();
-        table.defaults().pad(20).fillX().uniformX();
+        Texture femaleTex = new Texture(Gdx.files.internal("characterSelection/femaleCharacter.png"));
+        Texture maleTex = new Texture(Gdx.files.internal("characterSelection/maleCharacter.png"));
 
-        // 动态字体大
-        BitmapFont buttonFont = new BitmapFont(); // 如果使用 TTF 用 FreeTypeFontGenerator
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = buttonFont;
+        character1 = new ImageButton(new TextureRegionDrawable(new TextureRegion(femaleTex)));
+        character2 = new ImageButton(new TextureRegionDrawable(new TextureRegion(maleTex)));
 
-        //placeholder buttons, maybe change to image button when we have sprites
-        TextButton characterButton1 = new TextButton("Character 1", game.buttonSkin);
-        TextButton characterButton2 = new TextButton("Character 2", game.buttonSkin);
-        
-        table.add(characterButton1).height(Value.percentHeight(0.15f, table)).expandX();
-        
-        table.add(characterButton2).height(Value.percentHeight(0.15f, table)).expandX();
+        character1.setSize(150, 150);  // width, height
+        character2.setSize(150, 150);
+        backButton = createButton("Back");
+
+        // add buttons to stage
+        stage.addActor(character1);
+        stage.addActor(character2);
+        stage.addActor(backButton);
+
+        positionButtons();
+        addListeners();
+    }
+
+    private TextButton createButton(String text) {
+        TextButton button = new TextButton(text, skin);
+        button.getLabel().setFontScale(1.4f); // smaller text
+        button.pad(20f); // tighter padding
+        button.setSize(260, 85); // smaller overall button size
+        button.setColor(new Color(0.0f, 0.95f, 0.95f, 1f)); // turquoise
+        return button;
+    }
+
+    private void positionButtons() {
+        float w = stage.getViewport().getWorldWidth();
+        float h = stage.getViewport().getWorldHeight();
+
+        character1.setPosition(w / 2f - 120 - character1.getWidth() / 2f, h / 2f - character1.getHeight() / 2f);
+        character2.setPosition(w / 2f + 120 - character2.getWidth() / 2f, h / 2f - character2.getHeight() / 2f);
+
+        backButton.setPosition(w / 2f - backButton.getWidth() / 2f, h / 2f - 180);
+    }
 
 
-        characterButton1.addListener(new ClickListener(){
+
+    private void addListeners() {
+        Color normalColor = new Color(0.0f, 0.95f, 0.95f, 1f);
+        Color clickColor = new Color(0.4f, 1f, 1f, 1f);
+
+        character1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO: Set sprite here
+                character1.setColor(clickColor);
                 game.activeSpritePath = "sprites/femaleSprite.png";
-                game.setScreen(new GameScreen(game));
-                dispose();
-            } });
-        characterButton2.addListener(new ClickListener(){
+                Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game)));
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                character1.setColor(clickColor);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                character1.setColor(normalColor);
+            }
+        });
+
+        character2.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO: Set sprite here
+                character2.setColor(clickColor);
                 game.activeSpritePath = "sprites/maleSprite.png";
-                game.setScreen(new GameScreen(game));
-                dispose();
+                Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game)));
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                character2.setColor(clickColor);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                character2.setColor(normalColor);
+            }
+        });
+
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                backButton.setColor(clickColor);
+                Gdx.app.postRunnable(() -> game.setScreen(new MainMenuScreen(game, 300f)));
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                backButton.setColor(clickColor);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                backButton.setColor(normalColor);
             }
         });
     }
 
     @Override
-    public void show() {
-
-    }
-
-    @Override
     public void render(float delta) {
-
-        ScreenUtils.clear(Color.GREEN);
-        game.viewport.apply();
-        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        ScreenUtils.clear(Color.BLACK);
+        stage.getViewport().apply();
+        game.batch.setProjectionMatrix(stage.getCamera().combined);
 
         game.batch.begin();
 
+        float w = stage.getViewport().getWorldWidth();
+        float h = stage.getViewport().getWorldHeight();
 
-        float worldWidth = game.viewport.getWorldWidth();
-        float worldHeight = game.viewport.getWorldHeight();
+        if (background != null) {
+            game.batch.draw(background, 0, 0, w, h);
+        }
 
-        String title = "Character select screen";
-        GlyphLayout layout = new GlyphLayout(game.menuFont, title);
-        float titleX = (worldWidth - layout.width) / 2;
-        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.7f);
-
-        String subtitle = "Display 2 characters to choose from";
-        GlyphLayout subtitleLayout = new GlyphLayout(game.menuFont, subtitle);
-        float subtitleX = (worldWidth - subtitleLayout.width) / 2;
-        game.menuFont.draw(game.batch, subtitle, subtitleX, worldHeight * 0.6f);
+        float brightness = 0.85f + 0.15f * (float) Math.sin(TimeUtils.millis() / 500f);
+        game.menuFont.setColor(brightness, brightness, brightness, 1f);
+        layout.setText(game.menuFont, TITLE_TEXT);
+        game.menuFont.draw(game.batch, TITLE_TEXT, (w - layout.width) / 2f, h * 0.82f);
+        game.menuFont.setColor(Color.WHITE);
 
         game.batch.end();
 
-        stage.act();
+        stage.act(delta);
         stage.draw();
-
-
     }
 
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
-
+        positionButtons();
     }
 
-    @Override
-    public void pause() {
+    @Override public void show() {
 
     }
-
-    @Override
-    public void resume() {
+    @Override public void hide() {
 
     }
+    @Override public void pause() {
 
-    @Override
-    public void hide() {
+    }
+    @Override public void resume() {
 
     }
 
     @Override
     public void dispose() {
-
+        if (background != null) background.dispose();
+        stage.dispose();
     }
 }
