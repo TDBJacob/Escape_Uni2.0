@@ -120,7 +120,7 @@ public class Lighting {
         Pixmap pixmap = new Pixmap(mapWidth,mapHeight, Pixmap.Format.RGBA8888);
 
         // Fill entire pixmap with semi-transparent black
-        pixmap.setColor(0f, 0f, 0f, 0.85f);
+        pixmap.setColor(0f, 0f, 0f, 0.9f);
         pixmap.fill();
 
         pixmap.setBlending(Pixmap.Blending.None);

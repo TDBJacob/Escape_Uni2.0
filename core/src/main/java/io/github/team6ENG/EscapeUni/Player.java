@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class Player extends SpriteAnimations{
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public TextureRegion currentPlayerFrame;
-    private float speed = 1;
+    public float speed = 1;
     final Main game;
 
     public Sprite sprite;
