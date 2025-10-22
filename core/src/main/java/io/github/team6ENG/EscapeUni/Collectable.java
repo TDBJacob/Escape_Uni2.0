@@ -10,7 +10,9 @@ public class Collectable {
     public boolean playerHas = false;
     public Image img;
     public float x, y;
-    public Collectable(final Main game, String path,float x, float y, float scale){
+    public boolean isVisible;
+    public String originScreen;
+    public Collectable(final Main game, String path,float x, float y, float scale, boolean isVisible, String originScreen) {
         this.game = game;
         this.x = x;
         this.y = y;
@@ -18,6 +20,8 @@ public class Collectable {
         img = new Image(tex);
         img.setPosition(x, y);
         img.setScale(scale);
+        this.isVisible = isVisible;
+        this.originScreen = originScreen;
 
     }
 

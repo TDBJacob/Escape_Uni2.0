@@ -21,6 +21,8 @@ public class Main extends Game{
     public Skin buttonSkin;
     public String activeSpritePath;
 
+    public float gameTimer = 300f;
+
     /**
      * Initialise global game variables
      */

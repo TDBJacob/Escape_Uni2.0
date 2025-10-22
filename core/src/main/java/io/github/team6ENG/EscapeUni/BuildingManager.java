@@ -12,13 +12,13 @@ import com.badlogic.gdx.math.Rectangle;
 
 /**
  * Manages building-related interactions and rendering in the game world.
- * <p>
+ *
  * Features:
- * <ul>
- *   <li>Detects when the player approaches the Ron Cooke building trigger zone.</li>
- *   <li>Allows entering/exiting the building with specific key inputs.</li>
- *   <li>Displays prompts and simple UI transitions.</li>
- * </ul>
+ *
+ *   Detects when the player approaches the Ron Cooke building trigger zone.
+ *   Allows entering/exiting the building with specific key inputs.
+ *   Displays prompts and simple UI transitions.
+ *
  */
 public class BuildingManager {
 
@@ -58,7 +58,7 @@ public class BuildingManager {
     public void update(float delta) {
         if (inRonCooke) {
             // Inside Ron Cooke: allow exit with I key
-            if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
                 exitRonCooke();
             }
         } else {
@@ -90,10 +90,10 @@ public class BuildingManager {
      * Switches to an indoor view.
      */
     private void enterRonCooke() {
-        Gdx.app.log("Building", "Entered Ron Cooke");
         inRonCooke = true;
         game.setScreen(new RonCookeScreen(game, this, gameScreen));
-        
+        gameScreen.isDark = true;
+        gameScreen.hasTorch = true;
     }
 
     /**
@@ -101,7 +101,7 @@ public class BuildingManager {
      */
     private void exitRonCooke() {
         inRonCooke = false;
-        Gdx.app.log("Building", "Exited Ron Cooke");
+        game.setScreen(gameScreen);
     }
 
     /**
@@ -130,29 +130,6 @@ public class BuildingManager {
         }
     }
 
-    /**
-     * Renders the Ron Cooke interior view.
-     * Displays a black background and a centered welcome message.
-     */
-    private void renderRonCookeInterior(SpriteBatch batch, BitmapFont font, float worldWidth, float worldHeight) {
-        // Clear screen to black
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Main welcome text
-        font.setColor(Color.WHITE);
-        String welcomeText = "Welcome to the Ron Cooke";
-        GlyphLayout welcomeLayout = new GlyphLayout(font, welcomeText);
-        float welcomeWidth = welcomeLayout.width;
-        font.draw(batch, welcomeText, (worldWidth - welcomeWidth) / 2, worldHeight / 2);
-
-        // Exit hint
-        font.setColor(Color.GRAY);
-        String exitText = "(Press I to exit)";
-        GlyphLayout exitLayout = new GlyphLayout(font, exitText);
-        float exitWidth = exitLayout.width;
-        font.draw(batch, exitText, (worldWidth - exitWidth) / 2, worldHeight / 2 - 30);
-    }
 
     /**
      * Renders the building map (placeholder for future map logic).

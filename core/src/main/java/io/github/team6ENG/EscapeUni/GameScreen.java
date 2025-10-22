@@ -28,8 +28,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
     private Lighting lighting;
-    private boolean isDark = false;
-    private float gameTimer = 300f;
+    public boolean isDark = false;
 
     private final int totalNegativeEvents = 1;
     private final int totalPositiveEvents = 1;
@@ -50,12 +49,13 @@ public class GameScreen implements Screen {
     Goose goose = new Goose();
     float stateTime;
 
-    private boolean hasTorch = false;
+    public boolean hasTorch = false;
+    private boolean isTorchOn = false;
     private boolean isCamOnGoose = false;
     boolean hasGooseFood = false;
 
-    private final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
-    private int numOfInventoryItems = 0;
+    public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
+    public int numOfInventoryItems = 0;
 
     /**
      * Initialise the game elements
@@ -99,6 +99,7 @@ public class GameScreen implements Screen {
         player = new Player(game);
         player.loadSprite(collisionLayer, mapWallsId);
         player.sprite.setPosition(x, y);
+        player.speed = 1;
 
     }
 
@@ -154,7 +155,9 @@ public class GameScreen implements Screen {
      * They will then appear on screen and allow the player to pick them up
      */
     private void initialiseItems() {
-        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f));
+        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen"));
+        items.put("keyCard", new Collectable(game, "items/keyCard.png",   300, 200, 0.05f, false, "RonCookeScreen"));
+        items.put("torch", new Collectable(game, "items/torch.png",   300, 200, 0.1f, false, "RonCookeScreen"));
         numOfInventoryItems = items.size();
     }
 
@@ -167,7 +170,7 @@ public class GameScreen implements Screen {
         if(!isPaused) {
             updateCamera();
 
-            gameTimer -= delta;
+            game.gameTimer -= delta;
             handleInput(delta);
             player.handleInput(delta);
             float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
@@ -203,6 +206,9 @@ public class GameScreen implements Screen {
 
             }
 
+            if(isDark){
+                lighting.isVisible("playerNoTorch", true);
+            }
             player.updatePlayer(stateTime);
 
             // Goose follow player
@@ -225,9 +231,10 @@ public class GameScreen implements Screen {
 
             // Check if player can pick up items
             for(String key: items.keySet()){
-                if(!items.get(key).playerHas){
-                    if (items.get(key).checkInRange(player.sprite.getX(), player.sprite.getY()) && isEPressed){
-                        items.get(key).Collect();
+                Collectable item = items.get(key);
+                if(!item.playerHas && item.isVisible && item.originScreen.equals("GameScreen")){
+                    if (item.checkInRange(player.sprite.getX(), player.sprite.getY()) && isEPressed){
+                        item.Collect();
                         isEPressed = false;
                         if (key.equals("gooseFood")){
                             hasGooseFood = true;
@@ -260,7 +267,7 @@ public class GameScreen implements Screen {
         } // End isPaused
 
         // If time up
-        if(gameTimer <= 0) {
+        if(game.gameTimer <= 0) {
             game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
         }
 
@@ -375,8 +382,9 @@ public class GameScreen implements Screen {
 
         // Draw uncollected items in game
         for(String key: items.keySet()){
-            if(!items.get(key).playerHas){
-                items.get(key).img.draw(game.batch, 1);
+            Collectable item = items.get(key);
+            if(item.isVisible && !item.playerHas && item.originScreen.equals( "GameScreen")){
+                item.img.draw(game.batch, 1);
             }
         }
         if (player.sprite.getTexture() != null) {
@@ -421,25 +429,15 @@ public class GameScreen implements Screen {
         }
 
 
-        // Toggle the torch with CTRL key
-        if ((Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT))) {
-
-            isDark = !isDark;
-            goose.hasStolenTorch = false;
-            isCamOnGoose = false;
-            hasTorch = false;
-            if (isDark) {
-
-                hasTorch = true;
-                lighting.isVisible("playerNoTorch", false);
-                lighting.isVisible("playerTorch", true);
-                lighting.isVisible("gooseTorch", false);
+        // Toggle the torch with click
+        if(Gdx.input.justTouched() && hasTorch){
+            if(isTorchOn){
+                lighting.isVisible("playerTorch", false);
             }
-        }
-
-        // Cycle through screens for testing, remove later
-        if (!isPaused && Gdx.input.justTouched()) {
-            game.setScreen(new MainMenuScreen(game));
+            else {
+                lighting.isVisible("playerTorch", true);
+            }
+            isTorchOn = !isTorchOn;
         }
 
     }
@@ -462,15 +460,16 @@ public class GameScreen implements Screen {
         float itemXPos = (worldWidth - (numOfInventoryItems * 32))/2;
         String instructions= "";
         for(String key:items.keySet()) {
-            if (items.get(key).playerHas){
-                items.get(key).img.setPosition(itemXPos, worldHeight * 0.9f);
-                items.get(key).img.draw(game.batch, 1);
+            Collectable  item = items.get(key);
+            if (item.playerHas){
+                item.img.setPosition(itemXPos, worldHeight * 0.9f);
+                item.img.draw(game.batch, 1);
                 itemXPos += 32;
                 instructions = getInstructions(key);
 
             }
-            else if (items.get(key).checkInRange(player.sprite.getX(), player.sprite.getY())) {
-                instructions = "Press 'e' to collect";
+            else if (item.originScreen.equals("GameScreen") && item.isVisible && item.checkInRange(player.sprite.getX(), player.sprite.getY())) {
+                instructions = "Press 'e' to collect " + key;
 
             }
         }
@@ -494,7 +493,7 @@ public class GameScreen implements Screen {
         y -= lineSpacing;
         drawText(smallFont, String.format("Hidden Events:   %d/%d", foundHiddenEvents, totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(bigFont, String.format("%d:%d ", (int)gameTimer/60, (int)gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        drawText(bigFont, String.format("%d:%d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
 
         // player coordinates
         drawText(smallFont, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
@@ -517,7 +516,9 @@ public class GameScreen implements Screen {
         }
 
         // Game instructions
-        drawText(bigFont, "Press CTRL to pick up torch", Color.ORANGE, 20, 80);
+        if(hasTorch) {
+            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
+        }
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
         drawText(bigFont, "Click mouse to return to Menu", Color.GRAY, 20, 30);
 
