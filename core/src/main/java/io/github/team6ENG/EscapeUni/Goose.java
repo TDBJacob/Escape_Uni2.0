@@ -1,9 +1,14 @@
 package io.github.team6ENG.EscapeUni;
 
+import com.badlogic.gdx.Audio;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.HashMap;
-import static java.lang.Math.abs;
+import java.util.Random;
+
+import static java.lang.Math.*;
 
 /**
  * Represents and controls a goose
@@ -16,7 +21,8 @@ public class Goose extends SpriteAnimations {
     private float speed = 0.75f;
     public boolean isMoving;
     private TiledMapTileLayer.Cell cell;
-
+    private Sound honk;
+    private float probabilityOfHonk = 1000;
     public Goose baby = null;
 
     /**
@@ -34,6 +40,7 @@ public class Goose extends SpriteAnimations {
         animationInfo.put("idleRight", new Integer[]{15,5});
 
         generateAnimation(animationInfo);
+        honk = Gdx.audio.newSound(Gdx.files.internal("soundEffects/honk.mp3"));
     }
 
     /**
@@ -78,6 +85,14 @@ public class Goose extends SpriteAnimations {
             else{
                 currentGooseFrame = animations.get("idleRight").getKeyFrame(stateTime, true);
             }
+
+            Random random = new Random();
+            int doHonk = random.nextInt((int) probabilityOfHonk);
+            if(doHonk == 0) {
+                honk.play();
+            }
+
+
         }
         else{
             isMoving = false;
