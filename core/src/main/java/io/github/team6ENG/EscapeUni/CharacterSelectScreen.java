@@ -3,14 +3,18 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -37,20 +41,22 @@ public class CharacterSelectScreen implements Screen {
         table.setFillParent(true);
         stage.addActor(table);
         table.bottom();
-        table.defaults().pad(20).fillX().uniformX();
+        table.defaults().pad(50).fillX().uniformX().padBottom(0);
 
 
-        BitmapFont buttonFont = new BitmapFont();
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = buttonFont;
+        Texture img1 = new Texture(Gdx.files.internal("images/femaleSpriteImg.png"));
+        TextureRegionDrawable drawable1 = new TextureRegionDrawable(img1);
+        Texture img2 = new Texture(Gdx.files.internal("images/maleSpriteImg.png"));
+        TextureRegionDrawable drawable2 = new TextureRegionDrawable(img2);
+        drawable1.setMinSize(drawable1.getMinWidth() *10, drawable1.getMinHeight() * 10);
+        drawable2.setMinSize(drawable2.getMinWidth() * 10, drawable2.getMinHeight() * 10);
 
-        //placeholder buttons, maybe change to image button when we have sprites
-        TextButton characterButton1 = new TextButton("Character 1", game.buttonSkin);
-        TextButton characterButton2 = new TextButton("Character 2", game.buttonSkin);
+        ImageButton characterButton1 = new ImageButton(drawable1);
+        ImageButton characterButton2 = new ImageButton(drawable2);
 
-        table.add(characterButton1).height(Value.percentHeight(0.15f, table)).expandX();
+        table.add(characterButton1).height(Value.percentHeight(1f, table));
 
-        table.add(characterButton2).height(Value.percentHeight(0.15f, table)).expandX();
+        table.add(characterButton2).height(Value.percentHeight(1f, table));
 
 
         characterButton1.addListener(new ClickListener(){
@@ -84,7 +90,7 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void render(float delta) {
 
-        ScreenUtils.clear(Color.GREEN);
+        ScreenUtils.clear(Color.BLACK);
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
 
@@ -94,15 +100,11 @@ public class CharacterSelectScreen implements Screen {
         float worldWidth = game.viewport.getWorldWidth();
         float worldHeight = game.viewport.getWorldHeight();
 
-        String title = "Character select screen";
+        String title = "Choose your player";
         GlyphLayout layout = new GlyphLayout(game.menuFont, title);
         float titleX = (worldWidth - layout.width) / 2;
-        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.7f);
-
-        String subtitle = "Display 2 characters to choose from";
-        GlyphLayout subtitleLayout = new GlyphLayout(game.menuFont, subtitle);
-        float subtitleX = (worldWidth - subtitleLayout.width) / 2;
-        game.menuFont.draw(game.batch, subtitle, subtitleX, worldHeight * 0.6f);
+        game.menuFont.setColor(Color.WHITE);
+        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.9f);
 
         game.batch.end();
 
@@ -136,5 +138,6 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void dispose() {
 
+        stage.dispose();
     }
 }

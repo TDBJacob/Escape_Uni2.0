@@ -51,7 +51,6 @@ public class MainMenuScreen implements Screen {
         game.batch.end();
 
         if (Gdx.input.justTouched()) {
-
             game.setScreen(new CharacterSelectScreen(game));
             dispose();
         }
@@ -80,7 +79,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-
     }
 
 }
