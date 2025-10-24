@@ -170,7 +170,7 @@ public class GameScreen implements Screen {
      */
     private void initialiseItems() {
         items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen"));
-        items.put("keyCard", new Collectable(game, "items/keyCard.png",   300, 200, 0.05f, false, "RonCookeScreen"));
+        items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen"));
         items.put("torch", new Collectable(game, "items/torch.png",   300, 200, 0.1f, false, "RonCookeScreen"));
         numOfInventoryItems = items.size();
 

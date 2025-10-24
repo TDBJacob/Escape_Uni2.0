@@ -20,6 +20,7 @@ public class Main extends Game{
     public FitViewport viewport;
     public Skin buttonSkin;
     public String activeSpritePath;
+    public String activeUniIDPath;
 
     public float gameTimer = 300f;
 
