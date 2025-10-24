@@ -64,6 +64,7 @@ public class CharacterSelectScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 //TODO: Set sprite here
                 game.activeSpritePath = "sprites/femaleSprite.png";
+                game.activeUniIDPath = "items/idFemale.png";
                 game.setScreen(new GameScreen(game));
                 dispose();
             } });
@@ -72,6 +73,7 @@ public class CharacterSelectScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 //TODO: Set sprite here
                 game.activeSpritePath = "sprites/maleSprite.png";
+                game.activeUniIDPath = "items/idMale.png";
                 game.setScreen(new GameScreen(game));
                 dispose();
             }

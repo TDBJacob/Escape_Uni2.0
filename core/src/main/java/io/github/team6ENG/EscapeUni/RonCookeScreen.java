@@ -148,7 +148,7 @@ public class RonCookeScreen implements Screen {
         GlyphLayout layout = new GlyphLayout(game.menuFont, instructions);
         float textX = (worldWidth - layout.width) / 2;
         drawText(font, instructions, Color.WHITE, textX, worldHeight * 0.75f);
-        drawText(font, String.format("%d:%d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        drawText(font, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
 
         if(gameScreen.items.get("keyCard").playerHas){
             speech.clear();
