@@ -2,6 +2,7 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -29,6 +30,8 @@ public class Player extends SpriteAnimations{
     public boolean isMoving;
     public boolean isMovingHorizontally;
 
+    Sound footSteps;
+    boolean isFootsteps = false;
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
@@ -48,7 +51,7 @@ public class Player extends SpriteAnimations{
         animationInfo.put("walkLeftBackwards", new Integer[]{3,8});
         animationInfo.put("walkBackwards", new Integer[]{4,8});
 
-        generateAnimation(animationInfo);
+        generateAnimation(animationInfo, 0.3f);
 
         sprite = new Sprite(animations.get("walkLeftForwards").getKeyFrame(0, true));
         sprite.setBounds(sprite.getX(), sprite.getY(), 48, 64);
@@ -58,6 +61,8 @@ public class Player extends SpriteAnimations{
         torch.setPosition(sprite.getX(), sprite.getY());
         torch.setScale(0.02f);
         torch.setRotation(180);
+
+        footSteps = Gdx.audio.newSound(Gdx.files.internal("soundEffects/footsteps.mp3"));
 
     }
 
@@ -131,6 +136,14 @@ public class Player extends SpriteAnimations{
         }
         // check boundary
         keepPlayerInBounds();
+        if(isMoving && !isFootsteps){
+            isFootsteps = true;
+            footSteps.loop(.2f * game.gameVolume);
+        }
+        else if (!isMoving){
+            footSteps.stop();
+            isFootsteps = false;
+        }
 
     }
 

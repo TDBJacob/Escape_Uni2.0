@@ -3,6 +3,7 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import java.util.HashMap;
+import java.util.Random;
 
 
 /**
@@ -54,6 +56,11 @@ public class GameScreen implements Screen {
     private boolean isCamOnGoose = false;
     boolean hasGooseFood = false;
 
+    private Sound torchClick;
+    private Sound honk;
+    private final float probabilityOfHonk = 1000;
+    private Sound music;
+
     public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     public int numOfInventoryItems = 0;
 
@@ -76,6 +83,9 @@ public class GameScreen implements Screen {
 
         initialiseItems();
 
+        music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
+        music.loop(game.musicVolume);
+        torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
         buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
     }
@@ -123,7 +133,11 @@ public class GameScreen implements Screen {
         goose.loadSprite(collisionLayer, mapWallsId);
         goose.x = x;
         goose.y = y;
+
+
+        honk = Gdx.audio.newSound(Gdx.files.internal("soundEffects/honk.mp3"));
     }
+
 
     /**
     * Add and hide light circles for player and goose
@@ -159,6 +173,8 @@ public class GameScreen implements Screen {
         items.put("keyCard", new Collectable(game, "items/keyCard.png",   300, 200, 0.05f, false, "RonCookeScreen"));
         items.put("torch", new Collectable(game, "items/torch.png",   300, 200, 0.1f, false, "RonCookeScreen"));
         numOfInventoryItems = items.size();
+
+
     }
 
     /**
@@ -272,12 +288,19 @@ public class GameScreen implements Screen {
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            if(isPaused){
+
+                music.resume();
+            }
+            else{
+                music.pause();
+            }
             isPaused = !isPaused;
         }
 
         buildingManager.update(delta);
 
-
+        playAudio();
 
     }
 
@@ -410,6 +433,13 @@ public class GameScreen implements Screen {
 
 
     }
+    private void playAudio(){
+        Random random = new Random();
+        int doHonk = random.nextInt((int) probabilityOfHonk);
+        if(doHonk == 0 && !isPaused) {
+            honk.play(game.gameVolume);
+        }
+    }
 
     /**
      * Check for keyboard input
@@ -431,13 +461,9 @@ public class GameScreen implements Screen {
 
         // Toggle the torch with click
         if(Gdx.input.justTouched() && hasTorch){
-            if(isTorchOn){
-                lighting.isVisible("playerTorch", false);
-            }
-            else {
-                lighting.isVisible("playerTorch", true);
-            }
             isTorchOn = !isTorchOn;
+            lighting.isVisible("playerTorch", isTorchOn);
+            torchClick.play(game.gameVolume);
         }
 
     }
@@ -493,27 +519,12 @@ public class GameScreen implements Screen {
         y -= lineSpacing;
         drawText(smallFont, String.format("Hidden Events:   %d/%d", foundHiddenEvents, totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(bigFont, String.format("%d:%d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        drawText(bigFont, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
 
         // player coordinates
         drawText(smallFont, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
         y -= lineSpacing;
 
-        // player's torch status
-        drawText(smallFont, "Torch: " + (hasTorch ? "ON" : "OFF"), hasTorch ? Color.YELLOW : Color.WHITE, 20, y);
-        y -= lineSpacing;
-
-        // goose's torch status
-        drawText(smallFont, "Goose has torch: " + (goose.hasStolenTorch ? "YES" : "NO"),
-        goose.hasStolenTorch ? Color.CYAN : Color.WHITE, 20, y);
-        y -= lineSpacing;
-
-        // distance between player and goose (only shown when player has torch)
-        if (hasTorch && !goose.hasStolenTorch) {
-            float distance = (float) Math.hypot(goose.x - player.sprite.getX(), goose.y - player.sprite.getY());
-            drawText(smallFont, String.format("Distance to goose: %.1f", distance), Color.LIGHT_GRAY, 20, y);
-
-        }
 
         // Game instructions
         if(hasTorch) {
