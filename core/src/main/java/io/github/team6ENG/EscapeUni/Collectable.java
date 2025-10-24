@@ -1,4 +1,7 @@
 package io.github.team6ENG.EscapeUni;
+import com.badlogic.gdx.Audio;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
@@ -12,6 +15,7 @@ public class Collectable {
     public float x, y;
     public boolean isVisible;
     public String originScreen;
+    private Sound collect;
     public Collectable(final Main game, String path,float x, float y, float scale, boolean isVisible, String originScreen) {
         this.game = game;
         this.x = x;
@@ -23,6 +27,7 @@ public class Collectable {
         this.isVisible = isVisible;
         this.originScreen = originScreen;
 
+        collect = Gdx.audio.newSound(Gdx.files.internal("soundEffects/tap.mp3"));
     }
 
     /**
@@ -55,6 +60,7 @@ public class Collectable {
         img.setWidth(30);
         img.setHeight(30);
 
+        collect.play(game.gameVolume);
 
     }
 

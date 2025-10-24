@@ -21,8 +21,6 @@ public class Goose extends SpriteAnimations {
     private float speed = 0.75f;
     public boolean isMoving;
     private TiledMapTileLayer.Cell cell;
-    private Sound honk;
-    private float probabilityOfHonk = 1000;
     public Goose baby = null;
 
     /**
@@ -39,8 +37,7 @@ public class Goose extends SpriteAnimations {
         animationInfo.put("idleLeft", new Integer[]{16,5});
         animationInfo.put("idleRight", new Integer[]{15,5});
 
-        generateAnimation(animationInfo);
-        honk = Gdx.audio.newSound(Gdx.files.internal("soundEffects/honk.mp3"));
+        generateAnimation(animationInfo,0.6f);
     }
 
     /**
@@ -86,11 +83,8 @@ public class Goose extends SpriteAnimations {
                 currentGooseFrame = animations.get("idleRight").getKeyFrame(stateTime, true);
             }
 
-            Random random = new Random();
-            int doHonk = random.nextInt((int) probabilityOfHonk);
-            if(doHonk == 0) {
-                honk.play();
-            }
+
+
 
 
         }

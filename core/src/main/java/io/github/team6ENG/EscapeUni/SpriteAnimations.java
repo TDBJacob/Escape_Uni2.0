@@ -52,8 +52,9 @@ public class SpriteAnimations  {
      * Cuts the sprite sheet up
      * Stores resulting animations into animations dictionary
      * @param animInfo dictionary of sprite sheet layout
+     * @param animationSpeed number of seconds each animation frame should last
      */
-    protected void generateAnimation( HashMap<String, Integer[]> animInfo){
+    protected void generateAnimation( HashMap<String, Integer[]> animInfo, float animationSpeed){
         //animationInfo [0] = Row of animation, [1] = number of frames
         animationInfo = animInfo;
 
@@ -68,7 +69,7 @@ public class SpriteAnimations  {
             for (int i = 0; i < animationInfo.get(key)[1]; i++ ){
                 frames[i] = tmp[animationInfo.get(key)[0]][i];
             }
-            animations.put(key, new Animation<TextureRegion>(0.5f, frames));
+            animations.put(key, new Animation<TextureRegion>(animationSpeed, frames));
 
         }
     }
