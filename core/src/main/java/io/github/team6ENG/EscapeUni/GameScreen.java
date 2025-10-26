@@ -42,7 +42,7 @@ public class GameScreen implements Screen {
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
     private Image mapImg;
-    private final int mapWallsId = 610;
+    private final int mapWallsId = 1;
     private final int tileDimensions  = 8;
 
 
@@ -143,7 +143,10 @@ public class GameScreen implements Screen {
     * Add and hide light circles for player and goose
      */
     private void initializeLighting() {
-        lighting = new Lighting();
+        int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
+        int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
+
+        lighting = new Lighting(mapWidth, mapHeight);
 
         lighting.addLightSource("playerTorch",
             player.sprite.getX() + (player.sprite.getWidth() / 2),
