@@ -57,7 +57,7 @@ public class RonCookeScreen implements Screen {
      */
     private void initialisePlayer(int x, int y) {
         player = new Player(game);
-        player.loadSprite(new TiledMapTileLayer((int) game.viewport.getWorldWidth(), (int) game.viewport.getWorldHeight(), 16,16), 0);
+        player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);
         player.speed  = 2;

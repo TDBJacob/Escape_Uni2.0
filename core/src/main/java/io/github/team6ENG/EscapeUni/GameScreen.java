@@ -11,6 +11,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 import java.util.HashMap;
 import java.util.Random;
 
@@ -45,7 +47,9 @@ public class GameScreen implements Screen {
     private boolean exitConfirm = false;
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
-    private final int mapWallsId = 90;
+    private Image mapImg;
+    private final int mapWallsId = 610;
+    private final int tileDimensions  = 8;
 
 
     Goose goose = new Goose();
@@ -96,7 +100,9 @@ public class GameScreen implements Screen {
      * Load map and collision layer
      */
     private void initializeMap(int wallLayer) {
-        map = new TmxMapLoader().load("tileMap/testMap.tmx");
+        Texture mapTex = new Texture(Gdx.files.internal("tileMap/Image.png"));
+        mapImg = new Image(mapTex);
+        map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         int mapWallsLayer = wallLayer;
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
@@ -107,7 +113,7 @@ public class GameScreen implements Screen {
      */
     private void initializePlayer(int x, int y) {
         player = new Player(game);
-        player.loadSprite(collisionLayer, mapWallsId);
+        player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
         player.speed = 1;
 
@@ -130,7 +136,7 @@ public class GameScreen implements Screen {
      */
     private void initialiseGoose(int x, int y){
 
-        goose.loadSprite(collisionLayer, mapWallsId);
+        goose.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         goose.x = x;
         goose.y = y;
 
@@ -384,7 +390,7 @@ public class GameScreen implements Screen {
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-
+        mapImg.draw(game.batch, 1);
         stateTime += delta;
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
