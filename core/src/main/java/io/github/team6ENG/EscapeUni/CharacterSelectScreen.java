@@ -4,14 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -34,7 +31,7 @@ public class CharacterSelectScreen implements Screen {
     public CharacterSelectScreen(final Main game) {
         this.game = game;
 
-        stage = new Stage(new ExtendViewport(Gdx.graphics.getWidth(),Gdx.graphics.getHeight()));
+        stage = new Stage(game.viewport, game.batch);
         Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
@@ -62,18 +59,25 @@ public class CharacterSelectScreen implements Screen {
         characterButton1.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                 Gdx.app.postRunnable(() -> {
+                    game.activeSpritePath = "sprites/maleSprite.png";
+                    game.setScreen(new GameScreen(game));
+                    dispose();
+                });
                 //TODO: Set sprite here
-                game.activeSpritePath = "sprites/femaleSprite.png";
-                game.setScreen(new GameScreen(game));
-                dispose();
-            } });
+            }
+        });        
+                
+                
         characterButton2.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.postRunnable(() -> {
+                    game.activeSpritePath = "sprites/maleSprite.png";
+                    game.setScreen(new GameScreen(game));
+                    dispose();
+                });
                 //TODO: Set sprite here
-                game.activeSpritePath = "sprites/maleSprite.png";
-                game.setScreen(new GameScreen(game));
-                dispose();
             }
         });
     }
@@ -138,6 +142,12 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void dispose() {
 
-        stage.dispose();
+       if (Gdx.input.getInputProcessor() == stage)
+        Gdx.input.setInputProcessor(null);
+
+        if (stage != null) {
+            stage.dispose();
+            stage = null;
+        }   
     }
 }
