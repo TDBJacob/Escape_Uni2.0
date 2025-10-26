@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 /**
  * Represents character select screen
@@ -59,25 +58,24 @@ public class CharacterSelectScreen implements Screen {
         characterButton1.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                 Gdx.app.postRunnable(() -> {
+
+                Gdx.app.postRunnable(() -> {
                     game.activeSpritePath = "sprites/maleSprite.png";
+                    game.activeUniIDPath = "items/idFemale.png";
                     game.setScreen(new GameScreen(game));
                     dispose();
                 });
-                //TODO: Set sprite here
-            }
-        });        
-                
-                
+            } });
         characterButton2.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+
                 Gdx.app.postRunnable(() -> {
                     game.activeSpritePath = "sprites/maleSprite.png";
+                    game.activeUniIDPath = "items/idMale.png";
                     game.setScreen(new GameScreen(game));
                     dispose();
                 });
-                //TODO: Set sprite here
             }
         });
     }
@@ -148,6 +146,6 @@ public class CharacterSelectScreen implements Screen {
         if (stage != null) {
             stage.dispose();
             stage = null;
-        }   
+        }
     }
 }

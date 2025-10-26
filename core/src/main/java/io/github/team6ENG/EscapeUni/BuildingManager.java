@@ -2,8 +2,8 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -26,11 +26,15 @@ public class BuildingManager {
     private final Main game;
     private final GameScreen gameScreen;
     private boolean inRonCooke = false;
+    private boolean inLangwith = false;
     private boolean showEnterPrompt = false;
     private String currentBuilding = "";
+    private float lockedOutTime = 0;
 
+    Sound noAccess;
     // ====== Building Trigger Zones ======
     private final Rectangle ronCookeTrigger;
+    private final Rectangle langwithTrigger;
 
     // ====== References ======
     private final Player player;
@@ -47,7 +51,11 @@ public class BuildingManager {
         this.game = game;
         this.gameScreen = gameScreen;
         this.player = player;
-        this.ronCookeTrigger = new Rectangle(100, 200, 50, 50); // Example trigger zone
+        this.ronCookeTrigger = new Rectangle(350, 455, 50, 50);
+        this.langwithTrigger = new Rectangle(1078, 1215, 50, 50);
+
+
+        noAccess = Gdx.audio.newSound(Gdx.files.internal("soundEffects/wrong.mp3"));
     }
 
     /**
@@ -56,16 +64,26 @@ public class BuildingManager {
      * @param delta Time elapsed since the last frame (in seconds).
      */
     public void update(float delta) {
-        if (inRonCooke) {
+        if (inRonCooke || inLangwith) {
             // Inside Ron Cooke: allow exit with I key
             if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-                exitRonCooke();
+                exitBuilding();
             }
-        } else {
+        }
+        else {
             // Outside: check if player is near the building
             checkBuildingTrigger();
-            if (showEnterPrompt && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            if (showEnterPrompt && currentBuilding.equals("Ron Cooke") && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
                 enterRonCooke();
+            }
+            else if(showEnterPrompt && currentBuilding.equals("Langwith") && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+                if(gameScreen.items.get("keyCard").playerHas) {
+                    enterLangwith();
+                }
+                else{
+                    lockedOutTime = 5;
+                    noAccess.play();
+                }
             }
         }
     }
@@ -80,9 +98,20 @@ public class BuildingManager {
                 player.sprite.getWidth(),
                 player.sprite.getHeight()
         );
+        currentBuilding = "";
+        showEnterPrompt = false;
+        if(playerRect.overlaps(ronCookeTrigger)) {
+            showEnterPrompt = true;
+            currentBuilding = "Ron Cooke";
+        }
+        else if (playerRect.overlaps(langwithTrigger)) {
 
-        showEnterPrompt = playerRect.overlaps(ronCookeTrigger);
-        currentBuilding = showEnterPrompt ? "Ron Cooke" : "";
+            showEnterPrompt = true;
+            currentBuilding = "Langwith";
+        }
+
+
+
     }
 
     /**
@@ -94,14 +123,26 @@ public class BuildingManager {
         game.setScreen(new RonCookeScreen(game, this, gameScreen));
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
+        gameScreen.lighting.isVisible("playerNoTorch", true);
+
+    }
+    /**
+     * Enters the Langwith College.
+     * Switches to an indoor view.
+     */
+    private void enterLangwith() {
+        inLangwith = true;
+        game.setScreen(new LangwithScreen(game, this, gameScreen));
     }
 
     /**
      * Exits the Ron Cooke building and returns to the main world.
      */
-    private void exitRonCooke() {
+    private void exitBuilding() {
         inRonCooke = false;
+        inLangwith = false;
         game.setScreen(gameScreen);
+
     }
 
     /**
@@ -114,19 +155,29 @@ public class BuildingManager {
      */
     public void render(SpriteBatch batch, BitmapFont font, float worldWidth, float worldHeight) {
         renderWorldPrompts(batch, font, worldWidth, worldHeight);
+        lockedOutTime -= Gdx.graphics.getDeltaTime();
     }
 
     /**
      * Renders prompts while the player is outside the building.
      */
+    GlyphLayout layout = new GlyphLayout();
     private void renderWorldPrompts(SpriteBatch batch, BitmapFont font, float worldWidth, float worldHeight) {
         if (showEnterPrompt) {
             font.setColor(Color.YELLOW);
             String text = "Press G to enter " + currentBuilding;
 
-            GlyphLayout layout = new GlyphLayout(font, text);
+            layout = new GlyphLayout(font, text);
             float textWidth = layout.width;
             font.draw(batch, text, (worldWidth - textWidth) / 2, worldHeight - PROMPT_OFFSET_Y);
+        }
+
+        if(lockedOutTime > 0){
+            String lockedOutText = "Looks like you've lost your keycard\n head over to Ron Cooke for a new one";
+            layout = new GlyphLayout(font, lockedOutText);
+            float textWidth = layout.width;
+            font.setColor(Color.RED);
+            font.draw(batch, lockedOutText, (worldWidth - textWidth) / 2, worldHeight - PROMPT_OFFSET_Y - 30);
         }
     }
 
@@ -168,5 +219,13 @@ public class BuildingManager {
      */
     public boolean isInRonCooke() {
         return inRonCooke;
+    }
+    /**
+     * Returns whether the player is currently inside Langwith.
+     *
+     * @return true if the player is inside, false otherwise.
+     */
+    public boolean isInLangwith() {
+        return inLangwith;
     }
 }

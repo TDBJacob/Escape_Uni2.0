@@ -70,8 +70,8 @@ public class Goose extends SpriteAnimations {
      * @param isPlayerMoving is player moving
      */
     public void moveGoose(float stateTime, float followX, float followY, boolean isPlayerMoving) {
-        int tileX = (int)(x+ getWidth() / 2) / 16;
-        int tileY = (int)(y+ getHeight() / 2) / 16;
+        int tileX = (int)(x+ getWidth() / 2) / tileDimensions;
+        int tileY = (int)(y+ getHeight() / 2) / tileDimensions;
 
         float distance = (float) Math.sqrt(((x-followX) * (x-followX)) + ((y-followY)*(y-followY)));
         // If target is in range, idle
@@ -150,7 +150,7 @@ public class Goose extends SpriteAnimations {
         if (gooseIndex < 5) {
             baby = new Goose();
 
-            baby.loadSprite(wallsLayer, mapWallsId);
+            baby.loadSprite(wallsLayer, mapWallsId, tileDimensions);
             baby.x = x;
             baby.y = y;
             baby.speed = speed*0.9f;

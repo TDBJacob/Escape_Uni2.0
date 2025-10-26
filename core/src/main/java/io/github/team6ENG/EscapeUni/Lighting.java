@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 
 /**
  * Stores light sources and renders a dark overlay with
@@ -20,8 +21,11 @@ import com.badlogic.gdx.graphics.GL20;
  */
 public class Lighting {
     private HashMap<String, LightSource> lights = new HashMap<String, LightSource>();
-
-    public Lighting() {
+    private FrameBuffer frameBuffer;
+    private Texture lightTexture;
+    public Lighting(int mapWidth, int mapHeight) {
+        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, mapWidth, mapHeight, false);
+        lightTexture = new Texture(mapWidth, mapHeight, Pixmap.Format.RGBA8888);
     }
 
     /**
@@ -116,6 +120,7 @@ public class Lighting {
      */
 
     public Texture render(OrthographicCamera camera, int mapWidth, int mapHeight) {
+        frameBuffer.begin();
 
         Pixmap pixmap = new Pixmap(mapWidth,mapHeight, Pixmap.Format.RGBA8888);
 
@@ -131,16 +136,19 @@ public class Lighting {
                 pixmap.fillCircle((int) (lights.get(l).circleX), mapHeight - (int) (lights.get(l).circleY), lights.get(l).radius);
             }
         }
-        Texture texture = new Texture(pixmap);
+        lightTexture.draw(pixmap, 0, 0);
 
-        texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
         pixmap.dispose();
+        frameBuffer.end();
 
-        return texture;
+        return lightTexture;
 
     }
 
+    public void dispose(){
 
+    }
 
 
 }
