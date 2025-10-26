@@ -44,8 +44,8 @@ public class CharacterSelectScreen implements Screen {
         TextureRegionDrawable drawable1 = new TextureRegionDrawable(img1);
         Texture img2 = new Texture(Gdx.files.internal("images/maleSpriteImg.png"));
         TextureRegionDrawable drawable2 = new TextureRegionDrawable(img2);
-        drawable1.setMinSize(drawable1.getMinWidth() *10, drawable1.getMinHeight() * 10);
-        drawable2.setMinSize(drawable2.getMinWidth() * 10, drawable2.getMinHeight() * 10);
+        drawable1.setMinSize(drawable1.getMinWidth() *5, drawable1.getMinHeight() * 4);
+        drawable2.setMinSize(drawable2.getMinWidth() * 5, drawable2.getMinHeight() * 4);
 
         ImageButton characterButton1 = new ImageButton(drawable1);
         ImageButton characterButton2 = new ImageButton(drawable2);
@@ -60,7 +60,7 @@ public class CharacterSelectScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
 
                 Gdx.app.postRunnable(() -> {
-                    game.activeSpritePath = "sprites/maleSprite.png";
+                    game.activeSpritePath = "sprites/femaleSprite.png";
                     game.activeUniIDPath = "items/idFemale.png";
                     game.setScreen(new GameScreen(game));
                     dispose();
