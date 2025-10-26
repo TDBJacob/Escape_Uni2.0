@@ -161,19 +161,20 @@ public class BuildingManager {
     /**
      * Renders prompts while the player is outside the building.
      */
+    GlyphLayout layout = new GlyphLayout();
     private void renderWorldPrompts(SpriteBatch batch, BitmapFont font, float worldWidth, float worldHeight) {
         if (showEnterPrompt) {
             font.setColor(Color.YELLOW);
             String text = "Press G to enter " + currentBuilding;
 
-            GlyphLayout layout = new GlyphLayout(font, text);
+            layout = new GlyphLayout(font, text);
             float textWidth = layout.width;
             font.draw(batch, text, (worldWidth - textWidth) / 2, worldHeight - PROMPT_OFFSET_Y);
         }
 
         if(lockedOutTime > 0){
             String lockedOutText = "Looks like you've lost your keycard\n head over to Ron Cooke for a new one";
-            GlyphLayout layout = new GlyphLayout(font, lockedOutText);
+            layout = new GlyphLayout(font, lockedOutText);
             float textWidth = layout.width;
             font.setColor(Color.RED);
             font.draw(batch, lockedOutText, (worldWidth - textWidth) / 2, worldHeight - PROMPT_OFFSET_Y - 30);

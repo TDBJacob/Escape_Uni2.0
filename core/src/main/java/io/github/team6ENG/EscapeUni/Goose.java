@@ -22,8 +22,7 @@ public class Goose extends SpriteAnimations {
     public boolean isMoving;
     private TiledMapTileLayer.Cell cell;
     public Goose baby = null;
-    private float  mapWidth;
-    private float  mapHeight;
+
     /**
      * Generate goose and its animations
      */
@@ -39,8 +38,6 @@ public class Goose extends SpriteAnimations {
         animationInfo.put("idleRight", new Integer[]{15,5});
 
         generateAnimation(animationInfo,0.6f);
-        mapWidth = wallsLayer.getWidth();
-        mapHeight = wallsLayer.getHeight();
     }
 
     /**
@@ -51,7 +48,7 @@ public class Goose extends SpriteAnimations {
      */
     private boolean isMoveAllowed(int tileX, int tileY) {
         // check map boundaries
-        if (tileX < 0 || tileY < 0 || tileX >= mapWidth || tileY >= mapHeight) {
+        if (tileX < 0 || tileY < 0 || tileX >= wallsLayer.getWidth() || tileY >= wallsLayer.getHeight()) {
             return false;
         }
 
