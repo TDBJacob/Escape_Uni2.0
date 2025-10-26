@@ -2,84 +2,219 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 
 /**
- * Represents main menu screen
+ * MainMenuScreen — lifecycle safe:
+ * - Do not permanently steal input processor
+ * - Do not dispose shared resources
+ * - Keeps the same visual/behavior as before
  */
 public class MainMenuScreen implements Screen {
 
-    final Main game;
+    private final Main game;
 
-    /**
-     *
-     * @param game instance of Main
-     */
+    // stage and resources created in show() and disposed in dispose()
+    private Stage stage;
+    private Skin skin;
+    private Texture background;
+    private final GlyphLayout layout = new GlyphLayout();
+
+    private TextButton playButton;
+    private TextButton exitButton;
+
+    private com.badlogic.gdx.InputProcessor previousInputProcessor; // used to restore on hide()
+
+    private static final String TITLE_TEXT = "Escape University Of York";
+
     public MainMenuScreen(final Main game) {
-
         this.game = game;
+        // DO NOT initialize stage/input here — do it in show()
     }
 
-    /**
-     * Draw UI
-     * @param delta The time in seconds since the last render.
-     */
+    @Override
+    public void show() {
+        // create stage with a fixed virtual size (you used 800x450)
+        stage = new Stage(game.viewport);
+
+        // remember previous input processor so we can restore it later
+        previousInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(stage);
+
+        // Prefer shared skin from game (do NOT dispose it later)
+        skin = game.buttonSkin;
+
+        // Load background only for this screen
+        if (Gdx.files.internal("mainMenu/menuBackground.png").exists()) {
+            background = new Texture(Gdx.files.internal("mainMenu/menuBackground.png"));
+        } else {
+            background = null;
+            Gdx.app.log("MainMenuScreen", "menuBackground.png not found, continuing without it.");
+        }
+
+        // build UI
+        setupUI();
+    }
+
+    private void setupUI() {
+        playButton = createButton("Play");
+        exitButton = createButton("Exit");
+
+        stage.addActor(playButton);
+        stage.addActor(exitButton);
+
+        positionButtons();
+        addListeners();
+    }
+
+    private TextButton createButton(String text) {
+        // If skin is null, fallback to a simple TextButton may fail; ensure game.buttonSkin exists in assets
+        TextButton button = new TextButton(text, skin);
+        button.getLabel().setFontScale(1.6f);
+        button.pad(25f);
+        button.setSize(320, 100);
+        button.setColor(new Color(0.0f, 0.95f, 0.95f, 1f));
+        return button;
+    }
+
+    private void positionButtons() {
+        float w = stage.getViewport().getWorldWidth();
+        float h = stage.getViewport().getWorldHeight();
+
+        playButton.setPosition((w - playButton.getWidth()) / 2f, h / 2f + 20);
+        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f - 120);
+    }
+
+    private void addListeners() {
+        Color normalColor = new Color(0.0f, 0.95f, 0.95f, 1f);
+        Color clickColor = new Color(0.4f, 1f, 1f, 1f);
+
+        playButton.addListener(new ClickListener() {
+            private boolean clicked = false;
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (clicked) return;
+                clicked = true;
+                playButton.setColor(clickColor);
+                Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectScreen(game)));
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                playButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                playButton.setColor(normalColor);
+            }
+        });
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                exitButton.setColor(clickColor);
+                Gdx.app.postRunnable(Gdx.app::exit);
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                exitButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                exitButton.setColor(normalColor);
+            }
+        });
+    }
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
 
-        game.viewport.apply();
-        game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        // update stage
+        if (stage != null) {
+            stage.act(delta);
+        }
+
+        // Draw background + title using game's batch (aligned to stage camera)
+        if (stage != null) {
+            game.batch.setProjectionMatrix(stage.getCamera().combined);
+        } else {
+            game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
+        }
 
         game.batch.begin();
+        float w = (stage != null) ? stage.getViewport().getWorldWidth() : game.viewport.getWorldWidth();
+        float h = (stage != null) ? stage.getViewport().getWorldHeight() : game.viewport.getWorldHeight();
 
-        float worldWidth = game.viewport.getWorldWidth();
-        float worldHeight = game.viewport.getWorldHeight();
+        if (background != null) {
+            game.batch.draw(background, 0, 0, w, h);
+        }
 
-        String title = "Escape York University";
-        GlyphLayout layout = new GlyphLayout(game.menuFont, title);
-        float titleX = (worldWidth - layout.width) / 2;
-        game.menuFont.draw(game.batch, title, titleX, worldHeight * 0.7f);
-
-        String subtitle = "Click anywhere to play";
-        GlyphLayout subtitleLayout = new GlyphLayout(game.menuFont, subtitle);
-        float subtitleX = (worldWidth - subtitleLayout.width) / 2;
-        game.menuFont.draw(game.batch, subtitle, subtitleX, worldHeight * 0.6f);
+        float brightness = 0.85f + 0.15f * (float) Math.sin(TimeUtils.millis() / 500f);
+        if (game.menuFont != null) {
+            game.menuFont.setColor(brightness, brightness, brightness, 1f);
+            layout.setText(game.menuFont, TITLE_TEXT);
+            game.menuFont.draw(game.batch, TITLE_TEXT, (w - layout.width) / 2f, h * 0.82f);
+            game.menuFont.setColor(Color.WHITE);
+        }
 
         game.batch.end();
 
-        if (Gdx.input.justTouched()) {
-            game.setScreen(new CharacterSelectScreen(game));
-            dispose();
+        if (stage != null) stage.draw();
+
+        // allow quick keyboard start (space)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectScreen(game)));
         }
     }
 
     @Override
     public void resize(int width, int height) {
-        game.viewport.update(width, height, true);
+        if (stage != null) stage.getViewport().update(width, height, true);
+        positionButtons();
     }
 
     @Override
-    public void show() {
-    }
+    public void pause() { }
+
+    @Override
+    public void resume() { }
 
     @Override
     public void hide() {
-    }
+        if (Gdx.input.getInputProcessor() == stage) {
+            Gdx.input.setInputProcessor(null);
+        }
 
-    @Override
-    public void pause() {
-    }
-
-    @Override
-    public void resume() {
+        if (previousInputProcessor != null) {
+            Gdx.input.setInputProcessor(previousInputProcessor);
+            previousInputProcessor = null;
+        }
     }
 
     @Override
     public void dispose() {
+        // Dispose only things we created here
+        if (stage != null) {
+            stage.dispose();
+            stage = null;
+        }
+
+        if (background != null && !background.getTextureData().isPrepared()) {
+            background.dispose();
+            background = null;
+        }
+        
+        // DO NOT dispose game.menuFont or game.buttonSkin or game.batch here
     }
-
 }
-
