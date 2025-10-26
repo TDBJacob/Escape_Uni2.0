@@ -77,13 +77,13 @@ public class GameScreen implements Screen {
 
         initializeMap(0);
 
-        initializePlayer(300,300);
+        initializePlayer(1055,1215);
 
         initializeCamera();
 
         initializeLighting();
 
-        initialiseGoose(330,310);
+        initialiseGoose(950,1215);
 
         initialiseItems();
 
@@ -100,7 +100,7 @@ public class GameScreen implements Screen {
      * Load map and collision layer
      */
     private void initializeMap(int wallLayer) {
-        Texture mapTex = new Texture(Gdx.files.internal("tileMap/Image.png"));
+        Texture mapTex = new Texture(Gdx.files.internal("tileMap/map.png"));
         mapImg = new Image(mapTex);
         map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
