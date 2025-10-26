@@ -123,6 +123,8 @@ public class BuildingManager {
         game.setScreen(new RonCookeScreen(game, this, gameScreen));
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
+        gameScreen.lighting.isVisible("playerNoTorch", true);
+
     }
     /**
      * Enters the Langwith College.
@@ -140,6 +142,7 @@ public class BuildingManager {
         inRonCooke = false;
         inLangwith = false;
         game.setScreen(gameScreen);
+
     }
 
     /**

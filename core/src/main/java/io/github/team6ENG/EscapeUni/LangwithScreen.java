@@ -21,9 +21,10 @@ public class LangwithScreen implements Screen {
     private final BuildingManager buildingManager;
     private final GameScreen gameScreen;  // keep reference to return
     private final BitmapFont font;
+    private final BitmapFont smallFont;
     private Player player;
     private float stateTime;
-
+    private float pizzaText = 0;
 
     float worldWidth;
     float worldHeight ;
@@ -35,7 +36,7 @@ public class LangwithScreen implements Screen {
         this.buildingManager = buildingManager;
         this.gameScreen = gameScreen;
         this.font = game.menuFont;
-
+        this.smallFont = game.gameFont;
         initialisePlayer((int) 60,(int) game.viewport.getWorldHeight()/2);
         stateTime = 0;
     }
@@ -71,19 +72,28 @@ public class LangwithScreen implements Screen {
 
         for(String key: gameScreen.items.keySet()){
             Collectable item = gameScreen.items.get(key);
-            if(item.isVisible && !item.playerHas && item.originScreen.equals("RonCookeScreen")){
+            if(item.isVisible && !item.playerHas && item.originScreen.equals("LangwithScreen")){
                 item.img.draw(game.batch, 1);
                 if (item.checkInRange(player.sprite.getX()- (player.sprite.getHeight()/2) , player.sprite.getY() - (player.sprite.getHeight()/2)) && isEPressed){
-                    item.Collect();
-                    System.out.println("Here");
-                    isEPressed = false;
+                    if(key.equals("pizza")){
+                        isEPressed = false;
+                        pizzaText = 5;
+                        player.speedModifier = 2;
+                        gameScreen.items.get("pizza").isVisible = false;
+                        game.foundPositiveEvents += 1;
+                    }
+                    else {
 
+                        item.Collect();
+                        isEPressed = false;
+                    }
                 }
             }
         }
         game.batch.end();
         renderUI();
         game.gameTimer -= delta;
+        pizzaText -= delta;
         buildingManager.update(delta);
         stateTime += delta;
         isEPressed = Gdx.input.isKeyJustPressed(Input.Keys.E);
@@ -118,12 +128,31 @@ public class LangwithScreen implements Screen {
                 item.img.draw(game.batch, 1);
                 itemXPos += 32;
             }
-            else if (item.originScreen.equals("RonCookeScreen") && item.isVisible && item.checkInRange(player.sprite.getX()- 32, player.sprite.getY() - (player.sprite.getHeight()/2))){
+            else if (item.originScreen.equals("LangwithScreen") && item.isVisible && item.checkInRange(player.sprite.getX()- 32, player.sprite.getY() - (player.sprite.getHeight()/2))){
                 if (instructions.isEmpty()) {
-                    instructions = "Press 'e' to collect " + key;
+                    if (key.equals("pizza")) {
+                        instructions = "Press 'e' to eat pizza";
+                    }
+                    else {
+
+                        instructions = "Press 'e' to collect " + key;
+                    }
+
+
                 }
             }
         }
+        float y = worldHeight - 20f;
+        float lineSpacing = 15f;
+
+        // Requirements: Events tracker and game timer
+        drawText(smallFont, String.format("Negative Events: %d/%d", game.foundNegativeEvents, game.totalNegativeEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(smallFont, String.format("Positive Events: %d/%d", game.foundPositiveEvents, game.totalPositiveEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+
         GlyphLayout layout = new GlyphLayout(game.menuFont, instructions);
         float textX = (worldWidth - layout.width) / 2;
         drawText(font, instructions, Color.WHITE, textX, worldHeight * 0.75f);
@@ -133,6 +162,13 @@ public class LangwithScreen implements Screen {
         String exitText = "Press G to leave";
         GlyphLayout exitLayout = new GlyphLayout(font, exitText);
         font.draw(game.batch, exitText, (worldWidth - exitLayout.width) / 2, worldHeight - 20);
+
+        if(pizzaText > 0) {
+            font.setColor(Color.PURPLE);
+            String text = "PIZZA ENERGY, x2 SPEED";
+            layout = new GlyphLayout(font, text);
+            font.draw(game.batch, text, (worldWidth - layout.width) / 2, worldHeight - 50);
+        }
 
         game.batch.end();
     }

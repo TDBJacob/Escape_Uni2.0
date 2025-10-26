@@ -18,6 +18,7 @@ public class Player extends SpriteAnimations{
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public TextureRegion currentPlayerFrame;
     public float speed = 1;
+    public float speedModifier = 1;
     final Main game;
 
     public Sprite sprite;
@@ -71,7 +72,7 @@ public class Player extends SpriteAnimations{
      * @param delta time in seconds since last frame
      */
     public void handleInput(float delta) {
-        float actualSpeed = speed * 60f * delta;
+        float actualSpeed = speed * speedModifier* 60f * delta;
 
         TiledMapTileLayer.Cell cell;
         int x = (int)(sprite.getX()+(sprite.getWidth()/2))/tileDimensions;

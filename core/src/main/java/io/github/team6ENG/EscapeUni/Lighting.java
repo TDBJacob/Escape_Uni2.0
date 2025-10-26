@@ -140,7 +140,9 @@ public class Lighting {
 
     }
 
+    public void dispose(){
 
+    }
 
 
 }
