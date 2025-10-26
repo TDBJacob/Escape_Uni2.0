@@ -31,16 +31,10 @@ public class GameScreen implements Screen {
 
     private OrthographicCamera camera;
     private TiledMapTileLayer collisionLayer;
-    private Lighting lighting;
+    public Lighting lighting;
     public boolean isDark = false;
 
-    private final int totalNegativeEvents = 1;
-    private final int totalPositiveEvents = 1;
-    private final int totalHiddenEvents = 1;
 
-    private int foundNegativeEvents = 0;
-    private int foundPositiveEvents = 0;
-    private int foundHiddenEvents = 0;
 
     private boolean isPaused = false;
     private boolean isEPressed = false;
@@ -178,6 +172,8 @@ public class GameScreen implements Screen {
         items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen"));
         items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen"));
         items.put("torch", new Collectable(game, "items/torch.png",   300, 200, 0.1f, false, "RonCookeScreen"));
+        items.put("pizza", new Collectable(game, "items/pizza.png", 100, 100, 0.4f, true, "LangwithScreen"));
+
         numOfInventoryItems = items.size();
 
 
@@ -228,9 +224,6 @@ public class GameScreen implements Screen {
 
             }
 
-            if(isDark){
-                lighting.isVisible("playerNoTorch", true);
-            }
             player.updatePlayer(stateTime);
 
             // Goose follow player
@@ -275,7 +268,7 @@ public class GameScreen implements Screen {
 
                 items.remove("gooseFood");
                 goose.loadBabyGoose(0);
-                foundHiddenEvents += 1;
+                game.foundHiddenEvents += 1;
             }
 
             isEPressed = false;
@@ -439,8 +432,8 @@ public class GameScreen implements Screen {
 
 
     }
+    Random random = new Random();
     private void playAudio(){
-        Random random = new Random();
         int doHonk = random.nextInt((int) probabilityOfHonk);
         if(doHonk == 0 && !isPaused) {
             honk.play(game.gameVolume);
@@ -519,11 +512,11 @@ public class GameScreen implements Screen {
         float lineSpacing = 15f;
 
         // Requirements: Events tracker and game timer
-        drawText(smallFont, String.format("Negative Events: %d/%d", foundNegativeEvents, totalNegativeEvents), Color.WHITE, 20, y);
+        drawText(smallFont, String.format("Negative Events: %d/%d", game.foundNegativeEvents, game.totalNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Positive Events: %d/%d", foundPositiveEvents, totalPositiveEvents), Color.WHITE, 20, y);
+        drawText(smallFont, String.format("Positive Events: %d/%d", game.foundPositiveEvents, game.totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Hidden Events:   %d/%d", foundHiddenEvents, totalHiddenEvents), Color.WHITE, 20, y);
+        drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         drawText(bigFont, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
 
@@ -534,10 +527,9 @@ public class GameScreen implements Screen {
 
         // Game instructions
         if(hasTorch) {
-            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
+            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 55);
         }
-        drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 55);
-        drawText(bigFont, "Click mouse to return to Menu", Color.GRAY, 20, 30);
+        drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 30);
 
         if(isPaused) {
             smallFont.draw(game.batch, "PAUSED", (float) worldWidth / 2, worldHeight - 100);
@@ -617,6 +609,9 @@ public class GameScreen implements Screen {
         if (map != null) {
             map.dispose();
         }
+        if (lighting != null) {
+            lighting.dispose();
+        }
 
 
         if (mapRenderer != null) {
@@ -625,6 +620,12 @@ public class GameScreen implements Screen {
 
         if (buildingManager != null) {
             buildingManager.dispose();
+        }
+        if (torchClick != null) {
+            torchClick.dispose();
+        }
+        if (honk != null) {
+            honk.dispose();
         }
     }
 }

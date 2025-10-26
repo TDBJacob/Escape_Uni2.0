@@ -25,13 +25,21 @@ public class Main extends Game{
     public float gameTimer = 300f;
 
     public float gameVolume = 1f;
-    public float musicVolume = 0.3f;
+    public float musicVolume = 0.0f;
 
+    public final int totalNegativeEvents = 1;
+    public final int totalPositiveEvents = 1;
+    public final int totalHiddenEvents = 1;
+
+    public int foundNegativeEvents = 0;
+    public int foundPositiveEvents = 0;
+    public int foundHiddenEvents = 0;
     /**
      * Initialise global game variables
      */
     public void create() {
         batch = new SpriteBatch();
+
 
         menuFont = new BitmapFont(Gdx.files.internal("fonts/menuScreenFont.fnt"));
         viewport = new FitViewport(800, 450);

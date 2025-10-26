@@ -24,6 +24,7 @@ public class RonCookeScreen implements Screen {
     private final BuildingManager buildingManager;
     private final GameScreen gameScreen;  // keep reference to return
     private final BitmapFont font;
+    private final BitmapFont smallFont;
     private Player player;
     private Image receptionist;
     private float stateTime;
@@ -41,6 +42,7 @@ public class RonCookeScreen implements Screen {
         this.buildingManager = buildingManager;
         this.gameScreen = gameScreen;
         this.font = game.menuFont;
+        this.smallFont = game.gameFont;
 
         initialisePlayer((int) game.viewport.getWorldWidth()/2,(int) game.viewport.getWorldHeight()/2);
         initialiseReceptionist();
@@ -93,7 +95,6 @@ public class RonCookeScreen implements Screen {
                 item.img.draw(game.batch, 1);
                 if (item.checkInRange(player.sprite.getX()- (player.sprite.getHeight()/2) , player.sprite.getY() - (player.sprite.getHeight()/2)) && isEPressed){
                     item.Collect();
-                    System.out.println("Here");
                     isEPressed = false;
 
                 }
@@ -123,6 +124,7 @@ public class RonCookeScreen implements Screen {
         font.setColor(colour);
         font.draw(game.batch, text, x, y);
     }
+    private GlyphLayout layout = new GlyphLayout();
     private void renderUI(){
 
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
@@ -145,7 +147,17 @@ public class RonCookeScreen implements Screen {
                 }
             }
         }
-        GlyphLayout layout = new GlyphLayout(game.menuFont, instructions);
+        float y = worldHeight - 20f;
+        float lineSpacing = 15f;
+
+        // Requirements: Events tracker and game timer
+        drawText(smallFont, String.format("Negative Events: %d/%d", game.foundNegativeEvents, game.totalNegativeEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(smallFont, String.format("Positive Events: %d/%d", game.foundPositiveEvents, game.totalPositiveEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        layout.setText(game.menuFont, instructions);
         float textX = (worldWidth - layout.width) / 2;
         drawText(font, instructions, Color.WHITE, textX, worldHeight * 0.75f);
         drawText(font, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
@@ -189,5 +201,7 @@ public class RonCookeScreen implements Screen {
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
-    @Override public void dispose() {}
+    @Override public void dispose() {
+
+    }
 }
