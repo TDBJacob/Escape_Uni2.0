@@ -45,7 +45,8 @@ public class GameScreen implements Screen {
     private boolean exitConfirm = false;
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
-    private final int mapWallsId = 90;
+    private final int mapWallsId = 610;
+    private final int tileDimensions  = 8;
 
 
     Goose goose = new Goose();
@@ -71,7 +72,7 @@ public class GameScreen implements Screen {
     public GameScreen(final Main game) {
         this.game = game;
 
-        initializeMap(0);
+        initializeMap(1);
 
         initializePlayer(300,300);
 
@@ -96,7 +97,7 @@ public class GameScreen implements Screen {
      * Load map and collision layer
      */
     private void initializeMap(int wallLayer) {
-        map = new TmxMapLoader().load("tileMap/testMap.tmx");
+        map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         int mapWallsLayer = wallLayer;
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
@@ -107,7 +108,7 @@ public class GameScreen implements Screen {
      */
     private void initializePlayer(int x, int y) {
         player = new Player(game);
-        player.loadSprite(collisionLayer, mapWallsId);
+        player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
         player.speed = 1;
 
@@ -130,7 +131,7 @@ public class GameScreen implements Screen {
      */
     private void initialiseGoose(int x, int y){
 
-        goose.loadSprite(collisionLayer, mapWallsId);
+        goose.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         goose.x = x;
         goose.y = y;
 

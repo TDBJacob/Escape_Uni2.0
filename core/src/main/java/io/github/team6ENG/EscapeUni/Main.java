@@ -25,7 +25,7 @@ public class Main extends Game{
     public float gameTimer = 300f;
 
     public float gameVolume = 1f;
-    public float musicVolume = 0.3f;
+    public float musicVolume = 0f;
 
     /**
      * Initialise global game variables

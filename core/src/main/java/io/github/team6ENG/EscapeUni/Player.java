@@ -74,8 +74,8 @@ public class Player extends SpriteAnimations{
         float actualSpeed = speed * 60f * delta;
 
         TiledMapTileLayer.Cell cell;
-        int x = (int)(sprite.getX()+(sprite.getWidth()/2))/16;
-        int y = (int)(sprite.getY()+(sprite.getHeight()/2))/16;
+        int x = (int)(sprite.getX()+(sprite.getWidth()/2))/tileDimensions;
+        int y = (int)(sprite.getY()+(sprite.getHeight()/2))/tileDimensions;
         int mapWidth = wallsLayer.getWidth();
         int mapHeight = wallsLayer.getHeight();
 
@@ -151,10 +151,9 @@ public class Player extends SpriteAnimations{
      * Ensure player can't leave the map
      */
     private void keepPlayerInBounds() {
-        float tileSize = 16f;
 
-        float worldWidth = game.viewport.getWorldWidth() * tileSize;
-        float worldHeight = game.viewport.getWorldHeight() * tileSize;
+        float worldWidth = game.viewport.getWorldWidth() * tileDimensions;
+        float worldHeight = game.viewport.getWorldHeight() * tileDimensions;
 
         if (sprite.getX() < 0) sprite.setX(0);
 

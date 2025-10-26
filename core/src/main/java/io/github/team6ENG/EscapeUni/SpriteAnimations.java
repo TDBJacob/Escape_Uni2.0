@@ -23,7 +23,7 @@ public class SpriteAnimations  {
 
     protected TiledMapTileLayer wallsLayer;
     protected int mapWallsId;
-
+    protected int tileDimensions;
 
 
     /**
@@ -42,10 +42,12 @@ public class SpriteAnimations  {
      * Stores map info for later boundary detection
      * @param walls tilemap of game walls
      * @param id tilemap layer which represents the walls
+     * @param d dimentions of each tile on the map i.e. 8 or 16
      */
-    public void loadSprite(TiledMapTileLayer walls, int id) {
+    public void loadSprite(TiledMapTileLayer walls, int id, int d) {
         wallsLayer = walls;
         mapWallsId = id;
+        tileDimensions = d;
     }
 
     /**
