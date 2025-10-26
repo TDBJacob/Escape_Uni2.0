@@ -11,6 +11,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 import java.util.HashMap;
 import java.util.Random;
 
@@ -45,6 +47,7 @@ public class GameScreen implements Screen {
     private boolean exitConfirm = false;
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
+    private Image mapImg;
     private final int mapWallsId = 610;
     private final int tileDimensions  = 8;
 
@@ -72,7 +75,7 @@ public class GameScreen implements Screen {
     public GameScreen(final Main game) {
         this.game = game;
 
-        initializeMap(1);
+        initializeMap(0);
 
         initializePlayer(300,300);
 
@@ -97,6 +100,8 @@ public class GameScreen implements Screen {
      * Load map and collision layer
      */
     private void initializeMap(int wallLayer) {
+        Texture mapTex = new Texture(Gdx.files.internal("tileMap/Image.png"));
+        mapImg = new Image(mapTex);
         map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         int mapWallsLayer = wallLayer;
@@ -385,7 +390,7 @@ public class GameScreen implements Screen {
 
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
-
+        mapImg.draw(game.batch, 1);
         stateTime += delta;
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
