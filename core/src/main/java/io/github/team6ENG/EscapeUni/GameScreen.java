@@ -49,7 +49,7 @@ public class GameScreen implements Screen {
     public boolean hasTorch = false;
     private boolean isTorchOn = false;
     private boolean isCamOnGoose = false;
-    boolean hasGooseFood = false;
+    private boolean hasGooseFood = false;
     private boolean gameoverTrigger = false;
 
     private Sound torchClick;
