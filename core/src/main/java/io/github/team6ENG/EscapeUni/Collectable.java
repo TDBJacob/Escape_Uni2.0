@@ -1,5 +1,4 @@
 package io.github.team6ENG.EscapeUni;
-import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -57,11 +56,19 @@ public class Collectable {
 
         playerHas = true;
         img.setScale(1f, 1f);
-        img.setWidth(30);
-        img.setHeight(30);
+        float multiplier = img.getHeight()/img.getWidth();
+        img.setWidth(24);
+        img.setHeight(24 * multiplier);
 
         collect.play(game.gameVolume);
 
+    }
+
+    /**
+     * play sound
+     */
+    public void playSound(){
+        collect.play();
     }
 
 

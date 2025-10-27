@@ -78,6 +78,8 @@ public class BuildingManager {
             }
             else if(showEnterPrompt && currentBuilding.equals("Langwith") && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
                 if(gameScreen.items.get("keyCard").playerHas) {
+
+                    gameScreen.items.get("keyCard").playSound();
                     enterLangwith();
                 }
                 else{
@@ -120,6 +122,7 @@ public class BuildingManager {
      */
     private void enterRonCooke() {
         inRonCooke = true;
+        player.footSteps.stop();
         game.setScreen(new RonCookeScreen(game, this, gameScreen));
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
@@ -132,6 +135,7 @@ public class BuildingManager {
      */
     private void enterLangwith() {
         inLangwith = true;
+        player.footSteps.stop();
         game.setScreen(new LangwithScreen(game, this, gameScreen));
     }
 

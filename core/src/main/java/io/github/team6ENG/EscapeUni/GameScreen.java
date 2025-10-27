@@ -62,6 +62,7 @@ public class GameScreen implements Screen {
     public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     public int numOfInventoryItems = 0;
 
+    public float playerSpeedModifier = 1;
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -82,7 +83,7 @@ public class GameScreen implements Screen {
         initialiseItems();
 
         music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
-        music.loop(game.musicVolume);
+        music.loop(0.005f * game.musicVolume);
         torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
         buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
@@ -193,7 +194,7 @@ public class GameScreen implements Screen {
 
             game.gameTimer -= delta;
             handleInput(delta);
-            player.handleInput(delta);
+            player.handleInput(delta, playerSpeedModifier);
             float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
             float mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
@@ -268,7 +269,7 @@ public class GameScreen implements Screen {
 
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
             if (distance < 30f && hasGooseFood && isEPressed) {
-
+                items.get("gooseFood").playSound();
                 items.remove("gooseFood");
                 goose.loadBabyGoose(0);
                 game.foundHiddenEvents += 1;
