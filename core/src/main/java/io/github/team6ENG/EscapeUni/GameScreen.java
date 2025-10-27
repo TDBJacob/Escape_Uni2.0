@@ -221,6 +221,7 @@ public class GameScreen implements Screen {
             player.footSteps.stop();
             game.musicVolume = 0;
             game.gameVolume = 0;
+            music.stop();
             busLeaving = true;
             busX -= 80 * delta;
             lighting.isVisible("playerTorch", true);
@@ -232,7 +233,7 @@ public class GameScreen implements Screen {
 
             if (busX < 950) {
                 Gdx.app.postRunnable(() -> game.setScreen(
-                    new GameOverScreen(game, "You have escaped Uni successfully!")
+                    new WinScreen(game)
                 ));
             }
         }

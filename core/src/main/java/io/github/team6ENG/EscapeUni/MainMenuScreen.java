@@ -214,7 +214,7 @@ public class MainMenuScreen implements Screen {
             background.dispose();
             background = null;
         }
-        
+
         // DO NOT dispose game.menuFont or game.buttonSkin or game.batch here
     }
 }
