@@ -78,7 +78,7 @@ public class RonCookeScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        player.handleInput(delta);
+        player.handleInput(delta, gameScreen.playerSpeedModifier);
         player.updatePlayer(stateTime);
         game.batch.begin();
 
@@ -104,7 +104,7 @@ public class RonCookeScreen implements Screen {
         renderUI();
         game.gameTimer -= delta;
         speechTimer += delta;
-        if(gameScreen.items.get("keyCard").playerHas) {
+        if(gameScreen.items.get("keyCard").playerHas && gameScreen.items.get("torch").playerHas) {
             buildingManager.update(delta);
         }
         stateTime += delta;
