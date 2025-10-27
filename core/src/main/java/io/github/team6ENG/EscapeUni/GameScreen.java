@@ -64,7 +64,7 @@ public class GameScreen implements Screen {
     private boolean busVisible = false;
     private boolean playerOnBus = false;
     private boolean busLeaving = false;
-    
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -85,7 +85,7 @@ public class GameScreen implements Screen {
         initialiseItems();
 
         busTexture = new Texture(Gdx.files.internal("images/bus.png"));
-        busX = 1500;
+        busX = 1100;
         busY = 1545;
         music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
         music.loop(game.musicVolume);
@@ -193,38 +193,34 @@ public class GameScreen implements Screen {
     private void update(float delta) {
 
         // bus logic
-        if (!busVisible && player.sprite.getX() > 1400 && player.sprite.getY() > 1480) {
-            busVisible = true;
-        }
-
-        if (busVisible && !playerOnBus) {
+        if (!playerOnBus) {
             float dx = player.sprite.getX() - busX;
             float dy = player.sprite.getY() - busY;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < 30f) {
+            if (distance < 50f) {
                 playerOnBus = true;
                 isPaused = true;
                 player.sprite.setAlpha(0f);
-                Gdx.app.log("Bus", "Player boared the bus!");
                 game.gameFont.setColor(Color.BLUE);
                 game.gameFont.getData().setScale(2f);
             }
         }
 
         if (playerOnBus) {
+            player.footSteps.stop();
             busLeaving = true;
-            busX += 50 * delta;
+            busX -= 80 * delta;
             Gdx.gl.glClearColor(0, 0, 0, Math.min(1, (busX - 1500) / 300f));
 
-            if (busX > collisionLayer.getWidth() * collisionLayer.getTileWidth()) {
+            if (busX < 900) {
                 Gdx.app.postRunnable(() -> game.setScreen(
                     new GameOverScreen(game, "You have escaped Uni successfully!")
                 ));
-            }    
+            }
         }
 
-        if(!isPaused) {
+        if(!isPaused && !busLeaving) {
             updateCamera();
 
             game.gameTimer -= delta;
@@ -470,9 +466,8 @@ public class GameScreen implements Screen {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
 
-        if (busVisible) {
-            game.batch.draw(busTexture, busX, busY, 50, 30);
-        }
+        game.batch.draw(busTexture, busX, busY, 100, 60);
+
 
         game.batch.end();
 

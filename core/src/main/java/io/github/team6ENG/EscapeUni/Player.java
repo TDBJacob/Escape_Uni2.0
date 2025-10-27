@@ -224,4 +224,9 @@ public class Player extends SpriteAnimations{
 
     }
 
+    @Override
+    public void dispose() {
+        super.dispose();
+        torchTexture.dispose();
+    }
 }
