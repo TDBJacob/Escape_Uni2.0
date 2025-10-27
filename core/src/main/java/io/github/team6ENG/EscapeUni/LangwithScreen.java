@@ -60,7 +60,7 @@ public class LangwithScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        player.handleInput(delta);
+        player.handleInput(delta, gameScreen.playerSpeedModifier);
         player.updatePlayer(stateTime);
         game.batch.begin();
 
@@ -78,7 +78,7 @@ public class LangwithScreen implements Screen {
                     if(key.equals("pizza")){
                         isEPressed = false;
                         pizzaText = 5;
-                        player.speedModifier = 2;
+                        gameScreen.playerSpeedModifier = 2;
                         gameScreen.items.get("pizza").isVisible = false;
                         game.foundPositiveEvents += 1;
                     }
