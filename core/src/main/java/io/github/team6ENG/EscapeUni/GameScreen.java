@@ -50,6 +50,7 @@ public class GameScreen implements Screen {
     private boolean isTorchOn = false;
     private boolean isCamOnGoose = false;
     boolean hasGooseFood = false;
+    private boolean gameoverTrigger = false;
 
     private Sound torchClick;
     private Sound honk;
@@ -336,8 +337,13 @@ public class GameScreen implements Screen {
         } // End isPaused
 
         // If time up
-        if(game.gameTimer <= 0) {
-            game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
+        if(!gameoverTrigger && game.gameTimer <= 0) {
+            gameoverTrigger = true;
+            Gdx.app.postRunnable(() -> game.setScreen(
+                new GameOverScreen(game, "Sorry you missed the bus, better luck next time")
+            ));  
+            return;  
+            
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
