@@ -12,7 +12,6 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-
 import java.util.HashMap;
 import java.util.Random;
 
@@ -33,8 +32,6 @@ public class GameScreen implements Screen {
     private TiledMapTileLayer collisionLayer;
     public Lighting lighting;
     public boolean isDark = false;
-
-
 
     private boolean isPaused = false;
     private boolean isEPressed = false;
@@ -62,6 +59,12 @@ public class GameScreen implements Screen {
     public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     public int numOfInventoryItems = 0;
 
+    private Texture busTexture;
+    private float busX, busY;
+    private boolean busVisible = false;
+    private boolean playerOnBus = false;
+    private boolean busLeaving = false;
+
     public float playerSpeedModifier = 1;
     /**
      * Initialise the game elements
@@ -82,14 +85,15 @@ public class GameScreen implements Screen {
 
         initialiseItems();
 
+        busTexture = new Texture(Gdx.files.internal("images/bus.png"));
+        busX = 1100;
+        busY = 1545;
         music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
         music.loop(0.005f * game.musicVolume);
         torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
         buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
     }
-
-
 
     /**
      * Load map and collision layer
@@ -189,7 +193,35 @@ public class GameScreen implements Screen {
      */
     private void update(float delta) {
 
-        if(!isPaused) {
+        // bus logic
+        if (!playerOnBus) {
+            float dx = player.sprite.getX() - busX;
+            float dy = player.sprite.getY() - busY;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 50f) {
+                playerOnBus = true;
+                isPaused = true;
+                player.sprite.setAlpha(0f);
+                game.gameFont.setColor(Color.BLUE);
+                game.gameFont.getData().setScale(2f);
+            }
+        }
+
+        if (playerOnBus) {
+            player.footSteps.stop();
+            busLeaving = true;
+            busX -= 80 * delta;
+            Gdx.gl.glClearColor(0, 0, 0, Math.min(1, (busX - 1500) / 300f));
+
+            if (busX < 900) {
+                Gdx.app.postRunnable(() -> game.setScreen(
+                    new GameOverScreen(game, "You have escaped Uni successfully!")
+                ));
+            }
+        }
+
+        if(!isPaused && !busLeaving) {
             updateCamera();
 
             game.gameTimer -= delta;
@@ -354,6 +386,13 @@ public class GameScreen implements Screen {
             camera.position.y = mapHeight / 2f;
         }
 
+        if (busLeaving) {
+            camera.position.x = busX;
+            camera.position.y = busY + 20;
+            camera.update();
+            return;
+        }
+
         camera.update();
 }
 
@@ -428,6 +467,7 @@ public class GameScreen implements Screen {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
 
+        game.batch.draw(busTexture, busX, busY, 100, 60);
 
 
         game.batch.end();
@@ -475,6 +515,7 @@ public class GameScreen implements Screen {
      * Draw UI on screen
      */
     private void renderUI() {
+        if (busLeaving) return;
 
         BitmapFont smallFont = game.gameFont;
         BitmapFont bigFont = game.menuFont;
@@ -631,5 +672,6 @@ public class GameScreen implements Screen {
         if (honk != null) {
             honk.dispose();
         }
+        if (busTexture != null) busTexture.dispose();
     }
 }

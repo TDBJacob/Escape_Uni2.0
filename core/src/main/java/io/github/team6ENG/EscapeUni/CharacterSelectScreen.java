@@ -60,7 +60,7 @@ public class CharacterSelectScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
 
                 Gdx.app.postRunnable(() -> {
-                    game.activeSpritePath = "sprites/maleSprite.png";
+                    game.activeSpritePath = "sprites/femaleSprite.png";
                     game.activeUniIDPath = "items/idFemale.png";
                     game.setScreen(new GameScreen(game));
                     dispose();

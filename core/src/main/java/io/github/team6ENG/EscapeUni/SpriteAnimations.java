@@ -80,6 +80,7 @@ public class SpriteAnimations  {
         if (sheet != null) {
             sheet.dispose();
         }
+
     }
 
 
