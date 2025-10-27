@@ -64,6 +64,11 @@ public class Main extends Game{
         super.resize(width, height);
     }
 
+    public void setInputProcessor(com.badlogic.gdx.InputProcessor processor) {
+        Gdx.input.setInputProcessor(processor);
+    }
+
+
     public void render() {
         Gdx.gl.glClearColor(0, 0, 0, 1);    // black environment
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

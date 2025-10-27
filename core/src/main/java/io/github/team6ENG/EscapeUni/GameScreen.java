@@ -14,6 +14,12 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import java.util.HashMap;
 import java.util.Random;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 
 /**
@@ -42,6 +48,9 @@ public class GameScreen implements Screen {
     private final int mapWallsId = 1;
     private final int tileDimensions  = 8;
 
+    private Stage uiStage;
+    private ImageButton pauseButton;
+    private Texture pauseTexture;
 
     Goose goose = new Goose();
     float stateTime;
@@ -66,6 +75,11 @@ public class GameScreen implements Screen {
     private boolean busLeaving = false;
 
     public float playerSpeedModifier = 1;
+
+    public void setPaused(boolean paused) {
+        this.isPaused = paused;
+    }
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -397,12 +411,33 @@ public class GameScreen implements Screen {
 }
 
 
-
-
-
     @Override
     public void show() {
+        uiStage = new Stage(game.viewport);
+        game.setInputProcessor(uiStage);
+
+        pauseTexture = new Texture(Gdx.files.internal("pauseButton/pause.png"));
+        TextureRegionDrawable pauseDrawable = new TextureRegionDrawable(new TextureRegion(pauseTexture));
+
+        pauseButton = new ImageButton(pauseDrawable);
+        pauseButton.setSize(50, 50);
+        float worldWidth = game.viewport.getWorldWidth();
+        float worldHeight = game.viewport.getWorldHeight();
+        pauseButton.setPosition((worldWidth - pauseButton.getWidth()) / 2f, worldHeight - pauseButton.getHeight() - 20);
+
+
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                isPaused = true;
+                music.pause();
+                game.setScreen(new PauseScreen(game, GameScreen.this));
+            }
+        });
+
+        uiStage.addActor(pauseButton);
     }
+
 
     /**
      * Calls every frame to draw game screen
@@ -473,6 +508,11 @@ public class GameScreen implements Screen {
         game.batch.end();
 
         renderUI();
+
+        if (uiStage != null) {
+            uiStage.act(delta);
+            uiStage.draw();
+        }
 
 
     }
@@ -673,5 +713,9 @@ public class GameScreen implements Screen {
             honk.dispose();
         }
         if (busTexture != null) busTexture.dispose();
+
+        if (pauseTexture != null) pauseTexture.dispose();
+        if (uiStage != null) uiStage.dispose();
+
     }
 }
