@@ -1,5 +1,6 @@
 package io.github.team6ENG.EscapeUni;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -9,26 +10,31 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class PauseScreen implements Screen {
 
     private final Main game;
-    private final GameScreen gameScreen;
-    private final Stage stage;
+    private final Screen playScreen;
+    private final AudioManager audioManager;
+    private Stage stage;
     private final Skin skin;
 
     private final Slider musicSlider;
     private final Slider volumeSlider;
     private final TextButton continueButton;
 
-    public PauseScreen(final Main game, final GameScreen gameScreen) {
+    public PauseScreen(final Main game, final Screen playScreen, AudioManager audioManager) {
         this.game = game;
-        this.gameScreen = gameScreen;
+        this.playScreen = playScreen;
+        this.audioManager = audioManager;
         this.stage = new Stage(new ScreenViewport());
         this.skin = game.buttonSkin;
+
+        audioManager.pauseMusic();
+        audioManager.stopFootsteps();
+
 
         Gdx.input.setInputProcessor(stage);
 
@@ -72,8 +78,11 @@ public class PauseScreen implements Screen {
         // Continue button returns to same paused game
         continueButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                gameScreen.unpause();
-                game.setScreen(gameScreen);
+                audioManager.setMusicVolume();
+                audioManager.playMusic();
+                playScreen.resume();
+                game.setScreen(playScreen);
+                dispose();
             }
         });
         musicSlider.addListener(new ChangeListener() {
@@ -118,6 +127,8 @@ public class PauseScreen implements Screen {
     @Override public void resume() {
 
     }
-    @Override public void dispose() { stage.dispose();
+    @Override public void dispose() {
+        stage.dispose();
+
     }
 }

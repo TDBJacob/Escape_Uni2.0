@@ -30,6 +30,7 @@ public class LangwithScreen implements Screen {
     float worldHeight ;
 
     private boolean isEPressed = false;
+    private boolean isPaused = false;
 
     public LangwithScreen(Main game, BuildingManager buildingManager, GameScreen gameScreen) {
         this.game = game;
@@ -45,7 +46,7 @@ public class LangwithScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game);
+        player = new Player(game, buildingManager.audioManager);
         player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);
@@ -60,8 +61,10 @@ public class LangwithScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        player.handleInput(delta, gameScreen.playerSpeedModifier);
-        player.updatePlayer(stateTime);
+        if(!isPaused) {
+            player.handleInput(delta, gameScreen.playerSpeedModifier);
+            player.updatePlayer(stateTime);
+        }
         game.batch.begin();
 
         player.sprite.draw(game.batch);
@@ -97,6 +100,14 @@ public class LangwithScreen implements Screen {
         buildingManager.update(delta);
         stateTime += delta;
         isEPressed = Gdx.input.isKeyJustPressed(Input.Keys.E);
+
+
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            isPaused = true;
+            game.setScreen(new PauseScreen(game, this, buildingManager.audioManager));
+
+        }
 
     }
 
@@ -176,7 +187,9 @@ public class LangwithScreen implements Screen {
     @Override public void show() {}
     @Override public void resize(int width, int height) { game.viewport.update(width, height); }
     @Override public void pause() {}
-    @Override public void resume() {}
+    @Override public void resume() {
+        isPaused = false;
+    }
     @Override public void hide() {}
     @Override public void dispose() {}
 }

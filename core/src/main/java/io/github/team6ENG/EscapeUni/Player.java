@@ -30,15 +30,15 @@ public class Player extends SpriteAnimations{
     public boolean isMoving;
     public boolean isMovingHorizontally;
 
-    Sound footSteps;
+    private AudioManager audioManager;
     boolean isFootsteps = false;
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
      */
-    public Player(final Main g){
+    public Player(final Main g, AudioManager audioManager){
         super(g.activeSpritePath, 8, 7);
-
+        this.audioManager = audioManager;
         game = g;
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
@@ -62,7 +62,6 @@ public class Player extends SpriteAnimations{
         torch.setScale(0.02f);
         torch.setRotation(180);
 
-        footSteps = Gdx.audio.newSound(Gdx.files.internal("soundEffects/footsteps.mp3"));
 
     }
 
@@ -138,11 +137,11 @@ public class Player extends SpriteAnimations{
         keepPlayerInBounds();
         if(isMoving && !isFootsteps){
             isFootsteps = true;
-            footSteps.loop(.2f * game.gameVolume);
+            audioManager.loopFootsteps();
         }
         else if (!isMoving){
-            footSteps.stop();
             isFootsteps = false;
+            audioManager.stopFootsteps();
         }
 
     }
