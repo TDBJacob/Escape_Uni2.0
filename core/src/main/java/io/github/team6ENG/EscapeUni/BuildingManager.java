@@ -31,7 +31,7 @@ public class BuildingManager {
     private String currentBuilding = "";
     private float lockedOutTime = 0;
 
-    Sound noAccess;
+    AudioManager audioManager;
     // ====== Building Trigger Zones ======
     private final Rectangle ronCookeTrigger;
     private final Rectangle langwithTrigger;
@@ -47,15 +47,14 @@ public class BuildingManager {
      *
      * @param player The player instance used to track position and interaction.
      */
-    public BuildingManager(Main game, GameScreen gameScreen, Player player) {
+    public BuildingManager(Main game, GameScreen gameScreen, Player player, AudioManager audioManager) {
         this.game = game;
         this.gameScreen = gameScreen;
         this.player = player;
         this.ronCookeTrigger = new Rectangle(350, 455, 50, 50);
         this.langwithTrigger = new Rectangle(1078, 1215, 50, 50);
 
-
-        noAccess = Gdx.audio.newSound(Gdx.files.internal("soundEffects/wrong.mp3"));
+        this.audioManager = audioManager;
     }
 
     /**
@@ -84,7 +83,7 @@ public class BuildingManager {
                 }
                 else{
                     lockedOutTime = 5;
-                    noAccess.play();
+                    audioManager.playNoAccess();
                 }
             }
         }
@@ -122,7 +121,7 @@ public class BuildingManager {
      */
     private void enterRonCooke() {
         inRonCooke = true;
-        player.footSteps.stop();
+        gameScreen.audioManager.stopFootsteps();
         game.setScreen(new RonCookeScreen(game, this, gameScreen));
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
@@ -135,7 +134,7 @@ public class BuildingManager {
      */
     private void enterLangwith() {
         inLangwith = true;
-        player.footSteps.stop();
+        gameScreen.audioManager.stopFootsteps();
         game.setScreen(new LangwithScreen(game, this, gameScreen));
     }
 

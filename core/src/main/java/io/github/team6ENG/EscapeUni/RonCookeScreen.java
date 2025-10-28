@@ -36,7 +36,7 @@ public class RonCookeScreen implements Screen {
     ArrayList<String> speech = new ArrayList<String>();
 
     private boolean isEPressed = false;
-
+    private boolean isPaused = false;
     public RonCookeScreen(Main game, BuildingManager buildingManager, GameScreen gameScreen) {
         this.game = game;
         this.buildingManager = buildingManager;
@@ -58,7 +58,7 @@ public class RonCookeScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game);
+        player = new Player(game, buildingManager.audioManager);
         player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);
@@ -77,9 +77,10 @@ public class RonCookeScreen implements Screen {
         // Clear to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        player.handleInput(delta, gameScreen.playerSpeedModifier);
-        player.updatePlayer(stateTime);
+        if(!isPaused) {
+            player.handleInput(delta, gameScreen.playerSpeedModifier);
+            player.updatePlayer(stateTime);
+        }
         game.batch.begin();
 
         player.sprite.draw(game.batch);
@@ -102,18 +103,25 @@ public class RonCookeScreen implements Screen {
         }
         game.batch.end();
         renderUI();
-        game.gameTimer -= delta;
-        if(game.gameTimer < 0){
-            gameScreen.gameOver();
-            return;
-        }
-        speechTimer += delta;
-        if(gameScreen.items.get("keyCard").playerHas && gameScreen.items.get("torch").playerHas) {
-            buildingManager.update(delta);
-        }
-        stateTime += delta;
-        isEPressed = Gdx.input.isKeyJustPressed(Input.Keys.E);
+        if(!isPaused) {
+            game.gameTimer -= delta;
+            if(game.gameTimer < 0){
+                gameScreen.gameOver();
+                return;
+            }
+            speechTimer += delta;
+            if (gameScreen.items.get("keyCard").playerHas && gameScreen.items.get("torch").playerHas) {
+                buildingManager.update(delta);
+            }
+            stateTime += delta;
+            isEPressed = Gdx.input.isKeyJustPressed(Input.Keys.E);
 
+            if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+                isPaused = true;
+                game.setScreen(new PauseScreen(game, this, buildingManager.audioManager));
+
+            }
+        }
     }
 
     /**
@@ -203,7 +211,9 @@ public class RonCookeScreen implements Screen {
     @Override public void show() {}
     @Override public void resize(int width, int height) { game.viewport.update(width, height); }
     @Override public void pause() {}
-    @Override public void resume() {}
+    @Override public void resume() {
+        isPaused = false;
+    }
     @Override public void hide() {}
     @Override public void dispose() {
 
