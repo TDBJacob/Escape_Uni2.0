@@ -338,12 +338,8 @@ public class GameScreen implements Screen {
 
         // If time up
         if(!gameoverTrigger && game.gameTimer <= 0) {
-            gameoverTrigger = true;
-            Gdx.app.postRunnable(() -> game.setScreen(
-                new GameOverScreen(game, "Sorry you missed the bus, better luck next time")
-            ));  
-            return;  
-            
+           gameOver();
+           return;
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
@@ -629,6 +625,15 @@ public class GameScreen implements Screen {
             }
         }
         return "";
+    }
+
+    public void gameOver(){
+        gameoverTrigger = true;
+
+        Gdx.app.postRunnable(() -> game.setScreen(
+            new GameOverScreen(game, "Sorry you missed the bus, better luck next time")
+        ));
+
     }
 
     /**
