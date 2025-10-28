@@ -14,8 +14,8 @@ public class Collectable {
     public float x, y;
     public boolean isVisible;
     public String originScreen;
-    private Sound collect;
-    public Collectable(final Main game, String path,float x, float y, float scale, boolean isVisible, String originScreen) {
+    private AudioManager audioManager;
+    public Collectable(final Main game, String path,float x, float y, float scale, boolean isVisible, String originScreen, AudioManager audioManager) {
         this.game = game;
         this.x = x;
         this.y = y;
@@ -25,8 +25,8 @@ public class Collectable {
         img.setScale(scale);
         this.isVisible = isVisible;
         this.originScreen = originScreen;
+        this.audioManager = audioManager;
 
-        collect = Gdx.audio.newSound(Gdx.files.internal("soundEffects/tap.mp3"));
     }
 
     /**
@@ -60,7 +60,7 @@ public class Collectable {
         img.setWidth(24);
         img.setHeight(24 * multiplier);
 
-        collect.play(game.gameVolume);
+        audioManager.playCollect();
 
     }
 
@@ -68,7 +68,7 @@ public class Collectable {
      * play sound
      */
     public void playSound(){
-        collect.play();
+        audioManager.playCollect();
     }
 
 

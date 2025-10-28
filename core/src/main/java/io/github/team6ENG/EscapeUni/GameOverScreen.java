@@ -28,7 +28,6 @@ public class GameOverScreen implements Screen {
     // stage and resources created in show() and disposed in dispose()
     private Stage stage;
     private Skin skin;
-    private Texture background;
     private final GlyphLayout layout = new GlyphLayout();
 
     private TextButton playButton;
@@ -55,14 +54,6 @@ public class GameOverScreen implements Screen {
 
         // Prefer shared skin from game (do NOT dispose it later)
         skin = game.buttonSkin;
-
-        // Load background only for this screen
-        if (Gdx.files.internal("mainMenu/menuBackground.png").exists()) {
-            background = new Texture(Gdx.files.internal("mainMenu/menuBackground.png"));
-        } else {
-            background = null;
-            Gdx.app.log("MainMenuScreen", "menuBackground.png not found, continuing without it.");
-        }
 
         // build UI
         setupUI();
@@ -136,9 +127,7 @@ public class GameOverScreen implements Screen {
         float w = (stage != null) ? stage.getViewport().getWorldWidth() : game.viewport.getWorldWidth();
         float h = (stage != null) ? stage.getViewport().getWorldHeight() : game.viewport.getWorldHeight();
 
-        if (background != null) {
-            game.batch.draw(background, 0, 0, w, h);
-        }
+
 
         float brightness = 0.85f + 0.15f * (float) Math.sin(TimeUtils.millis() / 500f);
         if (game.menuFont != null) {
@@ -190,10 +179,6 @@ public class GameOverScreen implements Screen {
             stage = null;
         }
 
-        if (background != null && !background.getTextureData().isPrepared()) {
-            background.dispose();
-            background = null;
-        }
 
         // DO NOT dispose game.menuFont or game.buttonSkin or game.batch here
     }

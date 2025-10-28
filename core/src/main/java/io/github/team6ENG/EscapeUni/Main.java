@@ -24,8 +24,8 @@ public class Main extends Game{
 
     public float gameTimer = 30;
 
-    public float gameVolume = 1f;
-    public float musicVolume = 1f;
+    public float gameVolume = .5f;
+    public float musicVolume = .5f;
 
     public final int totalNegativeEvents = 1;
     public final int totalPositiveEvents = 1;
