@@ -15,7 +15,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import java.util.HashMap;
 import java.util.Random;
 
-
 /**
  * GameScreen - main gameplay screen
  *
@@ -42,7 +41,6 @@ public class GameScreen implements Screen {
     private final int mapWallsId = 1;
     private final int tileDimensions  = 8;
 
-
     Goose goose = new Goose();
     float stateTime;
 
@@ -51,10 +49,8 @@ public class GameScreen implements Screen {
     private boolean isCamOnGoose = false;
     boolean hasGooseFood = false;
 
-    private Sound torchClick;
-    private Sound honk;
+
     private final float probabilityOfHonk = 1000;
-    private Sound music;
 
     public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     public int numOfInventoryItems = 0;
@@ -66,6 +62,9 @@ public class GameScreen implements Screen {
     private boolean busLeaving = false;
 
     public float playerSpeedModifier = 1;
+
+    public AudioManager audioManager;
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -74,6 +73,8 @@ public class GameScreen implements Screen {
         this.game = game;
 
         initialiseMap(0);
+
+        initialiseAudio();
 
         initialisePlayer(1055,1215);
 
@@ -87,8 +88,7 @@ public class GameScreen implements Screen {
 
         initialiseBus();
 
-        initialiseAudio();
-        buildingManager = new BuildingManager(game, this, player);
+        buildingManager = new BuildingManager(game, this, player, audioManager);
         stateTime = 0f;
     }
 
@@ -108,7 +108,7 @@ public class GameScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game);
+        player = new Player(game, audioManager);
         player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
         player.speed = 1;
@@ -137,7 +137,6 @@ public class GameScreen implements Screen {
         goose.y = y;
 
 
-        honk = Gdx.audio.newSound(Gdx.files.internal("soundEffects/honk.mp3"));
     }
 
 
@@ -190,9 +189,8 @@ public class GameScreen implements Screen {
         busY = 1545;
     }
     private  void initialiseAudio() {
-        music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
-        music.loop(0.005f * game.musicVolume);
-        torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
+        audioManager = new AudioManager(game);
+
     }
 
     /**
@@ -218,10 +216,10 @@ public class GameScreen implements Screen {
         }
 
         if (playerOnBus) {
-            player.footSteps.stop();
+            audioManager.stopFootsteps();
             game.musicVolume = 0;
             game.gameVolume = 0;
-            music.stop();
+            audioManager.stopMusic();
             busLeaving = true;
             busX -= 80 * delta;
             lighting.isVisible("playerTorch", true);
@@ -279,7 +277,15 @@ public class GameScreen implements Screen {
             }
 
             player.updatePlayer(stateTime);
-
+            if(player.isMoving && !player.isFootsteps){
+                System.out.println("foot");
+                audioManager.loopFootsteps();
+                player.isFootsteps = true;
+            }
+            else if (!player.isMoving){
+                player.isFootsteps = false;
+                audioManager.stopFootsteps();
+            }
             // Goose follow player
             goose.moveGoose(stateTime,
                             player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
@@ -341,14 +347,9 @@ public class GameScreen implements Screen {
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            if(isPaused){
-
-                music.resume();
-            }
-            else{
-                music.pause();
-            }
-            isPaused = !isPaused;
+                audioManager.pauseMusic();
+            audioManager.stopFootsteps();
+            game.setScreen(new PauseScreen(game, GameScreen.this, audioManager));
         }
 
         buildingManager.update(delta);
@@ -413,9 +414,6 @@ public class GameScreen implements Screen {
 
         camera.update();
 }
-
-
-
 
 
     @Override
@@ -498,7 +496,7 @@ public class GameScreen implements Screen {
     private void playAudio(){
         int doHonk = random.nextInt((int) probabilityOfHonk);
         if(doHonk == 0 && !isPaused) {
-            honk.play(game.gameVolume);
+            audioManager.playHonk();
         }
     }
 
@@ -524,7 +522,7 @@ public class GameScreen implements Screen {
         if(Gdx.input.justTouched() && hasTorch){
             isTorchOn = !isTorchOn;
             lighting.isVisible("playerTorch", isTorchOn);
-            torchClick.play(game.gameVolume);
+            audioManager.playTorch();
         }
 
     }
@@ -590,8 +588,9 @@ public class GameScreen implements Screen {
 
         // Game instructions
         if(hasTorch) {
-            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 55);
+            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
         }
+        drawText(bigFont, "Press 'p' to pause", Color.WHITE, 20, 55);
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 30);
 
         if(isPaused) {
@@ -604,6 +603,7 @@ public class GameScreen implements Screen {
 
         buildingManager.renderUI(game.batch, smallFont, bigFont, worldWidth, worldHeight);
         game.batch.end();
+
     }
 
     /**
@@ -638,6 +638,7 @@ public class GameScreen implements Screen {
         font.draw(game.batch, text, x, y);
     }
 
+
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height);
@@ -645,12 +646,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
 
+        isPaused = false;
     }
 
     @Override
@@ -684,12 +685,8 @@ public class GameScreen implements Screen {
         if (buildingManager != null) {
             buildingManager.dispose();
         }
-        if (torchClick != null) {
-            torchClick.dispose();
-        }
-        if (honk != null) {
-            honk.dispose();
-        }
+
         if (busTexture != null) busTexture.dispose();
+
     }
 }
