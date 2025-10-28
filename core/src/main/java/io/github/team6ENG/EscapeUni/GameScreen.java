@@ -3,6 +3,7 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -64,7 +65,7 @@ public class GameScreen implements Screen {
     private Sound honk;
     private final float probabilityOfHonk = 1000;
     private Sound music;
-
+    private long musicID;
     public final HashMap<String, Collectable> items = new HashMap<String, Collectable>();
     public int numOfInventoryItems = 0;
 
@@ -76,9 +77,6 @@ public class GameScreen implements Screen {
 
     public float playerSpeedModifier = 1;
 
-    public void setPaused(boolean paused) {
-        this.isPaused = paused;
-    }
 
     /**
      * Initialise the game elements
@@ -103,7 +101,7 @@ public class GameScreen implements Screen {
         busX = 1100;
         busY = 1545;
         music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
-        music.loop(0.005f * game.musicVolume);
+        musicID = music.loop(0.01f * game.musicVolume);
         torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
         buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
@@ -343,6 +341,9 @@ public class GameScreen implements Screen {
             }
             else{
                 music.pause();
+                player.footSteps.stop();
+                game.setScreen(new PauseScreen(game, GameScreen.this));
+
             }
             isPaused = !isPaused;
         }
@@ -413,29 +414,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        uiStage = new Stage(game.viewport);
-        game.setInputProcessor(uiStage);
-
-        pauseTexture = new Texture(Gdx.files.internal("pauseButton/pause.png"));
-        TextureRegionDrawable pauseDrawable = new TextureRegionDrawable(new TextureRegion(pauseTexture));
-
-        pauseButton = new ImageButton(pauseDrawable);
-        pauseButton.setSize(50, 50);
-        float worldWidth = game.viewport.getWorldWidth();
-        float worldHeight = game.viewport.getWorldHeight();
-        pauseButton.setPosition((worldWidth - pauseButton.getWidth()) / 2f, worldHeight - pauseButton.getHeight() - 20);
 
 
-        pauseButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                isPaused = true;
-                music.pause();
-                game.setScreen(new PauseScreen(game, GameScreen.this));
-            }
-        });
-
-        uiStage.addActor(pauseButton);
     }
 
 
@@ -612,8 +592,9 @@ public class GameScreen implements Screen {
 
         // Game instructions
         if(hasTorch) {
-            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 55);
+            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
         }
+        drawText(bigFont, "Press 'p' to pause", Color.WHITE, 20, 55);
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 30);
 
         if(isPaused) {
@@ -660,6 +641,15 @@ public class GameScreen implements Screen {
         font.draw(game.batch, text, x, y);
     }
 
+    /**
+     * Unpause game
+     */
+    public void unpause() {
+
+        music.setVolume(musicID,0.005f * game.musicVolume);
+        this.isPaused = false;
+        music.resume();
+    }
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height);

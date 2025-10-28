@@ -84,7 +84,7 @@ public class BuildingManager {
                 }
                 else{
                     lockedOutTime = 5;
-                    noAccess.play();
+                    noAccess.play(game.gameVolume);
                 }
             }
         }
