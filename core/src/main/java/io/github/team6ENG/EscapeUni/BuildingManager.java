@@ -177,7 +177,7 @@ public class BuildingManager {
         }
 
         if(lockedOutTime > 0){
-            String lockedOutText = "Looks like you've lost your keycard\n head over to Ron Cooke for a new one";
+            String lockedOutText = "Looks like you've lost your keycard\nhead over to Ron Cooke for a new one";
             layout = new GlyphLayout(font, lockedOutText);
             float textWidth = layout.width;
             font.setColor(Color.RED);

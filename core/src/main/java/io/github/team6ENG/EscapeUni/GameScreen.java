@@ -3,7 +3,6 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -15,13 +14,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import java.util.HashMap;
 import java.util.Random;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-
 
 /**
  * GameScreen - main gameplay screen
@@ -48,10 +40,6 @@ public class GameScreen implements Screen {
     private Image mapImg;
     private final int mapWallsId = 1;
     private final int tileDimensions  = 8;
-
-    private Stage uiStage;
-    private ImageButton pauseButton;
-    private Texture pauseTexture;
 
     Goose goose = new Goose();
     float stateTime;
@@ -85,24 +73,21 @@ public class GameScreen implements Screen {
     public GameScreen(final Main game) {
         this.game = game;
 
-        initializeMap(0);
+        initialiseMap(0);
 
-        initializePlayer(1055,1215);
+        initialisePlayer(1055,1215);
 
-        initializeCamera();
+        initialiseCamera();
 
-        initializeLighting();
+        initialiseLighting();
 
         initialiseGoose(950,1215);
 
         initialiseItems();
 
-        busTexture = new Texture(Gdx.files.internal("images/bus.png"));
-        busX = 1100;
-        busY = 1545;
-        music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
-        musicID = music.loop(0.01f * game.musicVolume);
-        torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
+        initialiseBus();
+
+        initialiseAudio();
         buildingManager = new BuildingManager(game, this, player);
         stateTime = 0f;
     }
@@ -110,7 +95,7 @@ public class GameScreen implements Screen {
     /**
      * Load map and collision layer
      */
-    private void initializeMap(int wallLayer) {
+    private void initialiseMap(int wallLayer) {
         Texture mapTex = new Texture(Gdx.files.internal("tileMap/map.png"));
         mapImg = new Image(mapTex);
         map = new TmxMapLoader().load("tileMap/map.tmx");
@@ -122,7 +107,7 @@ public class GameScreen implements Screen {
     /**
      * Initialise player and set its position
      */
-    private void initializePlayer(int x, int y) {
+    private void initialisePlayer(int x, int y) {
         player = new Player(game);
         player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
@@ -133,7 +118,7 @@ public class GameScreen implements Screen {
     /**
      * Initialise camera and set to position of player
      */
-    private void initializeCamera() {
+    private void initialiseCamera() {
         camera = new OrthographicCamera(400,225);
         camera.position.set(
             player.sprite.getX() + player.sprite.getWidth() / 2,
@@ -159,7 +144,7 @@ public class GameScreen implements Screen {
     /**
     * Add and hide light circles for player and goose
      */
-    private void initializeLighting() {
+    private void initialiseLighting() {
         int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
         int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
@@ -191,12 +176,25 @@ public class GameScreen implements Screen {
     private void initialiseItems() {
         items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen"));
         items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen"));
-        items.put("torch", new Collectable(game, "items/torch.png",   300, 200, 0.1f, false, "RonCookeScreen"));
-        items.put("pizza", new Collectable(game, "items/pizza.png", 100, 100, 0.4f, true, "LangwithScreen"));
+        items.put("torch", new Collectable(game, "items/torch.png",   300, 220, 0.1f, false, "RonCookeScreen"));
+        items.put("pizza", new Collectable(game, "items/pizza.png", 600, 100, 0.4f, true, "LangwithScreen"));
+        items.put("phone", new Collectable(game, "items/phone.png", 100, 100, 0.05f, true, "LangwithScreen"));
 
         numOfInventoryItems = items.size();
 
 
+    }
+    private void initialiseBus() {
+        busTexture = new Texture(Gdx.files.internal("images/bus.png"));
+        busX = 1100;
+        busY = 1545;
+    }
+    private  void initialiseAudio() {
+        music = Gdx.audio.newSound(Gdx.files.internal("soundEffects/music.mp3"));
+        music.loop(0.005f * game.musicVolume);
+        musicID = music.loop(0.01f * game.musicVolume);
+
+        torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
     }
 
     /**
@@ -206,7 +204,7 @@ public class GameScreen implements Screen {
     private void update(float delta) {
 
         // bus logic
-        if (!playerOnBus) {
+        if (items.get("phone").playerHas && !playerOnBus) {
             float dx = player.sprite.getX() - busX;
             float dy = player.sprite.getY() - busY;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
@@ -214,7 +212,8 @@ public class GameScreen implements Screen {
             if (distance < 50f) {
                 playerOnBus = true;
                 isPaused = true;
-                player.sprite.setAlpha(0f);
+                hasTorch = false;
+                //player.sprite.setAlpha(0f);
                 game.gameFont.setColor(Color.BLUE);
                 game.gameFont.getData().setScale(2f);
             }
@@ -222,16 +221,25 @@ public class GameScreen implements Screen {
 
         if (playerOnBus) {
             player.footSteps.stop();
+            game.musicVolume = 0;
+            game.gameVolume = 0;
+            music.stop();
             busLeaving = true;
             busX -= 80 * delta;
+            lighting.isVisible("playerTorch", true);
+            lighting.isVisible("playerNoTorch", false);
+
+            player.sprite.setX(busX);
+            player.sprite.setY(busY);
             Gdx.gl.glClearColor(0, 0, 0, Math.min(1, (busX - 1500) / 300f));
 
-            if (busX < 900) {
+            if (busX < 950) {
                 Gdx.app.postRunnable(() -> game.setScreen(
-                    new GameOverScreen(game, "You have escaped Uni successfully!")
+                    new WinScreen(game)
                 ));
             }
         }
+        lighting.updateLightSource("playerTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
 
         if(!isPaused && !busLeaving) {
             updateCamera();
@@ -414,10 +422,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
-
     }
-
 
     /**
      * Calls every frame to draw game screen
@@ -475,6 +480,7 @@ public class GameScreen implements Screen {
             player.torch.draw(game.batch, 1);
         }
 
+        game.batch.draw(busTexture, busX, busY, 100, 60);
         int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
         int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
@@ -482,17 +488,11 @@ public class GameScreen implements Screen {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
 
-        game.batch.draw(busTexture, busX, busY, 100, 60);
 
 
         game.batch.end();
 
         renderUI();
-
-        if (uiStage != null) {
-            uiStage.act(delta);
-            uiStage.draw();
-        }
 
 
     }
