@@ -105,6 +105,10 @@ public class RonCookeScreen implements Screen {
         renderUI();
         if(!isPaused) {
             game.gameTimer -= delta;
+            if(game.gameTimer < 0){
+                gameScreen.gameOver();
+                return;
+            }
             speechTimer += delta;
             if (gameScreen.items.get("keyCard").playerHas && gameScreen.items.get("torch").playerHas) {
                 buildingManager.update(delta);

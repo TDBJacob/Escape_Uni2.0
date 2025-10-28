@@ -47,7 +47,8 @@ public class GameScreen implements Screen {
     public boolean hasTorch = false;
     private boolean isTorchOn = false;
     private boolean isCamOnGoose = false;
-    boolean hasGooseFood = false;
+    private boolean hasGooseFood = false;
+    private boolean gameoverTrigger = false;
 
 
     private final float probabilityOfHonk = 1000;
@@ -173,11 +174,11 @@ public class GameScreen implements Screen {
      * They will then appear on screen and allow the player to pick them up
      */
     private void initialiseItems() {
-        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen"));
-        items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen"));
-        items.put("torch", new Collectable(game, "items/torch.png",   300, 220, 0.1f, false, "RonCookeScreen"));
-        items.put("pizza", new Collectable(game, "items/pizza.png", 600, 100, 0.4f, true, "LangwithScreen"));
-        items.put("phone", new Collectable(game, "items/phone.png", 100, 100, 0.05f, true, "LangwithScreen"));
+        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen", audioManager));
+        items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen", audioManager));
+        items.put("torch", new Collectable(game, "items/torch.png",   300, 220, 0.1f, false, "RonCookeScreen", audioManager));
+        items.put("pizza", new Collectable(game, "items/pizza.png", 600, 100, 0.4f, true, "LangwithScreen", audioManager));
+        items.put("phone", new Collectable(game, "items/phone.png", 100, 100, 0.05f, true, "LangwithScreen", audioManager));
 
         numOfInventoryItems = items.size();
 
@@ -342,8 +343,9 @@ public class GameScreen implements Screen {
         } // End isPaused
 
         // If time up
-        if(game.gameTimer <= 0) {
-            game.setScreen(new GameOverScreen(game, "Sorry you missed the bus, better luck next time"));
+        if(!gameoverTrigger && game.gameTimer <= 0) {
+           gameOver();
+           return;
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
@@ -623,6 +625,15 @@ public class GameScreen implements Screen {
             }
         }
         return "";
+    }
+
+    public void gameOver(){
+        gameoverTrigger = true;
+        audioManager.stopMusic();
+        Gdx.app.postRunnable(() -> game.setScreen(
+            new GameOverScreen(game, "Sorry you missed the bus, better luck next time")
+        ));
+
     }
 
     /**

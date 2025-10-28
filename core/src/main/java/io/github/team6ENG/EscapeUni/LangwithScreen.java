@@ -96,6 +96,10 @@ public class LangwithScreen implements Screen {
         game.batch.end();
         renderUI();
         game.gameTimer -= delta;
+        if(game.gameTimer < 0){
+            gameScreen.gameOver();
+            return;
+        }
         pizzaText -= delta;
         buildingManager.update(delta);
         stateTime += delta;

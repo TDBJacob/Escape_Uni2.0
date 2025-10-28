@@ -12,6 +12,7 @@ public class AudioManager {
     private final Sound footSteps;
     private final Music music;
     private final Sound noAccess;
+    private final Sound collect;
     public AudioManager(final Main game){
         this.game = game;
 
@@ -19,6 +20,7 @@ public class AudioManager {
         torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
         footSteps = Gdx.audio.newSound(Gdx.files.internal("soundEffects/footsteps.mp3"));
         noAccess = Gdx.audio.newSound(Gdx.files.internal("soundEffects/wrong.mp3"));
+        collect = Gdx.audio.newSound(Gdx.files.internal("soundEffects/tap.mp3"));
         music = Gdx.audio.newMusic(Gdx.files.internal("soundEffects/music.mp3"));
         playMusic();
     }
@@ -33,6 +35,7 @@ public class AudioManager {
     public void playNoAccess(){
         noAccess.play(game.gameVolume);
     }
+    public void playCollect(){collect.play(game.gameVolume);}
     public void loopFootsteps(){
         footSteps.loop(.2f *game.gameVolume);
     }
@@ -40,6 +43,7 @@ public class AudioManager {
         footSteps.stop();
     }
     public void playMusic(){
+        setMusicVolume();
         music.play();
         music.setLooping(true);
     }
