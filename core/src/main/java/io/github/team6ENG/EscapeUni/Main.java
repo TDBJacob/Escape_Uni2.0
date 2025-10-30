@@ -22,7 +22,7 @@ public class Main extends Game{
     public String activeSpritePath;
     public String activeUniIDPath;
 
-    public float gameTimer = 30;
+    public float gameTimer = 300;
 
     public float gameVolume = .5f;
     public float musicVolume = .5f;
