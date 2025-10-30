@@ -1,14 +1,8 @@
 package io.github.team6ENG.EscapeUni;
 
-import com.badlogic.gdx.Audio;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.HashMap;
-import java.util.Random;
-
-import static java.lang.Math.*;
 
 /**
  * Represents and controls a goose
@@ -19,7 +13,7 @@ public class Goose extends SpriteAnimations {
     public boolean hasStolenTorch = false;
     public TextureRegion currentGooseFrame;
     private float speed = 0.75f;
-    public boolean isMoving;
+    public boolean isFlying;
     private TiledMapTileLayer.Cell cell;
     public Goose baby = null;
 
@@ -36,6 +30,9 @@ public class Goose extends SpriteAnimations {
         animationInfo.put("walkRight", new Integer[]{6,4});
         animationInfo.put("idleLeft", new Integer[]{16,5});
         animationInfo.put("idleRight", new Integer[]{15,5});
+        animationInfo.put("flyRight", new Integer[]{11,10});
+        animationInfo.put("flyLeft", new Integer[]{12,10});
+
 
         generateAnimation(animationInfo,0.6f);
     }
@@ -76,7 +73,7 @@ public class Goose extends SpriteAnimations {
 
         float distance = (float) Math.sqrt(((x-followX) * (x-followX)) + ((y-followY)*(y-followY)));
         // If target is in range, idle
-        if( distance <= 20 && !isPlayerMoving){
+        if( distance <= 20 && !isPlayerMoving && isMoveAllowed(tileX, tileY) ) {
             if(isFacingLeft){
                 currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
             }
@@ -84,42 +81,71 @@ public class Goose extends SpriteAnimations {
                 currentGooseFrame = animations.get("idleRight").getKeyFrame(stateTime, true);
             }
 
-
-
-
-
         }
         else{
-            isMoving = false;
-            if (x > followX +5 && isMoveAllowed(tileX-1,tileY)) {
+            isFlying = false;
+            if (x > followX) {
                 isFacingLeft = true;
-                currentGooseFrame = animations.get("walkLeft").getKeyFrame(stateTime, true);
-                x -= speed;
-                isMoving = true;
+
+                if ((!isMoveAllowed(tileX-1,tileY) && Math.abs(x-followX) > 50)|| !isMoveAllowed(tileX,tileY)) {
+                    isFlying = true;
+                    x -= speed;
+                }
+                else if (isMoveAllowed(tileX-1,tileY)){
+
+                    x -= speed;
+                }
             }
-            else if(x <= followX -5 && isMoveAllowed(tileX+1,tileY)) {
+            else if(x <= followX -5) {
                 isFacingLeft = false;
-                currentGooseFrame = animations.get("walkRight").getKeyFrame(stateTime, true);
-                x += speed;
-                isMoving = true;
+                if ( (!isMoveAllowed(tileX+1,tileY)&& Math.abs(x-followX) > 50) || !isMoveAllowed(tileX,tileY)){
+                    isFlying = true;
+                    x += speed;
+                }
+                else if(isMoveAllowed(tileX+1,tileY)){
+
+                    x += speed;
+                }
             }
 
-            if(y > followY +5 && isMoveAllowed(tileX,tileY-1)) {
-                y -= speed;
-                isMoving = true;
+            if(y > followY +5 ) {
+                if ((!isMoveAllowed(tileX,tileY-1)&& Math.abs(y-followY) > 50)|| !isMoveAllowed(tileX,tileY)) {
+                    isFlying = true;
+                    y -= speed;
+                }
+                else if(isMoveAllowed(tileX, tileY-1)){
+                    y-=speed;
+                }
             }
-            else if (y <= followY -5 && isMoveAllowed(tileX ,tileY+1)) {
-                y += speed;
-                isMoving = true;
+            else if (y <= followY -5 ) {
+                if((!isMoveAllowed(tileX ,tileY+1)&& Math.abs(y-followY) > 50)|| !isMoveAllowed(tileX,tileY)){
+                    isFlying = true;
+                    y += speed;
+                }
+                else if(isMoveAllowed(tileX ,tileY+1)){
+
+                    y += speed;
+                }
             }
 
-            if(!isMoving){
+            if(isFlying){
                 if(isFacingLeft){
-                    currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
+                    currentGooseFrame = animations.get("flyLeft").getKeyFrame(stateTime, true);
+
                 }
                 else{
-                    currentGooseFrame = animations.get("idleRight").getKeyFrame(stateTime, true);
+                    currentGooseFrame = animations.get("flyRight").getKeyFrame(stateTime, true);
                 }
+            }
+            else{
+                if(isFacingLeft){
+                    currentGooseFrame = animations.get("walkLeft").getKeyFrame(stateTime, true);
+
+                }
+                else{
+                    currentGooseFrame = animations.get("walkRight").getKeyFrame(stateTime, true);
+                }
+
             }
         }
     }
