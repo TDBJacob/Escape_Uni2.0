@@ -72,6 +72,7 @@ public class Goose extends SpriteAnimations {
     public void moveGoose(float stateTime, float followX, float followY, boolean isPlayerMoving) {
         int tileX = (int)(x+ getWidth() / 2) / tileDimensions;
         int tileY = (int)(y+ getHeight() / 2) / tileDimensions;
+        currentGooseFrame = animations.get("idleLeft").getKeyFrame(stateTime, true);
 
         float distance = (float) Math.sqrt(((x-followX) * (x-followX)) + ((y-followY)*(y-followY)));
         // If target is in range, idle

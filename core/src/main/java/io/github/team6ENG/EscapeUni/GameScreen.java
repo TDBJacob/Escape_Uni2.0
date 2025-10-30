@@ -279,7 +279,6 @@ public class GameScreen implements Screen {
 
             player.updatePlayer(stateTime);
             if(player.isMoving && !player.isFootsteps){
-                System.out.println("foot");
                 audioManager.loopFootsteps();
                 player.isFootsteps = true;
             }
