@@ -39,6 +39,7 @@ public class GameScreen implements Screen {
     private TiledMap map;
     private Image mapImg;
     private final int mapWallsId = 1;
+    private final int mapWaterId = 2;
     private final int tileDimensions  = 8;
 
     Goose goose = new Goose();
