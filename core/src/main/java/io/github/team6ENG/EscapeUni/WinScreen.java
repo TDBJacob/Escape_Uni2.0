@@ -80,7 +80,7 @@ public class WinScreen implements Screen {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f -40);
+        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f -100);
     }
 
     private void addListeners() {
@@ -132,6 +132,10 @@ public class WinScreen implements Screen {
             layout.setText(game.menuFont, TITLE_TEXT);
             game.menuFont.draw(game.batch, TITLE_TEXT, (w - layout.width) / 2f, h * 0.82f);
             game.menuFont.setColor(Color.WHITE);
+
+            layout.setText(game.menuFont, String.format("Score %d", (int)game.score));
+            game.menuFont.draw(game.batch, String.format("Score %d", (int)game.score), (w - layout.width) / 2f, h * 0.6f);
+
         }
 
         game.batch.end();

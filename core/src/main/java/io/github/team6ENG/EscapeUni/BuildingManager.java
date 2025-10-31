@@ -126,6 +126,7 @@ public class BuildingManager {
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
         gameScreen.lighting.isVisible("playerNoTorch", true);
+        gameScreen.lighting.isVisible("gooseNoTorch", true);
 
     }
     /**

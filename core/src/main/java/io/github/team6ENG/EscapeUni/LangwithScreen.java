@@ -172,6 +172,8 @@ public class LangwithScreen implements Screen {
         float textX = (worldWidth - layout.width) / 2;
         drawText(font, instructions, Color.WHITE, textX, worldHeight * 0.75f);
         drawText(font, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        layout = new GlyphLayout(game.menuFont, ("Score: " + (int)game.score));
+        drawText(font, ("Score: " +(int)game.score), Color.WHITE, (worldWidth - layout.width)/2, worldHeight-20f);
 
         font.setColor(Color.GRAY);
         String exitText = "Press G to leave";

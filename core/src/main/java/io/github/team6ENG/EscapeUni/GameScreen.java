@@ -3,15 +3,17 @@ package io.github.team6ENG.EscapeUni;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 import java.util.HashMap;
 import java.util.Random;
 
@@ -44,12 +46,15 @@ public class GameScreen implements Screen {
 
     Goose goose = new Goose();
     float stateTime;
+    private Rectangle stealTorchTrigger;
+
 
     public boolean hasTorch = false;
     private boolean isTorchOn = false;
     private boolean isCamOnGoose = false;
     private boolean hasGooseFood = false;
     private boolean gameoverTrigger = false;
+    private boolean gooseStolenTorch = false;
 
 
     private final float probabilityOfHonk = 1000;
@@ -78,13 +83,14 @@ public class GameScreen implements Screen {
 
         initialiseAudio();
 
-        initialisePlayer(1055,1215);
+        initialisePlayer(105,125);
+        //initialisePlayer(1055,1215);
 
         initialiseCamera();
 
         initialiseLighting();
 
-        initialiseGoose(950,1215);
+        initialiseGoose(100,100);
 
         initialiseItems();
 
@@ -138,6 +144,7 @@ public class GameScreen implements Screen {
         goose.x = x;
         goose.y = y;
 
+        stealTorchTrigger = new com.badlogic.gdx.math.Rectangle(510, 560, 50, 50);
 
     }
 
@@ -162,10 +169,12 @@ public class GameScreen implements Screen {
             new Color(0, 0, 0, 0.4f),
             12);
         lighting.addLightSource("gooseTorch",goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2), new Color(1,0.2f,0.1f,0.4f), 30);
+        lighting.addLightSource("gooseNoTorch",goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2), new Color(0, 0, 0, 0.4f), 10);
 
         lighting.isVisible("playerTorch", false);
         lighting.isVisible("playerNoTorch", false);
         lighting.isVisible("gooseTorch", false);
+        lighting.isVisible("gooseNoTorch", false);
 
 
     }
@@ -175,13 +184,12 @@ public class GameScreen implements Screen {
      * They will then appear on screen and allow the player to pick them up
      */
     private void initialiseItems() {
-        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   300, 200, 0.03f, true, "GameScreen", audioManager));
+        items.put("gooseFood", new Collectable(game, "items/gooseFood.png",   500, 1500, 0.03f, true, "GameScreen", audioManager));
         items.put("keyCard", new Collectable(game, game.activeUniIDPath,   300, 200, 0.05f, false, "RonCookeScreen", audioManager));
         items.put("torch", new Collectable(game, "items/torch.png",   300, 220, 0.1f, false, "RonCookeScreen", audioManager));
         items.put("pizza", new Collectable(game, "items/pizza.png", 600, 100, 0.4f, true, "LangwithScreen", audioManager));
         items.put("phone", new Collectable(game, "items/phone.png", 100, 100, 0.05f, true, "LangwithScreen", audioManager));
 
-        numOfInventoryItems = items.size();
 
 
     }
@@ -243,37 +251,21 @@ public class GameScreen implements Screen {
             updateCamera();
 
             game.gameTimer -= delta;
+            game.score -= delta;
             handleInput(delta);
             player.handleInput(delta, playerSpeedModifier);
             float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
             float mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
 
-            /*
-            //If goose has not yet stolen torch, check if goose can steal torch
-            if(!goose.hasStolenTorch && hasTorch){
-                float dx = goose.x - player.sprite.getX();
-                float dy = goose.y - player.sprite.getY();
-                float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < 30f) {
-                    goose.hasStolenTorch = true;
-                    hasTorch = false;
-                    isCamOnGoose = true;
-                    lighting.isVisible("gooseTorch", true);
-                    lighting.isVisible("playerTorch", false);
-                    lighting.isVisible("playerNoTorch", true);
-                }
-
-            }
-
-             */
 
             // Update light positions
             lighting.updateLightSource("playerTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
             lighting.updateLightSource("playerNoTorch", player.sprite.getX() + (player.sprite.getWidth() / 2), player.sprite.getY() + (player.sprite.getHeight() / 2));
+            lighting.updateLightSource("gooseNoTorch", goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2));
 
-            if(goose.hasStolenTorch){
+            if(gooseStolenTorch){
                 lighting.updateLightSource("gooseTorch", goose.x+ (goose.getWidth() / 2), goose.y + (goose.getHeight() / 2));
 
             }
@@ -287,12 +279,18 @@ public class GameScreen implements Screen {
                 player.isFootsteps = false;
                 audioManager.stopFootsteps();
             }
-            // Goose follow player
-            goose.moveGoose(stateTime,
-                            player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
-                            player.sprite.getY() + (player.sprite.getHeight() / 2),
-                            player.isMoving);
 
+            // Goose follow player
+            if(!gooseStolenTorch) {
+                goose.moveGoose(stateTime,
+                    player.sprite.getX() + (player.sprite.getWidth() / 2) - 20,
+                    player.sprite.getY() + (player.sprite.getHeight() / 2),
+                    player.isMoving, false);
+            }
+            else{
+                int[] runCoords = goose.nextRunLocation();
+                goose.moveGoose(stateTime,runCoords[0],runCoords[1],true, false);
+                }
             // If there are baby geese, they follow the goose directly in front of them
             Goose trail = goose;
             float stateOffset = 0.075f;
@@ -300,7 +298,7 @@ public class GameScreen implements Screen {
                 trail.baby.moveGoose(stateTime - stateOffset,
                     trail.x,
                     trail.y,
-                    player.isMoving);
+                    player.isMoving, trail.isSleeping);
                 stateOffset += 0.075f;
                 trail = trail.baby;
             }
@@ -311,6 +309,7 @@ public class GameScreen implements Screen {
                 if(!item.playerHas && item.isVisible && item.originScreen.equals("GameScreen")){
                     if (item.checkInRange(player.sprite.getX(), player.sprite.getY()) && isEPressed){
                         item.Collect();
+                        numOfInventoryItems += 1;
                         isEPressed = false;
                         if (key.equals("gooseFood")){
                             hasGooseFood = true;
@@ -330,9 +329,58 @@ public class GameScreen implements Screen {
                 items.remove("gooseFood");
                 goose.loadBabyGoose(0);
                 game.foundHiddenEvents += 1;
+                game.score += 100;
+                hasGooseFood = false;
             }
 
             isEPressed = false;
+
+
+            if(hasTorch || gooseStolenTorch){
+                Rectangle playerRect = new Rectangle(
+                    player.sprite.getX(),
+                    player.sprite.getY(),
+                    player.sprite.getWidth(),
+                    player.sprite.getHeight()
+                );
+
+                if(playerRect.overlaps(stealTorchTrigger) && !goose.attackModeActivated){
+                    goose.attackMode();
+                    audioManager.playHonk();
+
+                }
+                else if(goose.attackModeActivated){
+                    Rectangle gooseRect = new Rectangle( goose.x,goose.y,goose.getWidth(),goose.getHeight());
+                    if(playerRect.overlaps(gooseRect) && !gooseStolenTorch){
+                        gooseStolenTorch = true;
+                        isCamOnGoose = true;
+                        hasTorch = false;
+                        game.foundNegativeEvents += 1;
+                        lighting.isVisible("gooseTorch", true);
+                        lighting.isVisible("gooseNoTorch", false);
+                        lighting.isVisible("playerTorch", false);
+                        lighting.isVisible("playerNoTorch", true);
+                        audioManager.playHonk();
+
+                    }
+                    else if(!playerRect.overlaps(stealTorchTrigger) &&playerRect.overlaps(gooseRect) && gooseStolenTorch){
+
+                        isCamOnGoose = false;
+                        lighting.isVisible("gooseTorch", false);
+                        lighting.isVisible("gooseNoTorch", true);
+                        lighting.isVisible("playerTorch", true);
+                        lighting.isVisible("playerNoTorch", false);
+
+
+                        if(!goose.isSleeping && !hasTorch){
+                            game.score += 100;
+                        }
+
+                        hasTorch = true;
+                    }
+                }
+
+            }
 
             // Keep sprites in map boundary
             player.sprite.setX(Math.max(0, Math.min(player.sprite.getX(), mapWidth - player.sprite.getWidth())));
@@ -380,7 +428,7 @@ public class GameScreen implements Screen {
         // camera follows player
         float slope = 0.1f;
 
-        if(isCamOnGoose){
+        if(isCamOnGoose && Math.abs(finalX-playerCenterX)<100 && Math.abs(finalY-playerCenterY)<100){
 
             camera.position.x += (finalX - camera.position.x) * slope;
             camera.position.y += (finalY - camera.position.y) * slope;
@@ -545,12 +593,12 @@ public class GameScreen implements Screen {
 
         // Draw collected items in inventory bar
         // Display instructions if an item can be used or collected
-        float itemXPos = (worldWidth - (numOfInventoryItems * 32))/2;
+        float itemXPos = (worldWidth - ((numOfInventoryItems) * 32))/2;
         String instructions= "";
         for(String key:items.keySet()) {
             Collectable  item = items.get(key);
             if (item.playerHas){
-                item.img.setPosition(itemXPos, worldHeight * 0.9f);
+                item.img.setPosition(itemXPos, worldHeight * 0.8f);
                 item.img.draw(game.batch, 1);
                 itemXPos += 32;
                 instructions = getInstructions(key);
@@ -582,12 +630,17 @@ public class GameScreen implements Screen {
         drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         drawText(bigFont, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        layout = new GlyphLayout(game.menuFont, ("Score: " + (int)game.score));
+        drawText(bigFont, ("Score: " +(int)game.score), Color.WHITE, (worldWidth - layout.width)/2, worldHeight-20f);
 
         // player coordinates
         drawText(smallFont, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
         y -= lineSpacing;
 
-
+        if(gooseStolenTorch && !hasTorch){
+            layout = new GlyphLayout(game.menuFont, "THE GOOSE STOLE YOUR TORCH\nCATCH IT QUICK!!!");
+            drawText(bigFont, "THE GOOSE STOLE YOUR TORCH\nCATCH IT QUICK!!!", Color.RED, (worldWidth -layout.width)/2, worldHeight-80f);
+        }
         // Game instructions
         if(hasTorch) {
             drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
