@@ -43,13 +43,13 @@ public class Player extends SpriteAnimations{
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
         //      Value - Array representing row of animation on sprite sheet and number of frames it contains
-        animationInfo.put("idle", new Integer[]{0,8});
-        animationInfo.put("walkForwards", new Integer[]{1,8});
-        animationInfo.put("walkLeftForwards", new Integer[]{2,8});
-        animationInfo.put("walkRightForwards", new Integer[]{6,8});
-        animationInfo.put("walkRightBackwards", new Integer[]{5,8});
-        animationInfo.put("walkLeftBackwards", new Integer[]{3,8});
-        animationInfo.put("walkBackwards", new Integer[]{4,8});
+        animationInfo.put("idle", new Integer[]{0,0,8});
+        animationInfo.put("walkForwards", new Integer[]{1,0,8});
+        animationInfo.put("walkLeftForwards", new Integer[]{2,0,8});
+        animationInfo.put("walkRightForwards", new Integer[]{6,0,8});
+        animationInfo.put("walkRightBackwards", new Integer[]{5,0,8});
+        animationInfo.put("walkLeftBackwards", new Integer[]{3,0,8});
+        animationInfo.put("walkBackwards", new Integer[]{4,0,8});
 
         generateAnimation(animationInfo, 0.3f);
 

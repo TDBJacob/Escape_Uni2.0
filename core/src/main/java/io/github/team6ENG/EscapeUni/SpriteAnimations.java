@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -57,7 +59,7 @@ public class SpriteAnimations  {
      * @param animationSpeed number of seconds each animation frame should last
      */
     protected void generateAnimation( HashMap<String, Integer[]> animInfo, float animationSpeed){
-        //animationInfo [0] = Row of animation, [1] = number of frames
+        //animationInfo [0] = Row of animation, [1] = strat frame [2] = end frame
         animationInfo = animInfo;
 
         TextureRegion[][] tmp = TextureRegion.split(sheet,
@@ -67,9 +69,9 @@ public class SpriteAnimations  {
         TextureRegion[] frames;
         for(String key : animationInfo.keySet())
         {
-            frames = new TextureRegion[animationInfo.get(key)[1]];
-            for (int i = 0; i < animationInfo.get(key)[1]; i++ ){
-                frames[i] = tmp[animationInfo.get(key)[0]][i];
+            frames = new TextureRegion[animationInfo.get(key)[2]- animationInfo.get(key)[1]];
+            for (int i = animationInfo.get(key)[1]; i < animationInfo.get(key)[2]; i++ ){
+                frames[i - animationInfo.get(key)[1]] = tmp[animationInfo.get(key)[0]][i];
             }
             animations.put(key, new Animation<TextureRegion>(animationSpeed, frames));
 
