@@ -2,7 +2,6 @@ package io.github.team6ENG.EscapeUni;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -19,26 +18,27 @@ public class Player extends SpriteAnimations{
     public TextureRegion currentPlayerFrame;
     public float speed = 1.25f;
     final Main game;
+    protected int mapLangwithBarriersId;
 
     public Sprite sprite;
     private Texture torchTexture;
     public Image torch;
-    private static final boolean DEBUG = false;
 
     public boolean isFacingUp = false;
     public boolean isFacingLeft = false;
     public boolean isMoving;
     public boolean isMovingHorizontally;
-
+    public boolean hasEnteredLangwith;
     private AudioManager audioManager;
     boolean isFootsteps = false;
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
      */
-    public Player(final Main g, AudioManager audioManager){
+    public Player(final Main g, AudioManager audioManager, int mapLangwithBarriersId) {
         super(g.activeSpritePath, 8, 7);
         this.audioManager = audioManager;
+        this.mapLangwithBarriersId = mapLangwithBarriersId;
         game = g;
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
@@ -86,7 +86,7 @@ public class Player extends SpriteAnimations{
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             if (y + 1 < mapHeight) {
                 cell = wallsLayer.getCell(x, y + 1);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
+                if (cell == null || cell.getTile().getId() != mapWallsId &&(cell.getTile().getId() != mapLangwithBarriersId || hasEnteredLangwith)) {
                     sprite.translateY(actualSpeed);
                     isMoving = true;
                     isFacingUp = true;
@@ -98,7 +98,7 @@ public class Player extends SpriteAnimations{
         if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             if (y - 1 >= 0) {
                 cell = wallsLayer.getCell(x, y -1);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
+                if (cell == null || cell.getTile().getId() != mapWallsId&&(cell.getTile().getId() != mapLangwithBarriersId || hasEnteredLangwith)) {
                     sprite.translateY(-actualSpeed);
                     isMoving = true;
                     isFacingUp = false;
@@ -110,7 +110,7 @@ public class Player extends SpriteAnimations{
         if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             if (x - 1 >= 0) {
                 cell = wallsLayer.getCell(x -1 , y);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
+                if (cell == null || cell.getTile().getId() != mapWallsId &&(cell.getTile().getId() != mapLangwithBarriersId || hasEnteredLangwith)) {
                     sprite.translateX(-actualSpeed);
                     isMoving = true;
                     isFacingLeft = true;
@@ -124,7 +124,7 @@ public class Player extends SpriteAnimations{
         if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             if (x + 1 < mapWidth) {
                 cell = wallsLayer.getCell(x + 1, y);
-                if (cell == null || cell.getTile().getId() != mapWallsId) {
+                if (cell == null || cell.getTile().getId() != mapWallsId&&(cell.getTile().getId() != mapLangwithBarriersId || hasEnteredLangwith)) {
                     sprite.translateX(actualSpeed);
                     isMoving = true;
                     isFacingLeft = false;

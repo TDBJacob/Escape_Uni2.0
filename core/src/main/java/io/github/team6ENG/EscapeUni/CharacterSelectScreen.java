@@ -62,7 +62,7 @@ public class CharacterSelectScreen implements Screen {
                 Gdx.app.postRunnable(() -> {
                     game.activeSpritePath = "sprites/femaleSprite.png";
                     game.activeUniIDPath = "items/idFemale.png";
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new InstructionsScreen(game));
                     dispose();
                 });
             } });
@@ -73,7 +73,7 @@ public class CharacterSelectScreen implements Screen {
                 Gdx.app.postRunnable(() -> {
                     game.activeSpritePath = "sprites/maleSprite.png";
                     game.activeUniIDPath = "items/idMale.png";
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new InstructionsScreen(game));
                     dispose();
                 });
             }
