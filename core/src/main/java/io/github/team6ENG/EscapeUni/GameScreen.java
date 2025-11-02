@@ -42,6 +42,7 @@ public class GameScreen implements Screen {
     private Image mapImg;
     private final int mapWallsId = 1;
     private final int mapWaterId = 2;
+    public final int mapLangwithBarriersId = 3;
     private final int tileDimensions  = 8;
 
     Goose goose = new Goose();
@@ -55,7 +56,6 @@ public class GameScreen implements Screen {
     private boolean hasGooseFood = false;
     private boolean gameoverTrigger = false;
     private boolean gooseStolenTorch = false;
-
 
     private final float probabilityOfHonk = 1000;
 
@@ -83,8 +83,7 @@ public class GameScreen implements Screen {
 
         initialiseAudio();
 
-        initialisePlayer(105,125);
-        //initialisePlayer(1055,1215);
+        initialisePlayer(940,1215);
 
         initialiseCamera();
 
@@ -108,15 +107,14 @@ public class GameScreen implements Screen {
         mapImg = new Image(mapTex);
         map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
-        int mapWallsLayer = wallLayer;
-        collisionLayer = (TiledMapTileLayer)map.getLayers().get(mapWallsLayer);
+        collisionLayer = (TiledMapTileLayer)map.getLayers().get(wallLayer);
     }
 
     /**
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game, audioManager);
+        player = new Player(game, audioManager, mapLangwithBarriersId);
         player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
         player.speed = 1;
@@ -211,6 +209,7 @@ public class GameScreen implements Screen {
 
         // bus logic
         if (items.get("phone").playerHas && !playerOnBus) {
+            player.hasEnteredLangwith = true;
             float dx = player.sprite.getX() - busX;
             float dy = player.sprite.getY() - busY;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);

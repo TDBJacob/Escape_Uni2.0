@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
-import javax.swing.*;
-
 /**
  * Represents the interior of the Ron Cooke building.
  * Displays a black background with a welcome message.
@@ -46,7 +44,7 @@ public class LangwithScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game, buildingManager.audioManager);
+        player = new Player(game, buildingManager.audioManager, gameScreen.mapLangwithBarriersId);
         player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);

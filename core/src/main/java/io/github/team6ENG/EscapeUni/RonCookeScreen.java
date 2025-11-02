@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-import javax.swing.*;
 import java.util.ArrayList;
 
 /**
@@ -58,7 +57,7 @@ public class RonCookeScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game, buildingManager.audioManager);
+        player = new Player(game, buildingManager.audioManager, gameScreen.mapLangwithBarriersId);
         player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);
