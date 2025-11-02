@@ -44,7 +44,7 @@ public class LangwithScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game, buildingManager.audioManager, gameScreen.mapLangwithBarriersId);
+        player = new Player(game, buildingManager.audioManager, gameScreen.mapLangwithBarriersId, gameScreen.mapWaterId);
         player.loadSprite(new TiledMapTileLayer( 400, 225, 16,16), 0, 16);
         player.sprite.setPosition(x, y);
         player.sprite.setScale(4);
