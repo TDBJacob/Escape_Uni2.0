@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -41,7 +42,7 @@ public class GameScreen implements Screen {
     private TiledMap map;
     private Image mapImg;
     private final int mapWallsId = 1;
-    private final int mapWaterId = 2;
+    public final int mapWaterId = 2;
     public final int mapLangwithBarriersId = 3;
     private final int tileDimensions  = 8;
 
@@ -114,7 +115,7 @@ public class GameScreen implements Screen {
      * Initialise player and set its position
      */
     private void initialisePlayer(int x, int y) {
-        player = new Player(game, audioManager, mapLangwithBarriersId);
+        player = new Player(game, audioManager, mapLangwithBarriersId, mapWaterId);
         player.loadSprite(collisionLayer, mapWallsId, tileDimensions);
         player.sprite.setPosition(x, y);
         player.speed = 1;
@@ -518,7 +519,19 @@ public class GameScreen implements Screen {
             }
         }
         if (player.sprite.getTexture() != null) {
-            player.sprite.draw(game.batch);
+            if(player.inWater) {
+                Rectangle scissors = new Rectangle();
+                Rectangle clipBounds = new Rectangle(player.sprite.getX(), player.sprite.getY() + (player.sprite.getHeight() * 0.4f), player.sprite.getWidth(), player.sprite.getHeight());
+                ScissorStack.calculateScissors(camera, game.batch.getTransformMatrix(), clipBounds, scissors);
+                if (ScissorStack.pushScissors(scissors)) {
+                    player.sprite.draw(game.batch);
+                    game.batch.flush();
+                    ScissorStack.popScissors();
+                }
+            }
+            else{
+                player.sprite.draw(game.batch);
+            }
 
         }
         if(hasTorch){

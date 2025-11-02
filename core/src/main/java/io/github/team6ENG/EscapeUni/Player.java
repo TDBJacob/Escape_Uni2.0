@@ -19,6 +19,7 @@ public class Player extends SpriteAnimations{
     public float speed = 1.25f;
     final Main game;
     protected int mapLangwithBarriersId;
+    protected int mapWaterId;
 
     public Sprite sprite;
     private Texture torchTexture;
@@ -28,6 +29,7 @@ public class Player extends SpriteAnimations{
     public boolean isFacingLeft = false;
     public boolean isMoving;
     public boolean isMovingHorizontally;
+    public boolean inWater;
     public boolean hasEnteredLangwith;
     private AudioManager audioManager;
     boolean isFootsteps = false;
@@ -35,10 +37,11 @@ public class Player extends SpriteAnimations{
      * Initialises the player and its animations
      * @param g current instance of Main
      */
-    public Player(final Main g, AudioManager audioManager, int mapLangwithBarriersId) {
+    public Player(final Main g, AudioManager audioManager, int mapLangwithBarriersId, int waterId) {
         super(g.activeSpritePath, 8, 7);
         this.audioManager = audioManager;
         this.mapLangwithBarriersId = mapLangwithBarriersId;
+        this.mapWaterId = waterId;
         game = g;
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
@@ -71,12 +74,13 @@ public class Player extends SpriteAnimations{
      */
     public void handleInput(float delta, float speedModifier) {
         float actualSpeed = speed * speedModifier* 60f * delta;
-
+        if(inWater){actualSpeed /=2;}
         TiledMapTileLayer.Cell cell;
         int x = (int)(sprite.getX()+(sprite.getWidth()/2))/tileDimensions;
         int y = (int)(sprite.getY()+(sprite.getHeight()/2))/tileDimensions;
         int mapWidth = wallsLayer.getWidth();
         int mapHeight = wallsLayer.getHeight();
+
 
         isMoving = false;
         isFacingLeft = false;
@@ -91,6 +95,7 @@ public class Player extends SpriteAnimations{
                     isMoving = true;
                     isFacingUp = true;
                 }
+                checkIfInWater(cell);
             }
         }
 
@@ -103,6 +108,7 @@ public class Player extends SpriteAnimations{
                     isMoving = true;
                     isFacingUp = false;
                 }
+                checkIfInWater(cell);
             }
         }
 
@@ -116,6 +122,7 @@ public class Player extends SpriteAnimations{
                     isFacingLeft = true;
                     isMovingHorizontally = true;
                 }
+                checkIfInWater(cell);
             }
 
         }
@@ -130,9 +137,13 @@ public class Player extends SpriteAnimations{
                     isFacingLeft = false;
                     isMovingHorizontally = true;
                 }
+                checkIfInWater(cell);
+
             }
 
         }
+
+
         // check boundary
         keepPlayerInBounds();
         if(isMoving && !isFootsteps){
@@ -146,6 +157,15 @@ public class Player extends SpriteAnimations{
 
     }
 
+    private void checkIfInWater(TiledMapTileLayer.Cell cell){
+        if( cell != null && cell.getTile().getId() == mapWaterId){
+            inWater = true;
+
+        }
+        else{
+            inWater = false;
+        }
+    }
     /**
      * Ensure player can't leave the map
      */
