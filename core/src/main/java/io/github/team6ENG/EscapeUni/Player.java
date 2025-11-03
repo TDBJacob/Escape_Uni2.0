@@ -45,7 +45,7 @@ public class Player extends SpriteAnimations{
         game = g;
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
-        //      Value - Array representing row of animation on sprite sheet and number of frames it contains
+        //      Value - Array representing row of animation on sprite sheet and index of start and end frames
         animationInfo.put("idle", new Integer[]{0,0,8});
         animationInfo.put("walkForwards", new Integer[]{1,0,8});
         animationInfo.put("walkLeftForwards", new Integer[]{2,0,8});

@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 
+/**
+ * Control and play game sounds
+ */
 public class AudioManager {
 
     private final Main game;
@@ -13,6 +16,11 @@ public class AudioManager {
     private final Music music;
     private final Sound noAccess;
     private final Sound collect;
+
+    /**
+     * Initialised audio manager
+     * @param game current instance of Main
+     */
     public AudioManager(final Main game){
         this.game = game;
 
