@@ -134,8 +134,8 @@ public class WinScreen implements Screen {
             game.menuFont.draw(game.batch, TITLE_TEXT, (w - layout.width) / 2f, h * 0.82f);
             game.menuFont.setColor(Color.WHITE);
 
-            layout.setText(game.menuFont, String.format("Score %d", (int)game.score));
-            game.menuFont.draw(game.batch, String.format("Score %d", (int)game.score), (w - layout.width) / 2f, h * 0.6f);
+            layout.setText(game.menuFont, "Score: "+ (int)game.score);
+            game.menuFont.draw(game.batch, ("Score: "+ (int)game.score), (w - layout.width) / 2f, h * 0.6f);
 
         }
 

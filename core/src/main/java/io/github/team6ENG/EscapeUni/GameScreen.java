@@ -635,19 +635,17 @@ public class GameScreen implements Screen {
         float lineSpacing = 15f;
 
         // Requirements: Events tracker and game timer
-        drawText(smallFont, String.format("Negative Events: %d/%d", game.foundNegativeEvents, game.totalNegativeEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Negative Events: " + game.foundNegativeEvents +"/" + game.totalNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Positive Events: %d/%d", game.foundPositiveEvents, game.totalPositiveEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Positive Events: "+ game.foundPositiveEvents +"/"+ game.totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Hidden Events:   "+ game.foundHiddenEvents+"/"+ game.totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(bigFont, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        //Display time with 2 digits for seconds
+        drawText(bigFont, ((int)game.gameTimer/60 + ":" +((int)game.gameTimer % 60 <10?"0" :"" ) +(int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
         layout = new GlyphLayout(game.menuFont, ("Score: " + (int)game.score));
         drawText(bigFont, ("Score: " +(int)game.score), Color.WHITE, (worldWidth - layout.width)/2, worldHeight-20f);
 
-        // player coordinates
-        drawText(smallFont, String.format("Position: (%.1f, %.1f)", player.sprite.getX(), player.sprite.getY()), Color.LIGHT_GRAY, 20, y);
-        y -= lineSpacing;
 
         if(gooseStolenTorch && !hasTorch){
             layout = new GlyphLayout(game.menuFont, "THE GOOSE STOLE YOUR TORCH\nCATCH IT QUICK!!!");

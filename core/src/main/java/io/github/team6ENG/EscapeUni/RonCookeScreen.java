@@ -162,16 +162,17 @@ public class RonCookeScreen implements Screen {
         float lineSpacing = 15f;
 
         // Requirements: Events tracker and game timer
-        drawText(smallFont, String.format("Negative Events: %d/%d", game.foundNegativeEvents, game.totalNegativeEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Negative Events: " + game.foundNegativeEvents +"/" + game.totalNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Positive Events: %d/%d", game.foundPositiveEvents, game.totalPositiveEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Positive Events: "+ game.foundPositiveEvents+"/"+ game.totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
-        drawText(smallFont, String.format("Hidden Events:   %d/%d", game.foundHiddenEvents, game.totalHiddenEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Hidden Events:   "+ game.foundHiddenEvents+"/"+ game.totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         layout.setText(game.menuFont, instructions);
         float textX = (worldWidth - layout.width) / 2;
         drawText(font, instructions, Color.WHITE, textX, worldHeight * 0.75f);
-        drawText(font, String.format("%d:%02d ", (int)game.gameTimer/60, (int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
+        //Display time with 2 digits for seconds
+        drawText(font, ((int)game.gameTimer/60 + ":" +((int)game.gameTimer % 60 <10?"0" :"" ) +(int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
         layout = new GlyphLayout(game.menuFont, ("Score: " + (int)game.score));
         drawText(font, ("Score: " +(int)game.score), Color.WHITE, (worldWidth - layout.width)/2, worldHeight-20f);
 
@@ -202,7 +203,7 @@ public class RonCookeScreen implements Screen {
                 font.setColor(Color.GRAY);
                 String exitText = "Press G to leave";
                 GlyphLayout exitLayout = new GlyphLayout(font, exitText);
-                font.draw(game.batch, exitText, (worldWidth - exitLayout.width) / 2, worldHeight - 20);
+                font.draw(game.batch, exitText, (worldWidth - exitLayout.width) / 2, worldHeight - 50);
             }
         }
 
