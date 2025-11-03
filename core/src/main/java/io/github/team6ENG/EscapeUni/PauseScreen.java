@@ -13,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+/**
+ * screen when game is paused, contains volume settings
+ */
 public class PauseScreen implements Screen {
 
     private final Main game;
@@ -25,6 +28,12 @@ public class PauseScreen implements Screen {
     private final Slider volumeSlider;
     private final TextButton continueButton;
 
+    /**
+     * initialise pause screen
+     * @param game current instance of Main
+     * @param playScreen screen to return to
+     * @param audioManager active audio manager
+     */
     public PauseScreen(final Main game, final Screen playScreen, AudioManager audioManager) {
         this.game = game;
         this.playScreen = playScreen;

@@ -16,10 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
 /**
- * MainMenuScreen — lifecycle safe:
- * - Do not permanently steal input processor
- * - Do not dispose shared resources
- * - Keeps the same visual/behavior as before
+ * Instructions Screen, displays before game starts
  */
 public class InstructionsScreen implements Screen {
 
@@ -36,6 +33,10 @@ public class InstructionsScreen implements Screen {
 
     private static final String TITLE_TEXT = "It's time to meet your friends in town\nand the bus leaves in 5 minutes, better\ngrab your phone from your room in\nLangwith college before you board.";
 
+    /**
+     * Initialise the instructions screen
+     * @param game current instance of game
+     */
     public InstructionsScreen(final Main game) {
         this.game = game;
         // DO NOT initialize stage/input here — do it in show()
@@ -57,6 +58,9 @@ public class InstructionsScreen implements Screen {
         setupUI();
     }
 
+    /**
+     *Add required UI elements to stage
+     */
     private void setupUI() {
         playButton = createButton("Play");
 
@@ -66,6 +70,11 @@ public class InstructionsScreen implements Screen {
         addListeners();
     }
 
+    /**
+     * Set up each button
+     * @param text buttons display text
+     * @return new button with required parameters
+     */
     private TextButton createButton(String text) {
         // If skin is null, fallback to a simple TextButton may fail; ensure game.buttonSkin exists in assets
         TextButton button = new TextButton(text, skin);
@@ -76,6 +85,9 @@ public class InstructionsScreen implements Screen {
         return button;
     }
 
+    /**
+     * Place buttons on screen
+     */
     private void positionButtons() {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
@@ -83,6 +95,9 @@ public class InstructionsScreen implements Screen {
         playButton.setPosition((w - playButton.getWidth()) / 2f, h / 2f -100);
     }
 
+    /**
+     * Add listeners for button functionality
+     */
     private void addListeners() {
         Color normalColor = new Color(0.0f, 0.95f, 0.95f, 1f);
         Color clickColor = new Color(0.4f, 1f, 1f, 1f);

@@ -11,6 +11,7 @@ import java.util.List;
  * Represents and controls a goose
  */
 public class Goose extends SpriteAnimations {
+
     private HashMap<String, Integer[]> animationInfo = new HashMap<String, Integer[]>();
     public boolean isFacingLeft = true;
     public boolean hasStolenTorch = false;
@@ -31,7 +32,7 @@ public class Goose extends SpriteAnimations {
 
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
-        //      Value - Array representing row of animation on sprite sheet and number of frames it contains
+        //      Value - Array representing row of animation on sprite sheet and index of start and end frames
         animationInfo.put("walkLeft", new Integer[]{5,0,4});
         animationInfo.put("walkRight", new Integer[]{6,0,4});
         animationInfo.put("idleLeft", new Integer[]{16,0,5});
@@ -166,7 +167,7 @@ public class Goose extends SpriteAnimations {
     }
 
     /**
-     *
+     * get width of goose frame
      * @return width of goose
      */
     public float getWidth() {
@@ -174,7 +175,7 @@ public class Goose extends SpriteAnimations {
     }
 
     /**
-     *
+     * get height of goose frame
      * @return height of goose
      */
     public float getHeight() {

@@ -16,10 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
 /**
- * MainMenuScreen — lifecycle safe:
- * - Do not permanently steal input processor
- * - Do not dispose shared resources
- * - Keeps the same visual/behavior as before
+ * screen displayed when player wins
  */
 public class WinScreen implements Screen {
 
@@ -36,6 +33,10 @@ public class WinScreen implements Screen {
 
     private static final String TITLE_TEXT = "Congratulations, you escaped university:)";
 
+    /**
+     * initialise win screen
+     * @param game current Instance of Main
+     */
     public WinScreen(final Main game) {
         this.game = game;
         // DO NOT initialize stage/input here — do it in show()

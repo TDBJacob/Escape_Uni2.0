@@ -16,10 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
 /**
- * MainMenuScreen — lifecycle safe:
- * - Do not permanently steal input processor
- * - Do not dispose shared resources
- * - Keeps the same visual/behavior as before
+ * first screen to display when game loads
  */
 public class MainMenuScreen implements Screen {
 
@@ -37,6 +34,10 @@ public class MainMenuScreen implements Screen {
 
     private static final String TITLE_TEXT = "Escape University Of York";
 
+    /**
+     * Initialise menu screen
+     * @param game current instance of Main
+     */
     public MainMenuScreen(final Main game) {
         this.game = game;
         // DO NOT initialize stage/input here — do it in show()
@@ -58,7 +59,9 @@ public class MainMenuScreen implements Screen {
         // build UI
         setupUI();
     }
-
+    /**
+     *Add required UI elements to stage
+     */
     private void setupUI() {
         playButton = createButton("Play");
         exitButton = createButton("Exit");
@@ -70,6 +73,11 @@ public class MainMenuScreen implements Screen {
         addListeners();
     }
 
+    /**
+     * Set up each button
+     * @param text buttons display text
+     * @return new button with required parameters
+     */
     private TextButton createButton(String text) {
         // If skin is null, fallback to a simple TextButton may fail; ensure game.buttonSkin exists in assets
         TextButton button = new TextButton(text, skin);
@@ -79,7 +87,9 @@ public class MainMenuScreen implements Screen {
         button.setColor(new Color(0.0f, 0.95f, 0.95f, 1f));
         return button;
     }
-
+    /**
+     * Place buttons on screen
+     */
     private void positionButtons() {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
@@ -87,7 +97,9 @@ public class MainMenuScreen implements Screen {
         playButton.setPosition((w - playButton.getWidth()) / 2f, h / 2f );
         exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f - 120);
     }
-
+    /**
+     * Add listeners for button functionality
+     */
     private void addListeners() {
         Color normalColor = new Color(0.0f, 0.95f, 0.95f, 1f);
         Color clickColor = new Color(0.4f, 1f, 1f, 1f);

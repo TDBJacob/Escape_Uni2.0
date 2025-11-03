@@ -55,11 +55,13 @@ public class SpriteAnimations  {
     /**
      * Cuts the sprite sheet up
      * Stores resulting animations into animations dictionary
-     * @param animInfo dictionary of sprite sheet layout
+     * @param animInfo dictionary of sprite sheet layout:
+     *                 key - Name of animation
+     *                 Value - Array representing row of animation on sprite sheet and index of start and end frames
      * @param animationSpeed number of seconds each animation frame should last
      */
     protected void generateAnimation( HashMap<String, Integer[]> animInfo, float animationSpeed){
-        //animationInfo [0] = Row of animation, [1] = strat frame [2] = end frame
+        //animationInfo [0] = Row of animation, [1] = start frame [2] = end frame
         animationInfo = animInfo;
 
         TextureRegion[][] tmp = TextureRegion.split(sheet,
