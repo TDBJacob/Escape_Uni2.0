@@ -58,7 +58,21 @@ public class Main extends Game{
 
         this.setScreen(new MainMenuScreen(this));
     }
+    public void resetGame() {
+        gameTimer = 300;
+        score = 300;
 
+        foundNegativeEvents = 0;
+        foundPositiveEvents = 0;
+        foundHiddenEvents = 0;
+
+        activeSpritePath = null;
+        activeUniIDPath = null;
+
+        // Return to main menu
+        this.setScreen(new MainMenuScreen(this));
+
+    }
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
