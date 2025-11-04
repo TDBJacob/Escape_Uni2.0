@@ -31,7 +31,6 @@ public class CharacterSelectScreen implements Screen {
         this.game = game;
 
         stage = new Stage(game.viewport, game.batch);
-        Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
         table.setFillParent(true);
@@ -83,6 +82,7 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void show() {
 
+        Gdx.input.setInputProcessor(stage);
     }
 
     /**
@@ -140,8 +140,6 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void dispose() {
 
-       if (Gdx.input.getInputProcessor() == stage)
-        Gdx.input.setInputProcessor(null);
 
         if (stage != null) {
             stage.dispose();

@@ -27,7 +27,7 @@ public class GameOverScreen implements Screen {
     private Skin skin;
     private final GlyphLayout layout = new GlyphLayout();
 
-    private TextButton playButton;
+    private TextButton mainMenuButton;
     private TextButton exitButton;
 
     private com.badlogic.gdx.InputProcessor previousInputProcessor; // used to restore on hide()
@@ -65,8 +65,10 @@ public class GameOverScreen implements Screen {
      */
     private void setupUI() {
         exitButton = createButton("Exit");
+        mainMenuButton = createButton("Main Menu");
 
         stage.addActor(exitButton);
+        stage.addActor(mainMenuButton);
 
         positionButtons();
         addListeners();
@@ -92,7 +94,8 @@ public class GameOverScreen implements Screen {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f -40);
+        mainMenuButton.setPosition((w - mainMenuButton.getWidth()) / 2f, h / 2f -40);
+        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f - 150);
     }
     /**
      * Add listeners for button functionality
@@ -115,6 +118,22 @@ public class GameOverScreen implements Screen {
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
                 exitButton.setColor(normalColor);
+            }
+        });
+        mainMenuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                mainMenuButton.setColor(clickColor);
+                dispose();
+                game.resetGame();
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                mainMenuButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                mainMenuButton.setColor(normalColor);
             }
         });
     }

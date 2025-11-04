@@ -28,6 +28,7 @@ public class WinScreen implements Screen {
     private final GlyphLayout layout = new GlyphLayout();
 
     private TextButton exitButton;
+    private TextButton mainMenuButton;
 
     private com.badlogic.gdx.InputProcessor previousInputProcessor; // used to restore on hide()
 
@@ -60,8 +61,10 @@ public class WinScreen implements Screen {
 
     private void setupUI() {
         exitButton = createButton("Exit");
+        mainMenuButton = createButton("Main Menu");
 
         stage.addActor(exitButton);
+        stage.addActor(mainMenuButton);
 
         positionButtons();
         addListeners();
@@ -81,7 +84,8 @@ public class WinScreen implements Screen {
         float w = stage.getViewport().getWorldWidth();
         float h = stage.getViewport().getWorldHeight();
 
-        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f -100);
+        mainMenuButton.setPosition((w - mainMenuButton.getWidth()) / 2f, h / 2f -60);
+        exitButton.setPosition((w - exitButton.getWidth()) / 2f, h / 2f -170);
     }
 
     private void addListeners() {
@@ -102,6 +106,22 @@ public class WinScreen implements Screen {
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
                 exitButton.setColor(normalColor);
+            }
+        });
+        mainMenuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                mainMenuButton.setColor(clickColor);
+                dispose();
+                game.resetGame();
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                mainMenuButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                mainMenuButton.setColor(normalColor);
             }
         });
     }
@@ -135,7 +155,7 @@ public class WinScreen implements Screen {
             game.menuFont.setColor(Color.WHITE);
 
             layout.setText(game.menuFont, "Score: "+ (int)game.score);
-            game.menuFont.draw(game.batch, ("Score: "+ (int)game.score), (w - layout.width) / 2f, h * 0.6f);
+            game.menuFont.draw(game.batch, ("Score: "+ (int)game.score), (w - layout.width) / 2f, h * 0.7f);
 
         }
 

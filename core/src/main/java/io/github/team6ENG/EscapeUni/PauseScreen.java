@@ -1,6 +1,5 @@
 package io.github.team6ENG.EscapeUni;
 
-import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /**
  * screen when game is paused, contains volume settings
@@ -28,6 +26,7 @@ public class PauseScreen implements Screen {
     private final Slider musicSlider;
     private final Slider volumeSlider;
     private final TextButton continueButton;
+    private final TextButton mainMenuButton;
 
     /**
      * initialise pause screen
@@ -61,6 +60,7 @@ public class PauseScreen implements Screen {
         volumeSlider.setValue(game.gameVolume);
 
         continueButton = createButton("Continue");
+        mainMenuButton = createButton("Main Menu");
 
         Table table = new Table();
         table.setFillParent(true);
@@ -72,12 +72,13 @@ public class PauseScreen implements Screen {
         table.add(musicSlider).width(300).padBottom(40f).row();
         table.add(volumeLabel).padBottom(10f).row();
         table.add(volumeSlider).width(300).padBottom(40f).row();
-        table.add(continueButton).width(250).height(90).padBottom(20f).row();
+        table.add(continueButton).width(300).height(60).padBottom(20f).row();
+        table.add(mainMenuButton).width(300).height(60).padBottom(20f).row();
 
         addListeners();
     }
 
-    private TextButton  createButton(String text) {
+    private TextButton createButton(String text) {
         TextButton button = new TextButton(text, skin);
         button.getLabel().setFontScale(1.3f);
         button.setColor(new Color(0.0f, 0.95f, 0.95f, 1f)); // turquoise color
@@ -85,6 +86,8 @@ public class PauseScreen implements Screen {
     }
 
     private void addListeners() {
+        Color normalColor = new Color(0.0f, 0.95f, 0.95f, 1f);
+        Color clickColor = new Color(0.4f, 1f, 1f, 1f);
         // Continue button returns to same paused game
         continueButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
@@ -93,6 +96,29 @@ public class PauseScreen implements Screen {
                 playScreen.resume();
                 game.setScreen(playScreen);
                 dispose();
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                continueButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                continueButton.setColor(normalColor);
+            }
+        });
+        // Main menu button resets the game
+        mainMenuButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {;
+                dispose();
+                game.resetGame();
+            }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                mainMenuButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                mainMenuButton.setColor(normalColor);
             }
         });
         musicSlider.addListener(new ChangeListener() {
