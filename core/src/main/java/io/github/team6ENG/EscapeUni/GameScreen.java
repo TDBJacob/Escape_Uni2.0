@@ -693,6 +693,7 @@ public class GameScreen implements Screen {
     public void gameOver(){
         gameoverTrigger = true;
         audioManager.stopMusic();
+        audioManager.stopFootsteps();
         Gdx.app.postRunnable(() -> game.setScreen(
             new GameOverScreen(game, "Sorry you missed the bus, better luck next time")
         ));
