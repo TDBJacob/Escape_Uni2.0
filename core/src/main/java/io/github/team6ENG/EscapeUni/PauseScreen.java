@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /**
@@ -38,7 +39,7 @@ public class PauseScreen implements Screen {
         this.game = game;
         this.playScreen = playScreen;
         this.audioManager = audioManager;
-        this.stage = new Stage(new ScreenViewport());
+        this.stage = new Stage(new FitViewport(960, 540));
         this.skin = game.buttonSkin;
 
         audioManager.pauseMusic();
@@ -121,6 +122,7 @@ public class PauseScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+
         stage.getViewport().update(width, height, true);
     }
 
