@@ -58,6 +58,10 @@ public class Main extends Game{
 
         this.setScreen(new MainMenuScreen(this));
     }
+
+    /**
+     * Reset game and return to the main menu
+     */
     public void resetGame() {
         gameTimer = 300;
         score = 300;
