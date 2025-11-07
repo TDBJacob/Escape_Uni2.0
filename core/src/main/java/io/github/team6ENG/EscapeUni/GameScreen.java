@@ -37,7 +37,6 @@ public class GameScreen implements Screen {
 
     private boolean isPaused = false;
     private boolean isEPressed = false;
-    private boolean exitConfirm = false;
     OrthogonalTiledMapRenderer mapRenderer;
     private TiledMap map;
     private Image mapImg;
@@ -568,13 +567,7 @@ public class GameScreen implements Screen {
      */
     private void handleInput(float delta) {
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-               if (!exitConfirm) {
-                    exitConfirm = true;
-                } else {
-                    Gdx.app.exit();
-                }
-        }
+
         if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             isEPressed = true;
         }
@@ -662,9 +655,6 @@ public class GameScreen implements Screen {
             smallFont.draw(game.batch, "PAUSED", (float) worldWidth / 2, worldHeight - 100);
         }
 
-        if (exitConfirm) {
-            drawText(smallFont, "Press ESC again to quit", Color.RED, 20, 150);
-        }
 
         buildingManager.renderUI(game.batch, smallFont, bigFont, worldWidth, worldHeight);
         game.batch.end();
