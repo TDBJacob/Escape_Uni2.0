@@ -73,7 +73,7 @@ public class Player extends SpriteAnimations{
      * @param delta time in seconds since last frame
      */
     public void handleInput(float delta, float speedModifier) {
-        float actualSpeed = speed * speedModifier* 60f * delta;
+        float actualSpeed = speed * speedModifier* 300f * delta;
         if(inWater){actualSpeed /=2;}
         TiledMapTileLayer.Cell cell;
         int x = (int)(sprite.getX()+(sprite.getWidth()/2))/tileDimensions;

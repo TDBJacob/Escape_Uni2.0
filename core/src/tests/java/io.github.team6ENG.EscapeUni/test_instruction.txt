@@ -1,0 +1,2 @@
+This directory will contain tests for all the requirements of the game.
+Every time anything new is added to the game, a matching unit test with the naming convention ObjectTest should be added.
