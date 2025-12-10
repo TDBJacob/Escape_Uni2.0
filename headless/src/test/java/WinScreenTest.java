@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.team9.escapefromuni.Main;
 import io.github.team9.escapefromuni.WinScreen;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,44 +22,25 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class WinScreenTest {
 
     private static HeadlessApplication application;
 
-    @Mock
-    private Main mockGame;
-
-    @Mock
-    private SpriteBatch mockBatch;
-
-    @Mock
-    private BitmapFont mockFont;
-
-    @Mock
-    private FitViewport mockViewport;
-
-    @Mock
-    private Skin mockSkin;
-
-    @Mock
-    private Input mockInput;
-
-    @Mock
-    private GL20 mockGL20;
-
-    @Mock
-    private Graphics mockGraphics;
-
-    @Mock
-    private BitmapFont.BitmapFontData mockFontData;
+    @Mock private Main mockGame;
+    @Mock private SpriteBatch mockBatch;
+    @Mock private BitmapFont mockFont;
+    @Mock private FitViewport mockViewport;
+    @Mock private Skin mockSkin;
+    @Mock private Input mockInput;
+    @Mock private GL20 mockGL20;
+    @Mock private Graphics mockGraphics;
+    @Mock private BitmapFont.BitmapFontData mockFontData;
 
     private WinScreen winScreen;
     private AutoCloseable closeable;
 
     @BeforeAll
     public static void setUpApplication() {
-        // Initialize headless application once for all tests
         HeadlessApplicationConfiguration config = new HeadlessApplicationConfiguration();
         config.updatesPerSecond = -1;
 
@@ -109,6 +91,13 @@ public class WinScreenTest {
 
         // Create WinScreen instance
         winScreen = new WinScreen(mockGame);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        if (closeable != null) {
+            closeable.close();
+        }
     }
 
     @Test
