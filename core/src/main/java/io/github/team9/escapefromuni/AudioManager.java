@@ -24,15 +24,22 @@ public class AudioManager {
     public AudioManager(final Main game){
         this.game = game;
 
-        honk = Gdx.audio.newSound(Gdx.files.internal("soundEffects/honk.mp3"));
-        torchClick = Gdx.audio.newSound(Gdx.files.internal("soundEffects/click.mp3"));
-        footSteps = Gdx.audio.newSound(Gdx.files.internal("soundEffects/footsteps.mp3"));
-        noAccess = Gdx.audio.newSound(Gdx.files.internal("soundEffects/wrong.mp3"));
-        collect = Gdx.audio.newSound(Gdx.files.internal("soundEffects/tap.mp3"));
-        music = Gdx.audio.newMusic(Gdx.files.internal("soundEffects/music.mp3"));
+        honk = createSound("soundEffects/honk.mp3");
+        torchClick = createSound("soundEffects/click.mp3");
+        footSteps = createSound("soundEffects/footsteps.mp3");
+        noAccess = createSound("soundEffects/wrong.mp3");
+        collect = createSound("soundEffects/tap.mp3");
+        music = createMusic("soundEffects/music.mp3");
         playMusic();
     }
 
+    public Music createMusic(String filePath) {
+        return Gdx.audio.newMusic(Gdx.files.internal(filePath));
+    }
+
+    public Sound createSound(String filePath) {
+        return Gdx.audio.newSound(Gdx.files.internal(filePath));
+    }
 
     public void playHonk(){
         honk.play(game.gameVolume);

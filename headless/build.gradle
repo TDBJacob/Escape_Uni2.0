@@ -13,13 +13,18 @@ if (JavaVersion.current().isJava9Compatible()) {
  * CHANGED: for the asset tests, we need to add assets as a source
  * directory during testing, similarly to the lwjgl3 project.
  */
-sourceSets.test.resources.srcDirs += [ rootProject.file('assets').path ]
+//sourceSets {
+//  test {
+//    resources.srcDirs += [ "${rootProject.projectDir}/assets" ]
+//  }
+//}
 
 mainClassName = 'uk.ac.york.cs.eng1.gemo.headless.HeadlessLauncher'
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-headless'
 
 dependencies {
+  implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':core')
@@ -28,6 +33,7 @@ dependencies {
   testImplementation platform('org.junit:junit-bom:5.10.0')
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.mockito:mockito-core:5.11.0'
+  testImplementation 'com.badlogicgames.gdx:gdx-backend-headless:1.12.0'
 }
 
 jar {
