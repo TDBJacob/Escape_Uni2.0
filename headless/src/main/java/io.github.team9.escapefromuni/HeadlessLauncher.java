@@ -1,9 +1,8 @@
-package com.badlogic.escapefromuni.headless;
+package io.github.team9.escapefromuni;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.backends.headless.HeadlessApplication;
 import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-import com.badlogic.escapefromuni.Main;
 
 /** Launches the headless application. Can be converted into a utilities project or a server application. */
 public class HeadlessLauncher {
@@ -11,7 +10,7 @@ public class HeadlessLauncher {
         createApplication();
     }
 
-    private static Application createApplication() {
+    public static Application createApplication() {
         // Note: you can use a custom ApplicationListener implementation for the headless project instead of Main.
         return new HeadlessApplication(new Main(), getDefaultConfiguration());
     }
