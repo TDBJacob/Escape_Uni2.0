@@ -21,7 +21,7 @@ public class CharacterSelectScreen implements Screen {
 
 
     private final Main game;
-    private Stage stage;
+    public Stage stage; // potentially make private again and refactor tests
 
     /**
      * Initialises scene
@@ -119,7 +119,6 @@ public class CharacterSelectScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
-
     }
 
     @Override
