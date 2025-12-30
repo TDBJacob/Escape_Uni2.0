@@ -36,8 +36,8 @@ public class Collectible {
     public boolean checkInRange(float playerX, float playerY){
 
         if(!playerHas) {
-            float dx = x -8 -playerX;
-            float dy = y -16 - playerY ;
+            float dx = x -playerX;
+            float dy = y - playerY ;
             float distance = (float) Math.sqrt((dx * dx) + (dy * dy));
             return distance < 30f;
 

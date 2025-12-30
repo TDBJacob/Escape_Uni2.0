@@ -72,6 +72,12 @@ public class GameScreen implements Screen {
 
     public AudioManager audioManager;
 
+    public final HashMap<String, Trap> traps = new HashMap<String, Trap>();
+    private float coordPrintTimer = 0f;
+    private boolean isTrappedPopup = false;
+
+
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -94,6 +100,8 @@ public class GameScreen implements Screen {
         initialiseItems();
 
         initialiseBus();
+
+        intialiseTrap();
 
         buildingManager = new BuildingManager(game, this, player, audioManager);
         stateTime = 0f;
@@ -191,6 +199,57 @@ public class GameScreen implements Screen {
 
 
     }
+
+    private void intialiseTrap() {
+        Trap t1 = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), 373f, 1489f, true, "GameScreen", audioManager);
+        // require player center to be very close to trap center to activate
+        t1.setActivationRadius(4f);
+        traps.put("trap1", t1);
+        // add a few random traps (preserve trap1)
+        placeRandomTraps(5);
+    }
+
+    // Place a small number of traps randomly on free tiles (does not overwrite trap1)
+    private void placeRandomTraps(int count) {
+        if (collisionLayer == null) return;
+        Random rnd = new Random();
+        int placed = 0;
+        int attempts = 0;
+        int maxAttempts = count * 50;
+        int mapW = collisionLayer.getWidth();
+        int mapH = collisionLayer.getHeight();
+        int tileW = collisionLayer.getTileWidth();
+        int tileH = collisionLayer.getTileHeight();
+
+        while (placed < count && attempts < maxAttempts) {
+            attempts++;
+            int tx = rnd.nextInt(mapW);
+            int ty = rnd.nextInt(mapH);
+            // skip wall tiles
+            if (collisionLayer.getCell(tx, ty) != null) continue;
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            // avoid player spawn
+            float playerCenterX = player.sprite.getX() + player.sprite.getWidth()/2f;
+            float playerCenterY = player.sprite.getY() + player.sprite.getHeight()/2f;
+            float dx = worldX - playerCenterX;
+            float dy = worldY - playerCenterY;
+            if (Math.sqrt(dx*dx + dy*dy) < 80f) continue; // too close to player
+            // avoid overlap with existing traps
+            boolean overlap = false;
+            for (String k : traps.keySet()) {
+                Trap ex = traps.get(k);
+                float ddx = ex.x - worldX;
+                float ddy = ex.y - worldY;
+                if (Math.sqrt(ddx*ddx + ddy*ddy) < 20f) { overlap = true; break; }
+            }
+            if (overlap) continue;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen", audioManager);
+            t.setActivationRadius(4f);
+            traps.put("trap_rand_"+placed, t);
+            placed++;
+        }
+    }
     private void initialiseBus() {
         busTexture = new Texture(Gdx.files.internal("images/bus.png"));
         busX = 1100;
@@ -207,6 +266,57 @@ public class GameScreen implements Screen {
      */
     private void update(float delta) {
 
+        float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2f;
+        float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
+
+
+
+        // Then, inside update(float delta) after computing playerCenterX/playerCenterY:
+        coordPrintTimer += delta;
+        if (coordPrintTimer >= 10f) {
+            coordPrintTimer -= 10f; // keep any leftover time
+            //System.out.println(String.format("Player center: X=%.2f Y=%.2f", playerCenterX, playerCenterY));
+        }
+
+        // Check if player stepped on trap
+        // default to no slow and no popup
+        playerSpeedModifier = 1f;
+        boolean trapped = false;
+        for(String key: traps.keySet()){
+            Trap trap = traps.get(key);
+            // check using player center so player must be standing on the trap
+            if(trap.isVisible && trap.checkInRange(playerCenterX, playerCenterY)){
+                // debug log: show distance and coordinates
+                float dxT = playerCenterX - trap.x;
+                float dyT = playerCenterY - trap.y;
+                float dist = (float)Math.sqrt(dxT*dxT + dyT*dyT);
+                //Gdx.app.log("Trap", "Activating '"+key+"' at ("+trap.x+","+trap.y+") — playerCenter=("+playerCenterX+","+playerCenterY+") dist="+dist);
+                trap.activateTrap();
+            }
+            trap.update(delta);
+            if (trap.isActive()) {
+                playerSpeedModifier = trap.getSlowMultiplier();
+                //Gdx.app.log("Speed", "The Player speed modifier is "+playerSpeedModifier);
+                trapped = true;
+            }
+        }
+        // show popup if trapped
+        isTrappedPopup = trapped;
+
+        // Check for escape input (F key)
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+            for(String key: traps.keySet()){
+                if(traps.get(key).checkEscapeInput("F")){
+                    Gdx.app.log("Speed", "The speed modifier before deactivating trap is "+playerSpeedModifier);
+                    traps.get(key).deactivateTrap();
+                    // restore player speed and clear popup immediately
+                    playerSpeedModifier = 1f;
+                    isTrappedPopup = false;
+                    Gdx.app.log("Speed", "The speed modifier after deactivating trap is "+playerSpeedModifier);
+                    break; // only handle the first active trap
+                }
+            }
+        }
         // bus logic
         if (items.get("phone").playerHas && !playerOnBus) {
             player.hasEnteredLangwith = true;
@@ -510,6 +620,17 @@ public class GameScreen implements Screen {
         }
         game.batch.setColor(Color.WHITE);
 
+        // Draw traps
+        for(String key: traps.keySet()){
+            Trap trap = traps.get(key);
+            if(trap.isVisible){
+                // trap.x/trap.y are trap center coordinates; draw image centered
+                float drawX = trap.x - (trap.img.getWidth() * trap.img.getScaleX()) / 2f;
+                float drawY = trap.y - (trap.img.getHeight() * trap.img.getScaleY()) / 2f;
+                trap.img.setPosition(drawX, drawY);
+                trap.img.draw(game.batch, 1);
+            }
+        }
         // Draw uncollected items in game
         for(String key: items.keySet()){
             Collectible item = items.get(key);
@@ -622,6 +743,15 @@ public class GameScreen implements Screen {
 
         }else {
             drawText(bigFont, instructions, Color.BLACK, textX, worldHeight * 0.75f);
+        }
+
+        // If trapped show the escape prompt (override other instructions)
+        if (isTrappedPopup) {
+            String trapMsg = "Press 'F' to escape the trap";
+            GlyphLayout trapLayout = new GlyphLayout(game.menuFont, trapMsg);
+            float trapX = (worldWidth - trapLayout.width) / 2;
+            if (isDark) drawText(bigFont, trapMsg, Color.WHITE, trapX, worldHeight * 0.7f);
+            else drawText(bigFont, trapMsg, Color.BLACK, trapX, worldHeight * 0.7f);
         }
 
         float y = worldHeight - 20f;
