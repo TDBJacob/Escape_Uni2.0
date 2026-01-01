@@ -12,6 +12,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 
@@ -73,8 +74,13 @@ public class GameScreen implements Screen {
     public AudioManager audioManager;
 
     public final HashMap<String, Trap> traps = new HashMap<String, Trap>();
+    private boolean negativeEventCounted = false;
     private float coordPrintTimer = 0f;
     private boolean isTrappedPopup = false;
+
+
+    private PositiveEventGuide positiveGuide;
+    private boolean guideActive = false;
 
 
 
@@ -104,6 +110,7 @@ public class GameScreen implements Screen {
         intialiseTrap();
 
         buildingManager = new BuildingManager(game, this, player, audioManager);
+        positiveGuide = new PositiveEventGuide(game, new Vector2(375, 480), new Vector2(1103, 1240), 50f, game.menuFont, collisionLayer, mapWallsId);
         stateTime = 0f;
     }
 
@@ -278,6 +285,20 @@ public class GameScreen implements Screen {
             //System.out.println(String.format("Player center: X=%.2f Y=%.2f", playerCenterX, playerCenterY));
         }
 
+        // Toggle guide with G key
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            guideActive = !guideActive;
+            if (guideActive) {
+                positiveGuide.start();
+            } else {
+                positiveGuide.stop();
+            }
+        }
+
+        if (positiveGuide != null && guideActive) {
+            positiveGuide.update(playerCenterX, playerCenterY);
+        }
+
         // Check if player stepped on trap
         // default to no slow and no popup
         playerSpeedModifier = 1f;
@@ -290,7 +311,6 @@ public class GameScreen implements Screen {
                 float dxT = playerCenterX - trap.x;
                 float dyT = playerCenterY - trap.y;
                 float dist = (float)Math.sqrt(dxT*dxT + dyT*dyT);
-                //Gdx.app.log("Trap", "Activating '"+key+"' at ("+trap.x+","+trap.y+") — playerCenter=("+playerCenterX+","+playerCenterY+") dist="+dist);
                 trap.activateTrap();
             }
             trap.update(delta);
@@ -298,6 +318,11 @@ public class GameScreen implements Screen {
                 playerSpeedModifier = trap.getSlowMultiplier();
                 //Gdx.app.log("Speed", "The Player speed modifier is "+playerSpeedModifier);
                 trapped = true;
+                // count this trap only once for negative event
+                if (!negativeEventCounted) {
+                    negativeEventCounted = true;
+                    game.foundNegativeEvents += 1;
+                }
             }
         }
         // show popup if trapped
@@ -307,13 +332,10 @@ public class GameScreen implements Screen {
         if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
             for(String key: traps.keySet()){
                 if(traps.get(key).checkEscapeInput("F")){
-                    Gdx.app.log("Speed", "The speed modifier before deactivating trap is "+playerSpeedModifier);
                     traps.get(key).deactivateTrap();
                     // restore player speed and clear popup immediately
                     playerSpeedModifier = 1f;
                     isTrappedPopup = false;
-                    Gdx.app.log("Speed", "The speed modifier after deactivating trap is "+playerSpeedModifier);
-                    break; // only handle the first active trap
                 }
             }
         }
@@ -606,6 +628,11 @@ public class GameScreen implements Screen {
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
+
+        if (positiveGuide != null && guideActive && positiveGuide.isActive()) {
+            positiveGuide.render(game.batch, camera, player.sprite.getX() + player.sprite.getWidth() / 2f, player.sprite.getY() + player.sprite.getHeight() / 2f);
+        }
+
         //Draw yellow baby geese
         game.batch.setColor(Color.YELLOW);
         Goose trail = goose;
@@ -879,6 +906,10 @@ public class GameScreen implements Screen {
 
         if (buildingManager != null) {
             buildingManager.dispose();
+        }
+
+        if (positiveGuide != null) {
+            positiveGuide.dispose();
         }
 
         if (busTexture != null) busTexture.dispose();
