@@ -17,7 +17,7 @@ public class Goose extends SpriteAnimations {
     public boolean hasStolenTorch = false;
     public TextureRegion currentGooseFrame;
     private float speed = 0.75f;
-    private int idleDistance = 20;
+    public int idleDistance = 20;
     public boolean isFlying;
     private TiledMapTileLayer.Cell cell;
     public Goose baby = null;

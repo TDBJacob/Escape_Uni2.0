@@ -91,7 +91,7 @@ public class BuildingManager {
     /**
      * Checks if the player is near the Ron Cooke building trigger area.
      */
-    private void checkBuildingTrigger() {
+    public void checkBuildingTrigger() {
         Rectangle playerRect = new Rectangle(
                 player.sprite.getX(),
                 player.sprite.getY(),
@@ -114,34 +114,43 @@ public class BuildingManager {
 
     }
 
+    protected void setRonCookeScreen() {
+        game.setScreen(new RonCookeScreen(game, this, gameScreen));
+    }
+
     /**
      * Enters the Ron Cooke building.
      * Switches to an indoor view.
      */
-    private void enterRonCooke() {
+    public void enterRonCooke() {
         inRonCooke = true;
         gameScreen.audioManager.stopFootsteps();
-        game.setScreen(new RonCookeScreen(game, this, gameScreen));
+        setRonCookeScreen();
         gameScreen.isDark = true;
         gameScreen.hasTorch = true;
         gameScreen.lighting.isVisible("playerNoTorch", true);
         gameScreen.lighting.isVisible("gooseNoTorch", true);
 
     }
+
+    protected void setLangwithScreen() {
+        game.setScreen(new LangwithScreen(game, this, gameScreen));
+    }
+
     /**
      * Enters the Langwith College.
      * Switches to an indoor view.
      */
-    private void enterLangwith() {
+    public void enterLangwith() {
         inLangwith = true;
         gameScreen.audioManager.stopFootsteps();
-        game.setScreen(new LangwithScreen(game, this, gameScreen));
+        setLangwithScreen();
     }
 
     /**
      * Exits the Ron Cooke building and returns to the main world.
      */
-    private void exitBuilding() {
+    public void exitBuilding() {
         inRonCooke = false;
         inLangwith = false;
         game.setScreen(gameScreen);
@@ -213,6 +222,14 @@ public class BuildingManager {
      */
     public void dispose() {
         // Nothing to dispose yet — reserved for future textures/maps
+    }
+
+    public boolean getShowEnterPrompt() {
+        return showEnterPrompt;
+    }
+
+    public String getCurrentBuilding() {
+        return currentBuilding;
     }
 
     /**

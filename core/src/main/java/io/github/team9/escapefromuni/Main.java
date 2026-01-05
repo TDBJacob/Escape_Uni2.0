@@ -35,6 +35,8 @@ public class Main extends Game{
     public int foundNegativeEvents = 0;
     public int foundPositiveEvents = 0;
     public int foundHiddenEvents = 0;
+
+    public boolean atePizza;
     /**
      * Initialise global game variables
      */
@@ -55,6 +57,8 @@ public class Main extends Game{
         gameFont.setColor(Color.valueOf("4287f5FF"));
 
         buttonSkin = new Skin(Gdx.files.internal("skins/uiskin.json"));
+
+        atePizza = false;
 
         this.setScreen(new MainMenuScreen(this));
     }
