@@ -54,6 +54,9 @@ public class GameScreen implements Screen {
     float stateTime;
     private Rectangle stealTorchTrigger;
 
+    // Decides the bird projectiles' spawn distance and speed
+    final int birdSpawnDist = 250;
+    final int birdSpeed = 160;
 
     public boolean hasTorch = false;
     private boolean isTorchOn = false;
@@ -616,22 +619,20 @@ public class GameScreen implements Screen {
             int degAngle = random.nextInt(1, 360);
             double randAngle = Math.toRadians((double) degAngle);
 
-            int dist = 250;
-
-            int startX = plrX + (int)(dist * Math.cos(randAngle));
-            int startY = plrY + (int)(dist * Math.sin(randAngle));
+            int startX = plrX + (int)(birdSpawnDist * Math.cos(randAngle));
+            int startY = plrY + (int)(birdSpawnDist * Math.sin(randAngle));
 
             double mag = Math.sqrt(Math.pow(plrX - startX, 2) + Math.pow(plrY - startY, 2));
 
-            double velX = (plrX - startX) / mag;
-            double velY = (plrY - startY) / mag;
+            double velX = birdSpeed * (plrX - startX) / mag;
+            double velY = birdSpeed * (plrY - startY) / mag;
 
             projectiles.add(new Projectile(game, startX, startY, velX, velY, degAngle));
         }
 
         for (int i = projectiles.size() - 1; i >= 0; i--) {
             Projectile proj = projectiles.get(i);
-            proj.update();
+            proj.update(delta);
             if (!proj.hasHit) {
                 if (Intersector.overlaps(proj.projSprite.getBoundingRectangle(), playerHitbox)) {
                     game.score = Math.max(game.score-15,0);

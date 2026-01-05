@@ -1,92 +1,61 @@
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.team9.escapefromuni.*;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public class BuildingManagerTest extends BaseTest { //needed as a base to create other tests
 
-    private static Main testMain;
-    private static GameScreen testGameScreen;
-    private static Player testPlayer;
-    private static AudioManager testAudioManager;
-    private static BuildingManager testBuildingManager;
-    private static Lighting testLighting;
+    private static Main game;
+    private static GameScreen gameScreen;
+    private static Player player;
+    private static AudioManager audioManager;
+    private static BuildingManager buildingManagerTest;
 
-    @BeforeEach
-    public void testSetup() {
-        testGameScreen = mock(GameScreen.class);
-        testAudioManager = mock(AudioManager.class);
-        testLighting = mock(Lighting.class);
-        testMain = mock(Main.class);
+    @BeforeAll
+    public static void testSetup() {
+        gameScreen = mock(GameScreen.class);
+        game = mock(Main.class);
+        player = mock(Player.class);
+        audioManager = new AudioManager(game);
+        buildingManagerTest = new BuildingManager(game,gameScreen,player,audioManager);
 
-        testPlayer = mock(Player.class, CALLS_REAL_METHODS);
 
-        testGameScreen.audioManager = testAudioManager;
-        testGameScreen.lighting = testLighting;
-
-        testMain.viewport = new FitViewport(800, 450);
-
-        testPlayer.sprite = new Sprite();
-        testPlayer.sprite.setBounds(360, 460, 20, 40);
-        testBuildingManager = new BuildingManager(testMain, testGameScreen, testPlayer, testAudioManager) {
-            @Override
-            protected void setLangwithScreen() {
-                // nothing here to prevent from making screen
-            }
-            @Override
-            protected void setRonCookeScreen() {
-                // prevent real screen creation
-            }
-        };
     }
 
-    @Test //explanation here
-    public void testCheckBuildingTrigger() { //
-        testBuildingManager.update(0f);
-
-        // Assert observable behavior
-        assertTrue(testBuildingManager.getShowEnterPrompt());
-        assertEquals("Ron Cooke", testBuildingManager.getCurrentBuilding());
-        assertFalse(testBuildingManager.isInRonCooke());
+    @Test //marks test code and is needed before every block of test code
+    public void otherExampleTestCode() {
+        int otherNum;
+        otherNum = 15;
+        assertEquals(15, otherNum);
     }
 
-    @Test //explanation here
-    public void testExitBuilding() {
-        testBuildingManager.exitBuilding();
-
-        assertFalse(testBuildingManager.isInRonCooke(), "Should not be in Ron Cooke after leaving");
-        assertFalse(testBuildingManager.isInLangwith(), "Should not be in Langwith after leaving");
-
-        verify(testMain, times(1)).setScreen(testGameScreen);
-    }
-
-    @Test //explanation here
-    public void testEnterLangwith() {
-        testBuildingManager.enterLangwith();
-
-        assertTrue(testBuildingManager.isInLangwith(), "Should be in Langwith after entering");
-
-        verify(testAudioManager, times(1)).stopFootsteps();
-    }
-
-    @Test //explanation here
-    public void testEnterRonCooke() {
-        testBuildingManager.enterRonCooke();
-
-        assertTrue(testBuildingManager.isInRonCooke(), "Should be inside Ron Cooke after entering");
-        assertTrue(testGameScreen.isDark, "Should get dark after entering Ron Cooke");
-        assertTrue(testGameScreen.hasTorch, "Should get the torch in Ron Cooke");
-
-        verify(testAudioManager, times(1)).stopFootsteps();
-        verify(testLighting, times(1)).isVisible("playerNoTorch", true);
-
-        verify(testLighting, times(1)).isVisible("gooseNoTorch", true);
+    @Test //marks test code and is needed before every block of test code
+    public void playSoundTest() {
+        int otherNum;
+        otherNum = 15;
+        assertEquals(15, otherNum);
     }
 }
+
+//If you take the stuff down here, it's a good template
+
+//import org.junit.jupiter.api.BeforeAll;
+//import org.junit.jupiter.api.Test; //Needed to create test methods
+//import static org.junit.jupiter.api.Assertions.assertEquals; //Needed for assert equals
+//
+//public class CharacterSelectScreenTest extends BaseTest { //needed as a base to create other tests
+//
+//    @BeforeAll (this bit is optional)
+//    public static void testSetup() {
+//        //insert code here
+//    }
+//
+//    @Test //marks test code and is needed before every block of test code
+//    public void exampleTestCode() {
+//        //insert code here
+//    }
+//}

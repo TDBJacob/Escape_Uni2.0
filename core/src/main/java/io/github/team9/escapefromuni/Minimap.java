@@ -13,6 +13,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+/**
+ * Makes a minimap on the side of the screen
+ */
 public class Minimap {
     public SpriteBatch batch;
     public Texture mapTexture;
@@ -21,8 +24,13 @@ public class Minimap {
     public Texture minimapBorderTexture;
     public Texture playerTexture;
 
-    static final int VIEW_SIZE = 700;
+    // How wide should the minimap's view be
+    final int VIEW_SIZE = 700;
 
+    /**
+     * Loads minimap
+     * @param game the game instance
+     */
     public Minimap(Main game) {
         batch = game.batch;
 
@@ -32,13 +40,19 @@ public class Minimap {
         viewRegion = new TextureRegion(mapTexture, VIEW_SIZE, VIEW_SIZE);
     }
 
+    /**
+     * Run every frame, generates the minimap and works out where to
+     * put the green player icon.
+     */
     public void render(int x,int y) {
         int adjX = x - VIEW_SIZE / 2;
         int adjY = mapTexture.getHeight() - y - VIEW_SIZE / 2;
 
+        // The maximum x and y for the minimap
         int maxX = mapTexture.getWidth() - VIEW_SIZE;
         int maxY = mapTexture.getHeight() - VIEW_SIZE;
 
+        // Clamp so that the minimap doesn't go outside the map
         int srcX = MathUtils.clamp(adjX, 0, maxX);
         int srcY = MathUtils.clamp(adjY, 0, maxY);
 
