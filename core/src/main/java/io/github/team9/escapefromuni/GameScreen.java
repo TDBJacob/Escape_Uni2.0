@@ -7,14 +7,19 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -59,6 +64,14 @@ public class GameScreen implements Screen {
 
     private final float probabilityOfHonk = 1000;
 
+    private Sprite hurtOverlay;
+
+    private static int playerHitboxSizeX = 10;
+    private static int playerHitboxSizeY = 20;
+
+    private int frameLastHit;
+    private int framesElapsed;
+
     public final HashMap<String, Collectible> items = new HashMap<String, Collectible>();
     public int numOfInventoryItems = 0;
 
@@ -71,6 +84,15 @@ public class GameScreen implements Screen {
     public float playerSpeedModifier = 1;
 
     public AudioManager audioManager;
+
+    public Minimap minimap;
+
+    public ArrayList<Achievement> achievements;
+
+    public int projectileTimer;
+    public ArrayList<Projectile> projectiles;
+
+    public Rectangle playerHitbox;
 
     /**
      * Initialise the game elements
@@ -97,6 +119,27 @@ public class GameScreen implements Screen {
 
         buildingManager = new BuildingManager(game, this, player, audioManager);
         stateTime = 0f;
+
+        projectileTimer = 360;
+
+        hurtOverlay = new Sprite(new Texture("images/HurtOverlay.png"), 0,0, 800, 450);
+
+        framesElapsed = 0;
+        frameLastHit = 0;
+
+        minimap = new Minimap(game);
+
+        achievements = new ArrayList<Achievement>();
+        projectiles = new ArrayList<Projectile>();
+
+        playerHitbox = new Rectangle(
+            player.sprite.getX() + (playerHitboxSizeX-player.sprite.getWidth())/2,
+            player.sprite.getY() + (playerHitboxSizeY-player.sprite.getHeight())/2,
+            playerHitboxSizeX,
+            playerHitboxSizeY
+        );
+
+        initialiseAchievements();
     }
 
     /**
@@ -144,6 +187,19 @@ public class GameScreen implements Screen {
 
         stealTorchTrigger = new com.badlogic.gdx.math.Rectangle(510, 560, 50, 50);
 
+    }
+
+    /**
+     * Create achievements here and add them achievements array
+     * They can then be indexed and unlocked at later points
+     */
+    private void initialiseAchievements() {
+        achievements.add(new Achievement("FeedTheDuck", 100,
+            new Texture("achievementImages/FeedTheDuck.png")));
+        achievements.add(new Achievement("Spooky", 100,
+            new Texture("achievementImages/Spooky.png")));
+        achievements.add(new Achievement("EatPizza", 50,
+            new Texture("achievementImages/EatPizza.png")));
     }
 
 
@@ -207,12 +263,19 @@ public class GameScreen implements Screen {
      */
     private void update(float delta) {
 
+        framesElapsed += 1;
+
         // bus logic
         if (items.get("phone").playerHas && !playerOnBus) {
             player.hasEnteredLangwith = true;
             float dx = player.sprite.getX() - busX;
             float dy = player.sprite.getY() - busY;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+            if (game.atePizza == true) {
+                game.atePizza = false;
+                achievements.get(2).unlock(game);
+            }
 
             if (distance < 50f) {
                 playerOnBus = true;
@@ -250,7 +313,7 @@ public class GameScreen implements Screen {
             updateCamera();
 
             game.gameTimer -= delta;
-            game.score -= delta;
+            game.score = Math.max(game.score-delta,0);
             handleInput(delta);
             player.handleInput(delta, playerSpeedModifier);
             float mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
@@ -328,7 +391,8 @@ public class GameScreen implements Screen {
                 items.remove("gooseFood");
                 goose.loadBabyGoose(0);
                 game.foundHiddenEvents += 1;
-                game.score += 100;
+                //game.score += 100;
+                achievements.get(0).unlock(game);
                 hasGooseFood = false;
             }
 
@@ -360,7 +424,6 @@ public class GameScreen implements Screen {
                         lighting.isVisible("playerTorch", false);
                         lighting.isVisible("playerNoTorch", true);
                         audioManager.playHonk();
-
                     }
                     else if(!playerRect.overlaps(stealTorchTrigger) &&playerRect.overlaps(gooseRect) && gooseStolenTorch){
 
@@ -372,7 +435,7 @@ public class GameScreen implements Screen {
 
 
                         if(!goose.isSleeping && !hasTorch){
-                            game.score += 100;
+                            achievements.get(1).unlock(game);
                         }
 
                         hasTorch = true;
@@ -396,7 +459,7 @@ public class GameScreen implements Screen {
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-                audioManager.pauseMusic();
+            audioManager.pauseMusic();
             audioManager.stopFootsteps();
             game.setScreen(new PauseScreen(game, GameScreen.this, audioManager));
         }
@@ -541,16 +604,54 @@ public class GameScreen implements Screen {
         int mapWidth = collisionLayer.getWidth() * collisionLayer.getTileWidth();
         int mapHeight = collisionLayer.getHeight() * collisionLayer.getTileHeight();
 
+        int plrX = (int)player.sprite.getX() + (int)player.sprite.getWidth()/2;
+        int plrY = (int)player.sprite.getY() + (int)player.sprite.getHeight()/2;
+
+        playerHitbox.setPosition((int)player.sprite.getX()+(player.sprite.getWidth()-playerHitboxSizeX)/2,(int)player.sprite.getY()+(player.sprite.getHeight()-playerHitboxSizeY)/2);
+
+        projectileTimer -= 1;
+        if (projectileTimer <= 0) {
+            projectileTimer = random.nextInt(120, 600);
+
+            int degAngle = random.nextInt(1, 360);
+            double randAngle = Math.toRadians((double) degAngle);
+
+            int dist = 250;
+
+            int startX = plrX + (int)(dist * Math.cos(randAngle));
+            int startY = plrY + (int)(dist * Math.sin(randAngle));
+
+            double mag = Math.sqrt(Math.pow(plrX - startX, 2) + Math.pow(plrY - startY, 2));
+
+            double velX = (plrX - startX) / mag;
+            double velY = (plrY - startY) / mag;
+
+            projectiles.add(new Projectile(game, startX, startY, velX, velY, degAngle));
+        }
+
+        for (int i = projectiles.size() - 1; i >= 0; i--) {
+            Projectile proj = projectiles.get(i);
+            proj.update();
+            if (!proj.hasHit) {
+                if (Intersector.overlaps(proj.projSprite.getBoundingRectangle(), playerHitbox)) {
+                    game.score = Math.max(game.score-15,0);
+                    frameLastHit = framesElapsed;
+                    proj.hasHit = true;
+                    game.foundNegativeEvents += 1;
+                }
+            }
+            if (proj.framesAlive > 1200) {
+                projectiles.remove(i);
+            }
+        }
+
         if(isDark) {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
 
-
-
         game.batch.end();
 
         renderUI();
-
 
     }
     Random random = new Random();
@@ -628,7 +729,7 @@ public class GameScreen implements Screen {
         float lineSpacing = 15f;
 
         // Requirements: Events tracker and game timer
-        drawText(smallFont, ("Negative Events: " + game.foundNegativeEvents +"/" + game.totalNegativeEvents), Color.WHITE, 20, y);
+        drawText(smallFont, ("Negative Events: " + game.foundNegativeEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         drawText(smallFont, ("Positive Events: "+ game.foundPositiveEvents +"/"+ game.totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
@@ -655,6 +756,21 @@ public class GameScreen implements Screen {
             smallFont.draw(game.batch, "PAUSED", (float) worldWidth / 2, worldHeight - 100);
         }
 
+        if (!isDark) { // disable minimap in dark
+            float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2f;
+            float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
+            minimap.render((int) playerCenterX, (int) playerCenterY);
+        }
+
+        for (Achievement ach : achievements) {
+            ach.render(game);
+        }
+
+        if (frameLastHit > 0 && framesElapsed < frameLastHit + 30) {
+            hurtOverlay.setAlpha(1f - (float)(framesElapsed - frameLastHit)/(30));
+            hurtOverlay.draw(game.batch);
+        }
+        //hurtOverlay.draw(game.batch);
 
         buildingManager.renderUI(game.batch, smallFont, bigFont, worldWidth, worldHeight);
         game.batch.end();

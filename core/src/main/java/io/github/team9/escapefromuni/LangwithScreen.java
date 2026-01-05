@@ -82,6 +82,7 @@ public class LangwithScreen implements Screen {
                         gameScreen.playerSpeedModifier = 2;
                         gameScreen.items.get("pizza").isVisible = false;
                         game.foundPositiveEvents += 1;
+                        game.atePizza = true;
                     }
                     else {
 
