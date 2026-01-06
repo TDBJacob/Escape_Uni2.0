@@ -208,55 +208,27 @@ public class GameScreen implements Screen {
     }
 
     private void intialiseTrap() {
-        Trap t1 = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), 373f, 1489f, true, "GameScreen", audioManager);
-        // require player center to be very close to trap center to activate
-        t1.setActivationRadius(4f);
-        traps.put("trap1", t1);
-        // add a few random traps (preserve trap1)
-        placeRandomTraps(5);
-    }
-
-    // Place a small number of traps randomly on free tiles (does not overwrite trap1)
-    private void placeRandomTraps(int count) {
-        if (collisionLayer == null) return;
-        Random rnd = new Random();
-        int placed = 0;
-        int attempts = 0;
-        int maxAttempts = count * 50;
-        int mapW = collisionLayer.getWidth();
-        int mapH = collisionLayer.getHeight();
         int tileW = collisionLayer.getTileWidth();
         int tileH = collisionLayer.getTileHeight();
-
-        while (placed < count && attempts < maxAttempts) {
-            attempts++;
-            int tx = rnd.nextInt(mapW);
-            int ty = rnd.nextInt(mapH);
-            // skip wall tiles
+        // Fixed trap positions (tile coordinates)
+        int[][] trapPositions = {
+            {46, 185}, {11, 175}, {23, 160}, {35, 150}, {50, 140},
+            {60, 130}, {70, 120}, {80, 110}, {90, 100}, {100, 90}
+        };
+        for (int i = 0; i < trapPositions.length; i++) {
+            int tx = trapPositions[i][0];
+            int ty = trapPositions[i][1];
+            // skip if wall
             if (collisionLayer.getCell(tx, ty) != null) continue;
             float worldX = tx * tileW + tileW / 2f;
             float worldY = ty * tileH + tileH / 2f;
-            // avoid player spawn
-            float playerCenterX = player.sprite.getX() + player.sprite.getWidth()/2f;
-            float playerCenterY = player.sprite.getY() + player.sprite.getHeight()/2f;
-            float dx = worldX - playerCenterX;
-            float dy = worldY - playerCenterY;
-            if (Math.sqrt(dx*dx + dy*dy) < 80f) continue; // too close to player
-            // avoid overlap with existing traps
-            boolean overlap = false;
-            for (String k : traps.keySet()) {
-                Trap ex = traps.get(k);
-                float ddx = ex.x - worldX;
-                float ddy = ex.y - worldY;
-                if (Math.sqrt(ddx*ddx + ddy*ddy) < 20f) { overlap = true; break; }
-            }
-            if (overlap) continue;
             Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen", audioManager);
             t.setActivationRadius(4f);
-            traps.put("trap_rand_"+placed, t);
-            placed++;
+            traps.put("trap_"+i, t);
         }
     }
+
+
     private void initialiseBus() {
         busTexture = new Texture(Gdx.files.internal("images/bus.png"));
         busX = 1100;
@@ -282,7 +254,6 @@ public class GameScreen implements Screen {
         coordPrintTimer += delta;
         if (coordPrintTimer >= 10f) {
             coordPrintTimer -= 10f; // keep any leftover time
-            //System.out.println(String.format("Player center: X=%.2f Y=%.2f", playerCenterX, playerCenterY));
         }
 
         // Toggle guide with G key

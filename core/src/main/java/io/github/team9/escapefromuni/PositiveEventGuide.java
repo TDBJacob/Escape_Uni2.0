@@ -94,12 +94,15 @@ public class PositiveEventGuide {
         float dist = (float) Math.sqrt((target.x - playerX)*(target.x - playerX) + (target.y - playerY)*(target.y - playerY));
         String label = (stage == 0) ? "Head to RonCooke" : "Return to Langwith";
         String hint = String.format("%s  (%.0fm)", label, dist);
-        // Draw centered near top of screen in world coordinates using camera
-        float screenX = playerX - 130f; // Position next to player
-        float screenY = playerY + 20f;
+        // Draw text under score in UI space
+        float textX = camera.position.x - camera.viewportWidth / 2f + 20f;
+        float textY = camera.position.y + camera.viewportHeight / 2f - 60f;
         font.setColor(Color.YELLOW);
-        font.getData().setScale(0.6f);
-        font.draw(batch, hint, screenX, screenY);
+        font.getData().setScale(0.5f);
+        font.draw(batch, hint, textX, textY);
+        // Arrow next to player (unchanged)
+        float arrowX = playerX - 130f;
+        float arrowY = playerY + 20f;
         // Compute path and get direction to next step
         float dx = target.x - playerX;
         float dy = target.y - playerY;
@@ -124,7 +127,7 @@ public class PositiveEventGuide {
                     index = i;
                 }
             }
-            batch.draw(arrows[index], screenX + 120f, screenY - 10f, 20f, 20f);
+            batch.draw(arrows[index], arrowX + 120f, arrowY - 10f, 20f, 20f);
         } else {
             // Fallback: point to target
             float angleDeg = (float) Math.toDegrees(Math.atan2(dy, dx));
@@ -139,7 +142,7 @@ public class PositiveEventGuide {
                     index = i;
                 }
             }
-            batch.draw(arrows[index], screenX + 120f, screenY - 10f, 20f, 20f);
+            batch.draw(arrows[index], arrowX + 120f, arrowY - 10f, 20f, 20f);
         }
         // restore scale for other UI usage
         font.getData().setScale(0.8f);
