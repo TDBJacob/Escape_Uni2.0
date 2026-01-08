@@ -631,7 +631,7 @@ public class GameScreen implements Screen {
         for(String key: traps.keySet()){
             Trap trap = traps.get(key);
             if(trap.isVisible){
-                // trap.x/trap.y are trap center coordinates; draw image centered
+                // trap.x/trap.y are trap center coordinates; draw trap image
                 float drawX = trap.x - (trap.img.getWidth() * trap.img.getScaleX()) / 2f;
                 float drawY = trap.y - (trap.img.getHeight() * trap.img.getScaleY()) / 2f;
                 trap.img.setPosition(drawX, drawY);
@@ -789,7 +789,7 @@ public class GameScreen implements Screen {
         if(hasTorch) {
             drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 100);
         }
-        drawText(bigFont, "Press 'g' to toggle guide", Color.WHITE, 20, 80);
+        drawText(bigFont, "Press 'g' to toggle guide", Color.WHITE, 20, 80); // Trigger guide
         drawText(bigFont, "Press 'p' to pause", Color.WHITE, 20, 55);
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 30);
 

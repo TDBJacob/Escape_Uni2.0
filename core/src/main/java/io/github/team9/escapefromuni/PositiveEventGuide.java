@@ -2,7 +2,6 @@ package io.github.team9.escapefromuni;
 
 
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -27,10 +26,10 @@ public class PositiveEventGuide {
     private final int tileW, tileH, mapWallsId;
 
     /**
-     * Constructs a new PositiveEventGuide.
+     * constructs a new PositiveEventGuide.
      * @param roncookePos the position of RonCooke building
      * @param langwithPos the position of Langwith building
-     * @param arrivalRadius Radius that checks for player arrival
+     * @param arrivalRadius radius that checks for player arrival
      * @param collisionLayer the tiled map collision layer for pathfinding
      * @param mapWallsId the tile ID for walls in the collision layer
      */
@@ -41,7 +40,7 @@ public class PositiveEventGuide {
         this.arrivalRadius = arrivalRadius;
         this.font = game.menuFont; // reuse the menu font for guide text
         arrows = new Texture[4];
-        // Load textures lazily in render to avoid issues in headless tests
+        // load textures lazily in render to avoid issues in headless tests
         this.collisionLayer = collisionLayer;
         this.mapWallsId = mapWallsId;
         tileW = collisionLayer.getTileWidth();
@@ -50,8 +49,8 @@ public class PositiveEventGuide {
 
 
     /**
-     * Starts the guide if not already completed.
-     * Increments the positive events counter
+     * starts the guide if not already completed.
+     * increments the positive events counter
      */
     public void start() {
         if (!completed) {
@@ -64,14 +63,14 @@ public class PositiveEventGuide {
     }
 
     /**
-     * Stops the guide.
+     * stops the guide.
      */
     public void stop() {
         active = false;
     }
 
     /**
-     * Checks if the guide is currently active
+     * checks if the guide is currently active
      * @return true if active, false otherwise
      */
     public boolean isActive() {
@@ -87,7 +86,7 @@ public class PositiveEventGuide {
     }
 
     /**
-     * Gets the current stage of the guide.
+     * gets the current stage of the guide.
      * @return 0 for RonCooke stage, 1 for Langwith stage
      */
     public int getStage() {
@@ -95,8 +94,8 @@ public class PositiveEventGuide {
     }
 
     /**
-     * Updates the guide's state based on player position.
-     * Advances stages or completes the guide when the player reaches targets.
+     * updates the guide's state based on player position.
+     * advances stages or completes the guide when the player reaches targets.
      * @param playerX the player's x-coordinate
      * @param playerY the player's y-coordinate
      */
@@ -123,9 +122,9 @@ public class PositiveEventGuide {
     }
 
     /**
-     * Renders the guide's directional arrows on the map.
-     * Draws arrows along the path to the current target using A* pathfinding.
-     * @param batch the SpriteBatch to draw with
+     * renders the guide's directional arrows on the map.
+     * draws arrows along the path to the current target using A* pathfinding.
+     * @param batch the SpriteBatch to draw
      * @param camera the camera for rendering
      * @param playerX the player's x-coordinate
      * @param playerY the player's y-coordinate
@@ -197,6 +196,16 @@ public class PositiveEventGuide {
         }
     }
 
+
+    /**
+     * Finds the closest walkable tile to the goal tile.
+     *
+     * @param startX starting tile x
+     * @param startY starting tile y
+     * @param goalX  goal tile x
+     * @param goalY  goal tile y
+     * @return nearest walkable tile to the goal
+     */
     private Vector2 findNearestWalkableTile(int startX, int startY, int goalX, int goalY) {
         if (isWalkable(goalX, goalY)) return new Vector2(goalX, goalY);
         for (int dist = 1; dist < 10; dist++) {
@@ -215,6 +224,13 @@ public class PositiveEventGuide {
         return new Vector2(goalX, goalY);
     }
 
+    /**
+     * Determines whether a tile is walkable.
+     *
+     * @param x tile x-coordinate
+     * @param y tile y-coordinate
+     * @return true if the tile is not a wall
+     */
     private boolean isWalkable(int x, int y) {
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(x, y);
         return cell == null || cell.getTile().getId() != mapWallsId;
@@ -235,6 +251,26 @@ public class PositiveEventGuide {
         }
     }
 
+
+
+    /**
+     * Computes a walkable path between two tiles using the A* search algorithm.
+     * 
+     * The search is performed on a 4-connected grid (up, down, left, right)
+     * defined by the collision layer. Tiles marked as walls are treated as
+     * impassable. The heuristic used is Manhattan distance.
+     * 
+     * If a path to the goal tile exists, the method returns the sequence of tile
+     * coordinates from the start tile to the goal tile (inclusive). If no path
+     * can be found, an empty list is returned.
+     *
+     * @param startX starting tile x-coordinate
+     * @param startY starting tile y-coordinate
+     * @param goalX  goal tile x-coordinate
+     * @param goalY  goal tile y-coordinate
+     * @return a list of tile positions representing the path from start to goal,
+     *         or an empty list if no valid path exists
+     */
     private List<Vector2> findPath(int startX, int startY, int goalX, int goalY) {
         PriorityQueue<Node> open = new PriorityQueue<>((a, b) -> Float.compare(a.f, b.f));
         Set<String> closed = new HashSet<>();
