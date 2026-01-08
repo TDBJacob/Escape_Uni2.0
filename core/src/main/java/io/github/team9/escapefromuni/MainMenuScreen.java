@@ -212,4 +212,9 @@ public class MainMenuScreen implements Screen {
 
         // DO NOT dispose game.menuFont or game.buttonSkin or game.batch here
     }
+
+    // Getters for testing
+    public Stage getStage() { return stage; }
+    public TextButton getPlayButton() { return playButton; }
+    public TextButton getExitButton() { return exitButton; }
 }

@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -16,6 +15,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
 
@@ -96,6 +96,17 @@ public class GameScreen implements Screen {
     public ArrayList<Projectile> projectiles;
 
     public Rectangle playerHitbox;
+    public final HashMap<String, Trap> traps = new HashMap<String, Trap>();
+    private boolean negativeEventCounted = false;
+    private boolean isTrappedPopup = false;
+    private Texture trapTexture;
+
+
+    private PositiveEventGuide positiveGuide;
+    private boolean guideActive = false;
+    private String guideHint = "";
+
+
 
     /**
      * Initialise the game elements
@@ -120,7 +131,10 @@ public class GameScreen implements Screen {
 
         initialiseBus();
 
+        intialiseTrap();
+
         buildingManager = new BuildingManager(game, this, player, audioManager);
+        positiveGuide = new PositiveEventGuide(game, new Vector2(375, 480), new Vector2(1103, 1240), 50f, game.menuFont, collisionLayer, mapWallsId);
         stateTime = 0f;
 
         projectileTimer = 360;
@@ -250,6 +264,30 @@ public class GameScreen implements Screen {
 
 
     }
+
+    /**
+     * Initializes traps on the map at specific coordinates.
+     * Each trap has a activation radius
+     */
+    private void intialiseTrap() {
+        int tileW = collisionLayer.getTileWidth();
+        int tileH = collisionLayer.getTileHeight();
+        trapTexture = new Texture(Gdx.files.internal("Traps/Bear_Trap.png"));
+        
+        for (int i = 0; i < 9; i++) {
+            int tx = 50 + i * 10;
+            int ty = 150 - i * 10;
+            if (collisionLayer.getCell(tx, ty) == null) {
+                float worldX = tx * tileW + tileW / 2f;
+                float worldY = ty * tileH + tileH / 2f;
+                Trap t = new Trap(game, new Image(trapTexture), worldX, worldY, true, "GameScreen");
+                t.setActivationRadius(10f);
+                traps.put("trap_" + (i + 1), t);
+            }
+        }
+    }
+
+
     private void initialiseBus() {
         busTexture = new Texture(Gdx.files.internal("images/bus.png"));
         busX = 1100;
@@ -268,6 +306,78 @@ public class GameScreen implements Screen {
 
         framesElapsed += 1;
 
+        float playerCenterX = player.sprite.getX() + player.sprite.getWidth() / 2f;
+        float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
+
+
+        // Use G to turn on guide
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            guideActive = !guideActive;
+            if (guideActive) {
+                positiveGuide.start();
+            } else {
+                positiveGuide.stop();
+            }
+        }
+
+        // Update positive event guide if active
+        if (positiveGuide != null && guideActive) {
+            positiveGuide.update(playerCenterX, playerCenterY);
+        }
+
+        // Update guide hint for UI display
+        if (positiveGuide != null && guideActive && positiveGuide.isActive()) {
+            Vector2 target = (positiveGuide.getStage() == 0) ? new Vector2(375, 480) : new Vector2(1103, 1240);
+            float dist = (float) Math.sqrt((target.x - playerCenterX)*(target.x - playerCenterX) + (target.y - playerCenterY)*(target.y - playerCenterY));
+            String label = (positiveGuide.getStage() == 0) ? "Follow arrows through the maze to RonCooke" : "Follow arrows back to Langwith";
+            guideHint = String.format("%s  (%.0fm)", label, dist);
+        } else {
+            guideHint = "";
+        }
+
+        // Check if player stepped on trap
+        // default to no slow and no popup
+        playerSpeedModifier = 1f;
+        boolean trapped = false;
+        for(String key: traps.keySet()){
+            Trap trap = traps.get(key);
+            // see if player center is within range
+            boolean inRange = trap.isVisible && trap.checkInRange(playerCenterX, playerCenterY);
+
+            // Trigger ONLY when player enters the trap
+            if (inRange && !trap.playerWasInRange) {
+                trap.activateTrap();
+            }
+
+            // Remember for next frame
+            trap.playerWasInRange = inRange;
+
+            trap.update(delta);
+            
+            if (trap.isActive()) {
+                playerSpeedModifier = trap.getSlowMultiplier();
+                trapped = true;
+                // count this trap only once for negative event
+                if (!negativeEventCounted) {
+                    negativeEventCounted = true;
+                    game.foundNegativeEvents += 1;
+                }
+            }
+        }
+        // show popup if trapped
+        isTrappedPopup = trapped;
+
+        // Check for escape input (F key)
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+            for(String key: traps.keySet()){
+                if(traps.get(key).checkEscapeInput("F")){
+                    traps.get(key).deactivateTrap();
+                    // restore player speed and clear popup immediately
+                    playerSpeedModifier = 1f;
+                    isTrappedPopup = false;
+                }
+            }
+        }
         // bus logic
         if (items.get("phone").playerHas && !playerOnBus) {
             player.hasEnteredLangwith = true;
@@ -562,6 +672,12 @@ public class GameScreen implements Screen {
 
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
+
+        // Render positive event guide arrows if active
+        if (positiveGuide != null && guideActive && positiveGuide.isActive()) {
+            positiveGuide.render(game.batch, camera, player.sprite.getX() + player.sprite.getWidth() / 2f, player.sprite.getY() + player.sprite.getHeight() / 2f);
+        }
+
         //Draw yellow baby geese
         game.batch.setColor(Color.YELLOW);
         Goose trail = goose;
@@ -576,6 +692,17 @@ public class GameScreen implements Screen {
         }
         game.batch.setColor(Color.WHITE);
 
+        // Draw traps
+        for(String key: traps.keySet()){
+            Trap trap = traps.get(key);
+            if(trap.isVisible){
+                // trap.x/trap.y are trap center coordinates; draw trap image
+                float drawX = trap.x - (trap.img.getWidth() * trap.img.getScaleX()) / 2f;
+                float drawY = trap.y - (trap.img.getHeight() * trap.img.getScaleY()) / 2f;
+                trap.img.setPosition(drawX, drawY);
+                trap.img.draw(game.batch, 1);
+            }
+        }
         // Draw uncollected items in game
         for(String key: items.keySet()){
             Collectible item = items.get(key);
@@ -726,6 +853,15 @@ public class GameScreen implements Screen {
             drawText(bigFont, instructions, Color.BLACK, textX, worldHeight * 0.75f);
         }
 
+        // If trapped show the escape prompt
+        if (isTrappedPopup) {
+            String trapMsg = "Press 'F' to escape the trap";
+            GlyphLayout trapLayout = new GlyphLayout(game.menuFont, trapMsg);
+            float trapX = (worldWidth - trapLayout.width) / 2;
+            if (isDark) drawText(bigFont, trapMsg, Color.WHITE, trapX, worldHeight * 0.7f);
+            else drawText(bigFont, trapMsg, Color.BLACK, trapX, worldHeight * 0.7f);
+        }
+
         float y = worldHeight - 20f;
         float lineSpacing = 15f;
 
@@ -736,6 +872,10 @@ public class GameScreen implements Screen {
         y -= lineSpacing;
         drawText(smallFont, ("Hidden Events:   "+ game.foundHiddenEvents+"/"+ game.totalHiddenEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
+        if (!guideHint.isEmpty()) {
+            drawText(smallFont, guideHint, Color.YELLOW, 20, y);
+            y -= lineSpacing;
+        }
         //Display time with 2 digits for seconds
         drawText(bigFont, ((int)game.gameTimer/60 + ":" +((int)game.gameTimer % 60 <10?"0" :"" ) +(int)game.gameTimer % 60), Color.WHITE, worldWidth - 80f, worldHeight-20f);
         layout = new GlyphLayout(game.menuFont, ("Score: " + (int)game.score));
@@ -748,8 +888,9 @@ public class GameScreen implements Screen {
         }
         // Game instructions
         if(hasTorch) {
-            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 80);
+            drawText(bigFont, "Left click to switch on torch", Color.ORANGE, 20, 100);
         }
+        drawText(bigFont, "Press 'g' to toggle guide", Color.WHITE, 20, 80); // Trigger guide
         drawText(bigFont, "Press 'p' to pause", Color.WHITE, 20, 55);
         drawText(bigFont, "Use Arrow Keys or WASD to move", Color.WHITE, 20, 30);
 
@@ -868,7 +1009,13 @@ public class GameScreen implements Screen {
             buildingManager.dispose();
         }
 
+        if (positiveGuide != null) {
+            positiveGuide.dispose();
+        }
+
         if (busTexture != null) busTexture.dispose();
+
+        if (trapTexture != null) trapTexture.dispose();
 
     }
 }
