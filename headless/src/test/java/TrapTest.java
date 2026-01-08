@@ -1,43 +1,44 @@
-package io.github.team9.escapefromuni;
-
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.backends.headless.HeadlessApplication;
-import com.badlogic.gdx.backends.headless.HeadlessApplicationConfiguration;
-import org.junit.jupiter.api.BeforeAll;
+import io.github.team9.escapefromuni.Main;
+import io.github.team9.escapefromuni.Trap;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class TrapTest {
 
-    @BeforeAll
-    public static void init() {
-        if (Gdx.gl == null) {
-            HeadlessApplicationConfiguration hAConfig = new HeadlessApplicationConfiguration();
-            new HeadlessApplication(new ApplicationAdapter() {}, hAConfig);
-            Gdx.gl = mock(GL20.class);
-            Gdx.gl20 = Gdx.gl;
-        }
-    }
+
+/**
+ * Tests the Trap class
+ * 
+ * 
+ * 
+ * 
+ */
+public class TrapTest extends BaseTest{ // Base Test creates headless backend and creates mock graphics
 
     @Test
     public void testConstructor() {
-        // Mock objects
-        Main game = mock(Main.class);
-        Drawable drawable = mock(Drawable.class);
-        Image img = new Image(drawable);
+
+        // Mock all the attributes
+
+        Main game = mock(Main.class); // Mocks Main class, responsible for rendering and game logic
+
+        Drawable drawable = mock(Drawable.class); // Mocks Drawable class to avoid testure or rendering
+
+        Image img = new Image(drawable); // Set image size so trap activation is well defined
+
         img.setSize(16, 16); // Set size for activation radius
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 200, true, "GameScreen", audioManager);
-        assertEquals(100, trap.x, 0.01);
-        assertEquals(200, trap.y, 0.01);
-        assertTrue(trap.isVisible);
-        assertEquals("GameScreen", trap.originScreen);
+
+        // Create a Trap object, at coordinates (100,200)
+        Trap trap = new Trap(game, img, 100, 200, true, "GameScreen"); 
+
+        assertEquals(100, trap.getX(), 0.01); // Checks if trap is at x coordinate 100
+        assertEquals(200, trap.getY(), 0.01); // Checks if trap is at y coordinate
+        assertTrue(trap.getIsVisible()); // Check if trap is visible
+        assertEquals("GameScreen", trap.getOriginScreen()); // Check 
         assertFalse(trap.isActive());
+        assertEquals(8f, trap.getActivationRadius(), 0.01); // Check activation radius calculation
     }
 
     @Test
@@ -46,8 +47,7 @@ public class TrapTest {
         Drawable drawable = mock(Drawable.class);
         Image img = new Image(drawable);
         img.setSize(16, 16);
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen", audioManager);
+        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
         trap.setActivationRadius(10f);
         assertTrue(trap.checkInRange(105, 100)); // Within radius
         assertFalse(trap.checkInRange(120, 100)); // Outside
@@ -59,8 +59,7 @@ public class TrapTest {
         Drawable drawable = mock(Drawable.class);
         Image img = new Image(drawable);
         img.setSize(16, 16);
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen", audioManager);
+        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
         assertFalse(trap.isActive());
         trap.activateTrap();
         assertTrue(trap.isActive());
@@ -75,8 +74,7 @@ public class TrapTest {
         Drawable drawable = mock(Drawable.class);
         Image img = new Image(drawable);
         img.setSize(16, 16);
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen", audioManager);
+        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
         trap.setEscapeKey("F");
         assertFalse(trap.checkEscapeInput("F")); // Not active
         trap.activateTrap();
@@ -91,8 +89,7 @@ public class TrapTest {
         Drawable drawable = mock(Drawable.class);
         Image img = new Image(drawable);
         img.setSize(16, 16);
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen", audioManager);
+        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
         trap.activateTrap();
         trap.update(5f);
         assertEquals(5f, trap.getTrapDuration(), 0.01);
@@ -101,13 +98,18 @@ public class TrapTest {
     }
 
     @Test
-    public void testGetSlowMultiplier() {
+    public void testEscapeRestoresSpeed() {
         Main game = mock(Main.class);
         Drawable drawable = mock(Drawable.class);
         Image img = new Image(drawable);
         img.setSize(16, 16);
-        AudioManager audioManager = mock(AudioManager.class);
-        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen", audioManager);
-        assertEquals(0f, trap.getSlowMultiplier(), 0.01);
+        Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
+        trap.activateTrap();
+        assertEquals(0.5f, trap.getSlowMultiplier(), 0.01); // Speed reduced when active
+        // Simulate escape key press
+        if (trap.checkEscapeInput("F")) {
+            trap.deactivateTrap();
+        }
+        assertEquals(1f, trap.getSlowMultiplier(), 0.01); // Speed restored after escape
     }
 }

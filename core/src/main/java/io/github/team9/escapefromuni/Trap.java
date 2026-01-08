@@ -2,39 +2,34 @@ package io.github.team9.escapefromuni;
 
 
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.math.Rectangle;
 
-/**
- * Represents a trap
- */
+
 public class Trap {
 
     Main game;
     public Image img;
-    public float x, y; // now treated as trap center
+    public float x, y;
     public boolean isVisible;
     public String originScreen;
-    private AudioManager audioManager;
 
-    public boolean isActive = false;
-    private String escapeKey = "F";
-    private float trapDuration = 3f;
-    private final float MAX_TRAP_DURATION = 10f;
-    private float activationRadius = 8f;
+    public boolean isActive = false; // Check if  Trap is active
+    private String escapeKey = "F"; // Escape trap key
+    private float trapDuration = 3f; // Duration since trap was turned on
+    private final float MAX_TRAP_DURATION = 30f; // Maximum time it can stay turned on
+    private float activationRadius = 16f; // Activation Radius
+    public boolean playerWasInRange = false; // Check if Player within range
 
-    public Trap(final Main game, Image img, float x, float y, boolean isVisible, String originScreen, AudioManager audioManager) {
+    public Trap(final Main game, Image img, float x, float y, boolean isVisible, String originScreen) {
         this.game = game;
         this.img = img;
         this.x = x; // center x
         this.y = y; // center y
         this.isVisible = isVisible;
         this.originScreen = originScreen;
-        this.audioManager = audioManager;
         // default activation radius = half the max dimension of the image (so standing on sprite triggers)
         float imgW = img.getWidth() * img.getScaleX();
         float imgH = img.getHeight() * img.getScaleY();
         this.activationRadius = Math.max(imgW, imgH) / 2f;
-
     }
 
     /**
@@ -89,7 +84,6 @@ public class Trap {
      * @param delta time since last frame
      */
     public void update(float delta) {
-        float testSpeed = 0f;
         if (isActive) {
             trapDuration += delta;
             if (trapDuration >= MAX_TRAP_DURATION) {
@@ -112,5 +106,25 @@ public class Trap {
 
     public float getTrapDuration() {
         return trapDuration;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public boolean getIsVisible() {
+        return isVisible;
+    }
+
+    public String getOriginScreen() {
+        return originScreen;
+    }
+
+    public float getActivationRadius() {
+        return activationRadius;
     }
 }

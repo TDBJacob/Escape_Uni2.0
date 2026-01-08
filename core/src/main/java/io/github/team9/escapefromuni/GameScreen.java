@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -75,7 +74,6 @@ public class GameScreen implements Screen {
 
     public final HashMap<String, Trap> traps = new HashMap<String, Trap>();
     private boolean negativeEventCounted = false;
-    private float coordPrintTimer = 0f;
     private boolean isTrappedPopup = false;
 
 
@@ -208,23 +206,107 @@ public class GameScreen implements Screen {
     }
 
     private void intialiseTrap() {
+
         int tileW = collisionLayer.getTileWidth();
         int tileH = collisionLayer.getTileHeight();
-        // Fixed trap positions (tile coordinates)
-        int[][] trapPositions = {
-            {46, 185}, {11, 175}, {23, 160}, {35, 150}, {50, 140},
-            {60, 130}, {70, 120}, {80, 110}, {90, 100}, {100, 90}
-        };
-        for (int i = 0; i < trapPositions.length; i++) {
-            int tx = trapPositions[i][0];
-            int ty = trapPositions[i][1];
-            // skip if wall
-            if (collisionLayer.getCell(tx, ty) != null) continue;
+        
+        // Trap 1
+        int tx = 100;
+        int ty = 90;
+        if (collisionLayer.getCell(tx, ty) == null) {
             float worldX = tx * tileW + tileW / 2f;
             float worldY = ty * tileH + tileH / 2f;
-            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen", audioManager);
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
             t.setActivationRadius(4f);
-            traps.put("trap_"+i, t);
+            traps.put("trap_1", t);
+        }
+        
+        // Trap 2
+        tx = 11;
+        ty = 175;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_2", t);
+        }
+        
+        // Trap 3
+        tx = 23;
+        ty = 160;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_3", t);
+        }
+        
+        // Trap 4
+        tx = 25;
+        ty = 150;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_4", t);
+        }
+        
+        // Trap 5
+        tx = 50;
+        ty = 140;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_5", t);
+        }
+        
+        // Trap 6
+        tx = 60;
+        ty = 130;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_6", t);
+        }
+        
+        // Trap 7
+        tx = 70;
+        ty = 120;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_7", t);
+        }
+        
+        // Trap 8
+        tx = 80;
+        ty = 110;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_8", t);
+        }
+        
+        // Trap 9
+        tx = 90;
+        ty = 100;
+        if (collisionLayer.getCell(tx, ty) == null) {
+            float worldX = tx * tileW + tileW / 2f;
+            float worldY = ty * tileH + tileH / 2f;
+            Trap t = new Trap(game, new Image(new Texture(Gdx.files.internal("Traps/Bear_Trap.png"))), worldX, worldY, true, "GameScreen");
+            t.setActivationRadius(4f);
+            traps.put("trap_9", t);
         }
     }
 
@@ -249,13 +331,6 @@ public class GameScreen implements Screen {
         float playerCenterY = player.sprite.getY() + player.sprite.getHeight() / 2f;
 
 
-
-        // Then, inside update(float delta) after computing playerCenterX/playerCenterY:
-        coordPrintTimer += delta;
-        if (coordPrintTimer >= 10f) {
-            coordPrintTimer -= 10f; // keep any leftover time
-        }
-
         // Toggle guide with G key
         if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             guideActive = !guideActive;
@@ -277,17 +352,20 @@ public class GameScreen implements Screen {
         for(String key: traps.keySet()){
             Trap trap = traps.get(key);
             // check using player center so player must be standing on the trap
-            if(trap.isVisible && trap.checkInRange(playerCenterX, playerCenterY)){
-                // debug log: show distance and coordinates
-                float dxT = playerCenterX - trap.x;
-                float dyT = playerCenterY - trap.y;
-                float dist = (float)Math.sqrt(dxT*dxT + dyT*dyT);
+            boolean inRange = trap.isVisible && trap.checkInRange(playerCenterX, playerCenterY);
+
+            // Trigger ONLY when player enters the trap
+            if (inRange && !trap.playerWasInRange) {
                 trap.activateTrap();
             }
+
+            // Remember for next frame
+            trap.playerWasInRange = inRange;
+
             trap.update(delta);
+            
             if (trap.isActive()) {
                 playerSpeedModifier = trap.getSlowMultiplier();
-                //Gdx.app.log("Speed", "The Player speed modifier is "+playerSpeedModifier);
                 trapped = true;
                 // count this trap only once for negative event
                 if (!negativeEventCounted) {
@@ -743,7 +821,7 @@ public class GameScreen implements Screen {
             drawText(bigFont, instructions, Color.BLACK, textX, worldHeight * 0.75f);
         }
 
-        // If trapped show the escape prompt (override other instructions)
+        // If trapped show the escape prompt
         if (isTrappedPopup) {
             String trapMsg = "Press 'F' to escape the trap";
             GlyphLayout trapLayout = new GlyphLayout(game.menuFont, trapMsg);

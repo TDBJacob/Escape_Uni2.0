@@ -43,7 +43,9 @@ public class RonCookeScreen implements Screen {
         this.font = game.menuFont;
         this.smallFont = game.gameFont;
 
-        initialisePlayer((int) game.viewport.getWorldWidth()/2,(int) game.viewport.getWorldHeight()/2);
+        int x = game.viewport != null ? (int) game.viewport.getWorldWidth() / 2 : 200;
+        int y = game.viewport != null ? (int) game.viewport.getWorldHeight() / 2 : 200;
+        initialisePlayer(x, y);
         initialiseReceptionist();
         stateTime = 0;
         speech.add("Locked yourself out huh?");
@@ -67,7 +69,9 @@ public class RonCookeScreen implements Screen {
     private void initialiseReceptionist(){
         Texture tex = new Texture(Gdx.files.internal("sprites/receptionist.png"));
         receptionist = new Image(tex);
-        receptionist.setPosition((float) (game.viewport.getWorldWidth() * 0.2),  (game.viewport.getWorldHeight() - receptionist.getHeight()) /2.5f);
+        float worldWidth = game.viewport != null ? game.viewport.getWorldWidth() : 400f;
+        float worldHeight = game.viewport != null ? game.viewport.getWorldHeight() : 225f;
+        receptionist.setPosition((float) (worldWidth * 0.2),  (worldHeight - receptionist.getHeight()) / 2.5f);
         receptionist.setScale(5);
     }
 
@@ -220,4 +224,12 @@ public class RonCookeScreen implements Screen {
     @Override public void dispose() {
 
     }
+
+    // Getters for testing
+    public Player getPlayer() { return player; }
+    public Image getReceptionist() { return receptionist; }
+    public float getSpeechTimer() { return speechTimer; }
+    public ArrayList<String> getSpeech() { return speech; }
+    public boolean isEPressed() { return isEPressed; }
+    public boolean isPaused() { return isPaused; }
 }

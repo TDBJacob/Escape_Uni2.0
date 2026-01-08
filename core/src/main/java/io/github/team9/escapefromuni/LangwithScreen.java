@@ -36,7 +36,8 @@ public class LangwithScreen implements Screen {
         this.gameScreen = gameScreen;
         this.font = game.menuFont;
         this.smallFont = game.gameFont;
-        initialisePlayer((int) 60,(int) game.viewport.getWorldHeight()/2);
+        int y = game.viewport != null ? (int) game.viewport.getWorldHeight() / 2 : 200;
+        initialisePlayer(60, y);
         stateTime = 0;
     }
 
@@ -198,4 +199,10 @@ public class LangwithScreen implements Screen {
     }
     @Override public void hide() {}
     @Override public void dispose() {}
+
+    // Getters for testing
+    public Player getPlayer() { return player; }
+    public boolean isEPressed() { return isEPressed; }
+    public boolean isPaused() { return isPaused; }
+    public float getPizzaText() { return pizzaText; }
 }
