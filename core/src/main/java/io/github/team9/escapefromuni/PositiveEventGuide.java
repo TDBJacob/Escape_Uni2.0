@@ -20,6 +20,7 @@ public class PositiveEventGuide {
     private boolean active = false;
     private boolean completed = false;
     private boolean counted = false;
+    private boolean started = false;
     private final BitmapFont font;
     private final Texture[] arrows;
     private final TiledMapTileLayer collisionLayer;
@@ -32,10 +33,7 @@ public class PositiveEventGuide {
         this.arrivalRadius = arrivalRadius;
         this.font = game.menuFont; // reuse the menu font for guide text
         arrows = new Texture[4];
-        arrows[0] = new Texture("Guide/00_0.png"); // right
-        arrows[1] = new Texture("Guide/00_90.png"); // up
-        arrows[2] = new Texture("Guide/00_180.png"); // left
-        arrows[3] = new Texture("Guide/00_270.png"); // down
+        // Load textures lazily in render to avoid issues in headless tests
         this.collisionLayer = collisionLayer;
         this.mapWallsId = mapWallsId;
         tileW = collisionLayer.getTileWidth();
@@ -44,7 +42,13 @@ public class PositiveEventGuide {
 
 
     public void start() {
-        if (!completed) active = true;
+        if (!completed) {
+            active = true;
+            if (!started) {
+                game.foundPositiveEvents++;
+                started = true;
+            }
+        }
     }
 
     public void stop() {
@@ -90,6 +94,13 @@ public class PositiveEventGuide {
      */
     public void render(SpriteBatch batch, Camera camera, float playerX, float playerY) {
         if (!isActive()) return;
+        // Load textures lazily
+        if (arrows[0] == null) {
+            arrows[0] = new Texture("Guide/00_0.png"); // right
+            arrows[1] = new Texture("Guide/00_90.png"); // up
+            arrows[2] = new Texture("Guide/00_180.png"); // left
+            arrows[3] = new Texture("Guide/00_270.png"); // down
+        }
         Vector2 target = (stage == 0) ? roncookePos : langwithPos;
         float dist = (float) Math.sqrt((target.x - playerX)*(target.x - playerX) + (target.y - playerY)*(target.y - playerY));
         String label = (stage == 0) ? "Follow arrows through the maze to RonCooke" : "Follow arrows back to Langwith";
