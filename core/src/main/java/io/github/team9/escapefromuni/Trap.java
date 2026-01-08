@@ -16,7 +16,7 @@ public class Trap {
     private String escapeKey = "F"; // Escape trap key
     private float trapDuration = 3f; // Duration since trap was turned on
     private final float MAX_TRAP_DURATION = 30f; // Maximum time it can stay turned on
-    private float activationRadius = 16f; // Activation Radius
+    private float activationRadius = 100f; // Activation Radius
     public boolean playerWasInRange = false; // Check if Player within range
 
     public Trap(final Main game, Image img, float x, float y, boolean isVisible, String originScreen) {

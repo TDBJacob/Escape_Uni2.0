@@ -92,7 +92,7 @@ public class PositiveEventGuide {
         if (!isActive()) return;
         Vector2 target = (stage == 0) ? roncookePos : langwithPos;
         float dist = (float) Math.sqrt((target.x - playerX)*(target.x - playerX) + (target.y - playerY)*(target.y - playerY));
-        String label = (stage == 0) ? "Head to RonCooke" : "Return to Langwith";
+        String label = (stage == 0) ? "Follow arrows through the maze to RonCooke" : "Follow arrows back to Langwith";
         String hint = String.format("%s  (%.0fm)", label, dist);
         // Draw text under score in UI space
         float textX = camera.position.x - camera.viewportWidth / 2f + 20f;
@@ -100,52 +100,84 @@ public class PositiveEventGuide {
         font.setColor(Color.YELLOW);
         font.getData().setScale(0.5f);
         font.draw(batch, hint, textX, textY);
-        // Arrow next to player (unchanged)
-        float arrowX = playerX - 130f;
-        float arrowY = playerY + 20f;
-        // Compute path and get direction to next step
-        float dx = target.x - playerX;
-        float dy = target.y - playerY;
+        // Compute path
         int pTileX = (int)(playerX / tileW);
         int pTileY = (int)(playerY / tileH);
         int tTileX = (int)(target.x / tileW);
         int tTileY = (int)(target.y / tileH);
-        List<Vector2> path = findPath(pTileX, pTileY, tTileX, tTileY);
+        Vector2 nearest = findNearestWalkableTile(pTileX, pTileY, tTileX, tTileY);
+        List<Vector2> path = findPath(pTileX, pTileY, (int)nearest.x, (int)nearest.y);
         if (path.size() > 1) {
-            Vector2 next = path.get(1);
-            float localDx = next.x * tileW + tileW / 2f - playerX;
-            float localDy = next.y * tileH + tileH / 2f - playerY;
-            float angleDeg = (float) Math.toDegrees(Math.atan2(localDy, localDx));
-            angleDeg = (angleDeg % 360 + 360) % 360; // normalize to 0-360
-            float[] dirs = {0, 90, 180, 270};
-            int index = 0;
-            float minDiff = Math.abs(angleDeg - dirs[0]);
-            for (int i = 1; i < 4; i++) {
-                float diff = Math.abs(angleDeg - dirs[i]);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    index = i;
+            // draw path arrows
+            int maxArrows = 20;
+            for(int i = 0; i < Math.min(path.size() - 1, maxArrows); i++){
+                Vector2 current = path.get(i);
+                Vector2 next = path.get(i+1);
+                float cx = current.x * tileW + tileW / 2f;
+                float cy = current.y * tileH + tileH / 2f;
+                float nx = next.x * tileW + tileW / 2f;
+                float ny = next.y * tileH + tileH / 2f;
+                float dx = nx - cx;
+                float dy = ny - cy;
+                float angleDeg = (float) Math.toDegrees(Math.atan2(dy, dx));
+                angleDeg = (angleDeg % 360 + 360) % 360;
+                int index = 0;
+                float minDiff = Math.abs(angleDeg - 0);
+                float[] dirs = {0, 90, 180, 270};
+                for (int j = 1; j < 4; j++) {
+                    float diff = Math.abs(angleDeg - dirs[j]);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        index = j;
+                    }
                 }
+                batch.draw(arrows[index], cx - 10f, cy - 10f, 20f, 20f);
             }
-            batch.draw(arrows[index], arrowX + 120f, arrowY - 10f, 20f, 20f);
         } else {
-            // Fallback: point to target
+            // Fallback: draw arrow next to player pointing to target
+            float arrowX = playerX - 130f;
+            float arrowY = playerY + 20f;
+            float dx = target.x - playerX;
+            float dy = target.y - playerY;
             float angleDeg = (float) Math.toDegrees(Math.atan2(dy, dx));
             angleDeg = (angleDeg % 360 + 360) % 360;
-            float[] dirs = {0, 90, 180, 270};
             int index = 0;
-            float minDiff = Math.abs(angleDeg - dirs[0]);
-            for (int i = 1; i < 4; i++) {
-                float diff = Math.abs(angleDeg - dirs[i]);
+            float minDiff = Math.abs(angleDeg - 0);
+            float[] dirs = {0, 90, 180, 270};
+            for (int j = 1; j < 4; j++) {
+                float diff = Math.abs(angleDeg - dirs[j]);
                 if (diff < minDiff) {
                     minDiff = diff;
-                    index = i;
+                    index = j;
                 }
             }
             batch.draw(arrows[index], arrowX + 120f, arrowY - 10f, 20f, 20f);
         }
         // restore scale for other UI usage
         font.getData().setScale(0.8f);
+    }
+
+    private Vector2 findNearestWalkableTile(int startX, int startY, int goalX, int goalY) {
+        if (isWalkable(goalX, goalY)) return new Vector2(goalX, goalY);
+        for (int dist = 1; dist < 10; dist++) {
+            for (int dx = -dist; dx <= dist; dx++) {
+                for (int dy = -dist; dy <= dist; dy++) {
+                    if (Math.abs(dx) + Math.abs(dy) == dist) {
+                        int nx = goalX + dx;
+                        int ny = goalY + dy;
+                        if (nx >= 0 && ny >= 0 && nx < collisionLayer.getWidth() && ny < collisionLayer.getHeight() && isWalkable(nx, ny)) {
+                            return new Vector2(nx, ny);
+                        }
+                    }
+                }
+            }
+        }
+        return new Vector2(goalX, goalY);
+    }
+
+    private boolean isWalkable(int x, int y) {
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(x, y);
+        return cell == null || cell.getTile().getId() != mapWallsId;
     }
 
     private static class Node {
