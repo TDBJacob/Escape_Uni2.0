@@ -95,10 +95,12 @@ public class Trap {
     }
 
     /**
-     * Reduce Player speed to 0
+     * Get the speed multiplier for the player when trapped.
+     * Returns 0 when active (no movement), 1 when inactive (normal speed).
+     * @return speed multiplier based on trap active state
      */
     public float getSlowMultiplier() {
-        return 0;
+        return isActive ? 0f : 1f;
     }
 
     /**
