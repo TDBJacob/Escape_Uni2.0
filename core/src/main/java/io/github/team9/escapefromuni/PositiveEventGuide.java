@@ -63,6 +63,10 @@ public class PositiveEventGuide {
         return completed;
     }
 
+    public int getStage() {
+        return stage;
+    }
+
     /**
      * Call each frame with player center coords.
      */
@@ -103,14 +107,7 @@ public class PositiveEventGuide {
         }
         Vector2 target = (stage == 0) ? roncookePos : langwithPos;
         float dist = (float) Math.sqrt((target.x - playerX)*(target.x - playerX) + (target.y - playerY)*(target.y - playerY));
-        String label = (stage == 0) ? "Follow arrows through the maze to RonCooke" : "Follow arrows back to Langwith";
-        String hint = String.format("%s  (%.0fm)", label, dist);
-        // Draw text under score in UI space
-        float textX = camera.position.x - camera.viewportWidth / 2f + 20f;
-        float textY = camera.position.y + camera.viewportHeight / 2f - 60f;
-        font.setColor(Color.YELLOW);
-        font.getData().setScale(0.5f);
-        font.draw(batch, hint, textX, textY);
+        // Hint is now drawn in UI
         // Compute path
         int pTileX = (int)(playerX / tileW);
         int pTileY = (int)(playerY / tileH);
@@ -164,8 +161,6 @@ public class PositiveEventGuide {
             }
             batch.draw(arrows[index], arrowX + 120f, arrowY - 10f, 20f, 20f);
         }
-        // restore scale for other UI usage
-        font.getData().setScale(0.8f);
     }
 
     private Vector2 findNearestWalkableTile(int startX, int startY, int goalX, int goalY) {
