@@ -10,10 +10,6 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Tests the Trap class
- * 
- * 
- * 
- * 
  */
 public class TrapTest extends BaseTest{ // Base Test creates headless backend and creates mock graphics
 

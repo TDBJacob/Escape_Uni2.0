@@ -26,6 +26,14 @@ public class PositiveEventGuide {
     private final TiledMapTileLayer collisionLayer;
     private final int tileW, tileH, mapWallsId;
 
+    /**
+     * Constructs a new PositiveEventGuide.
+     * @param roncookePos the position of RonCooke building
+     * @param langwithPos the position of Langwith building
+     * @param arrivalRadius Radius that checks for player arrival
+     * @param collisionLayer the tiled map collision layer for pathfinding
+     * @param mapWallsId the tile ID for walls in the collision layer
+     */
     public PositiveEventGuide(Main game, Vector2 roncookePos, Vector2 langwithPos, float arrivalRadius, BitmapFont font, TiledMapTileLayer collisionLayer, int mapWallsId) {
         this.game = game;
         this.roncookePos = roncookePos;
@@ -41,6 +49,10 @@ public class PositiveEventGuide {
     }
 
 
+    /**
+     * Starts the guide if not already completed.
+     * Increments the positive events counter
+     */
     public void start() {
         if (!completed) {
             active = true;
@@ -51,24 +63,42 @@ public class PositiveEventGuide {
         }
     }
 
+    /**
+     * Stops the guide.
+     */
     public void stop() {
         active = false;
     }
 
+    /**
+     * Checks if the guide is currently active
+     * @return true if active, false otherwise
+     */
     public boolean isActive() {
         return active && !completed;
     }
 
+    /**
+     * Checks if the guide has been completed.
+     * @return true if completed, false otherwise
+     */
     public boolean isCompleted() {
         return completed;
     }
 
+    /**
+     * Gets the current stage of the guide.
+     * @return 0 for RonCooke stage, 1 for Langwith stage
+     */
     public int getStage() {
         return stage;
     }
 
     /**
-     * Call each frame with player center coords.
+     * Updates the guide's state based on player position.
+     * Advances stages or completes the guide when the player reaches targets.
+     * @param playerX the player's x-coordinate
+     * @param playerY the player's y-coordinate
      */
     public void update(float playerX, float playerY) {
         if (!active || completed) return;
@@ -93,8 +123,12 @@ public class PositiveEventGuide {
     }
 
     /**
-     * Draw a simple directional hint overlay.
-     * Call after setting SpriteBatch projection (game.batch.begin()).
+     * Renders the guide's directional arrows on the map.
+     * Draws arrows along the path to the current target using A* pathfinding.
+     * @param batch the SpriteBatch to draw with
+     * @param camera the camera for rendering
+     * @param playerX the player's x-coordinate
+     * @param playerY the player's y-coordinate
      */
     public void render(SpriteBatch batch, Camera camera, float playerX, float playerY) {
         if (!isActive()) return;

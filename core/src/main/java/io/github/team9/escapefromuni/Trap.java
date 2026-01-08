@@ -26,16 +26,15 @@ public class Trap {
         this.y = y; // center y
         this.isVisible = isVisible;
         this.originScreen = originScreen;
-        // default activation radius = half the max dimension of the image (so standing on sprite triggers)
         float imgW = img.getWidth() * img.getScaleX();
         float imgH = img.getHeight() * img.getScaleY();
         this.activationRadius = Math.max(imgW, imgH) / 2f;
     }
 
     /**
-     * Check if player's center point is on the trap image (requires player to be on the trap)
-     * Trap coordinates (x,y) are interpreted as the trap center.
-     * Uses a small activation radius (in pixels) around the trap center.
+     * Ensure Player is within range
+     * Trap coordinates (x,y) 
+     * Small Activation radius around the trap
      * @param playerCenterX player's center x coordinate
      * @param playerCenterY player's center y coordinate
      * @return true if player's center is inside the trap active radius
@@ -47,6 +46,9 @@ public class Trap {
         return distSq <= activationRadius * activationRadius;
     }
 
+    /**
+     * Activate Trap Radius
+     */
     public void setActivationRadius(float radius) {
         this.activationRadius = radius;
     }
@@ -70,7 +72,7 @@ public class Trap {
     }
 
     /**
-     * Check if player pressed the escape key
+     * Check if player pressed the escape key "F"
      * @param keyPressed the key that was pressed
      * @return true if the correct key was pressed
      */
@@ -92,18 +94,30 @@ public class Trap {
         }
     }
 
+    /**
+     * Reduce Player speed to 0
+     */
     public float getSlowMultiplier() {
         return 0;
     }
 
+    /**
+     * Check if Trap is active
+     */
     public boolean isActive() {
         return isActive;
     }
 
+    /**
+     * Check if Player clicked Escape Key
+     */
     public void setEscapeKey(String key) {
         this.escapeKey = key;
     }
 
+    /**
+     * Getters for unit testing and accessing private attribute
+     */
     public float getTrapDuration() {
         return trapDuration;
     }
