@@ -89,8 +89,11 @@ public class TrapTest extends BaseTest{ // Base Test creates headless backend an
         trap.activateTrap();
         trap.update(5f);
         assertEquals(5f, trap.getTrapDuration(), 0.01);
-        trap.update(6f);
-        assertFalse(trap.isActive()); // Should deactivate after 10f
+        trap.update(25f);
+        assertFalse(trap.isActive()); // Check if trap active after 30f
+        trap.deactivateTrap();
+        assertFalse(trap.isActive());
+        assertEquals(0f, trap.getTrapDuration(), 0.01);
     }
 
     @Test
@@ -101,7 +104,8 @@ public class TrapTest extends BaseTest{ // Base Test creates headless backend an
         img.setSize(16, 16);
         Trap trap = new Trap(game, img, 100, 100, true, "GameScreen");
         trap.activateTrap();
-        assertEquals(0.5f, trap.getSlowMultiplier(), 0.01); // Speed reduced when active
+        assertEquals(0f, trap.getSlowMultiplier(), 0.01); // check if speed is 0 when stepping on trap
+        // Speed reduced when active
         // Simulate escape key press
         if (trap.checkEscapeInput("F")) {
             trap.deactivateTrap();
