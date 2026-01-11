@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import static io.github.team9.escapefromuni.Fish.fishText;
+
 /**
  * GameScreen - main gameplay screen
  *
@@ -174,6 +176,7 @@ public class GameScreen implements Screen {
         );
 
         initialiseAchievements();
+
     }
 
     /**
@@ -238,6 +241,8 @@ public class GameScreen implements Screen {
             new Texture("achievementImages/Spooky.png")));
         achievements.add(new Achievement("EatPizza", 50,
             new Texture("achievementImages/EatPizza.png")));
+        //added for hidden features need to add textures
+//        achievements.add(new Achievement("ItBroke?", 50, new Texture("")));
     }
 
 
@@ -804,6 +809,10 @@ public class GameScreen implements Screen {
             game.batch.draw(lighting.render(camera, mapWidth, mapHeight), 0, 0);
         }
 
+        if (fishText){
+            Fish.renderText(game.batch, game.gameFont);
+        }
+
         game.batch.end();
 
         renderUI();
@@ -832,6 +841,8 @@ public class GameScreen implements Screen {
             //check torch counter
             if(torchUseCounter >= 10){
                 torchBroken = true;
+                game.foundHiddenEvents += 1;
+                // jacob: achievements.get(4);
             }
             // Toggle the torch with click
             if(Gdx.input.justTouched() && hasTorch){
@@ -847,6 +858,7 @@ public class GameScreen implements Screen {
                 lighting.isVisible("playerTorch", isTorchOn);
                 audioManager.playTorch();
                 torchTimer -= 1f;
+
             }
         }
         //hidden event logic (if the torch is toggled 10 times the flashlight breaks:
@@ -866,6 +878,7 @@ public class GameScreen implements Screen {
 
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
+
 
         // Draw collected items in inventory bar
         // Display instructions if an item can be used or collected
