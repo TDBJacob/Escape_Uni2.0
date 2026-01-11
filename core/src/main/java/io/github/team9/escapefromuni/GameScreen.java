@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -18,6 +21,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack;
+
+import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +54,12 @@ public class GameScreen implements Screen {
     public final int mapWaterId = 2;
     public final int mapLangwithBarriersId = 3;
     private final int tileDimensions  = 8;
+
+    public MapLayer itemLayer;
+    public MapLayer enemyLayer;
+
+    public Array<mapItems> allLevelItems;
+    public Array<stationaryEnemy> allStatLevelEnemies;
 
     Goose goose = new Goose();
     float stateTime;
@@ -119,6 +130,10 @@ public class GameScreen implements Screen {
 
         initialiseMap(0);
 
+        //generates arrays for items + stationary enemies
+        allLevelItems = mapItems.generateLevelItems(itemLayer);
+        allStatLevelEnemies = stationaryEnemy.generateLevelStatEnemies(enemyLayer);
+
         initialiseAudio();
 
         initialisePlayer(940,1215);
@@ -170,6 +185,10 @@ public class GameScreen implements Screen {
         map = new TmxMapLoader().load("tileMap/map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         collisionLayer = (TiledMapTileLayer)map.getLayers().get(wallLayer);
+
+        //loads in items + stationary enemies from Tiled
+        itemLayer = map.getLayers().get("Items");
+        enemyLayer = map.getLayers().get("Stationary_enemies");
     }
 
     /**
@@ -305,6 +324,9 @@ public class GameScreen implements Screen {
      * @param delta - Time since last frame
      */
     private void update(float delta) {
+
+        mapItems.itemCollision(allLevelItems);
+        stationaryEnemy.statEnemyCollision(allStatLevelEnemies);
 
         framesElapsed += 1;
 
@@ -672,6 +694,9 @@ public class GameScreen implements Screen {
         mapImg.draw(game.batch, 1);
         stateTime += delta;
 
+        mapItems.render(allLevelItems, game.batch);
+        stationaryEnemy.render(allStatLevelEnemies, game.batch, game.gameFont);
+
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
 
@@ -865,7 +890,6 @@ public class GameScreen implements Screen {
         float textX = (worldWidth - layout.width) / 2;
         if(isDark){
             drawText(bigFont, instructions,Color.WHITE, textX, worldHeight* 0.75f);
-
         }else {
             drawText(bigFont, instructions, Color.BLACK, textX, worldHeight * 0.75f);
         }
@@ -884,10 +908,13 @@ public class GameScreen implements Screen {
 
         // Requirements: Events tracker and game timer
         drawText(smallFont, ("Negative Events: " + game.foundNegativeEvents), Color.WHITE, 20, y);
+
         y -= lineSpacing;
         drawText(smallFont, ("Positive Events: "+ game.foundPositiveEvents +"/"+ game.totalPositiveEvents), Color.WHITE, 20, y);
         y -= lineSpacing;
         drawText(smallFont, ("Hidden Events:   "+ game.foundHiddenEvents+"/"+ game.totalHiddenEvents), Color.WHITE, 20, y);
+        y -= lineSpacing;
+        drawText(smallFont, ("Coin count:      "+ (int)player.coinCount+"/"+ 15), Color.WHITE, 20, y);
         y -= lineSpacing;
         if (!guideHint.isEmpty()) {
             drawText(smallFont, guideHint, Color.YELLOW, 20, y);
@@ -973,7 +1000,7 @@ public class GameScreen implements Screen {
      * @param x     The x-coordinate for text position
      * @param y     The y-coordinate for text position
      */
-    private void drawText(BitmapFont font, String text, Color colour, float x, float y) {
+    public void drawText(BitmapFont font, String text, Color colour, float x, float y) {
         font.setColor(colour);
         font.draw(game.batch, text, x, y);
     }

@@ -110,6 +110,7 @@ public class PauseScreen implements Screen {
         mainMenuButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {;
                 dispose();
+                Player.itemSpeedBoost = 1;
                 game.resetGame();
             }
             @Override

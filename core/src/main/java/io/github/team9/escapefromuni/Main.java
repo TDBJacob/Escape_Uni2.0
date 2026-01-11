@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 public class Main extends Game{
 
     public SpriteBatch batch;
-    public BitmapFont menuFont;
+    public static BitmapFont menuFont;
     public BitmapFont gameFont;
     public FitViewport viewport;
     public Skin buttonSkin;
@@ -32,9 +32,9 @@ public class Main extends Game{
     public final int totalPositiveEvents = 2;
     public final int totalHiddenEvents = 1;
 
-    public int foundNegativeEvents = 0;
-    public int foundPositiveEvents = 0;
-    public int foundHiddenEvents = 0;
+    public static int foundNegativeEvents = 0;
+    public static int foundPositiveEvents = 0;
+    public static int foundHiddenEvents = 0;
 
     public boolean atePizza;
     /**
@@ -111,5 +111,13 @@ public class Main extends Game{
         if (batch != null) {
             batch.dispose();
         }
+    }
+
+    //general distance checking function
+    public static boolean inRange(float range, float x1, float y1, float x2, float y2) {
+        if (range > (Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))))) {
+            return true;
+        }
+        return false;
     }
 }
