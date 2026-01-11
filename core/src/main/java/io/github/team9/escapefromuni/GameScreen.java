@@ -842,7 +842,7 @@ public class GameScreen implements Screen {
             if(torchUseCounter >= 10){
                 torchBroken = true;
                 game.foundHiddenEvents += 1;
-                achievements.get(4).unlock(game);
+                // jacob: achievements.get(4);
             }
             // Toggle the torch with click
             if(Gdx.input.justTouched() && hasTorch){
@@ -858,6 +858,7 @@ public class GameScreen implements Screen {
                 lighting.isVisible("playerTorch", isTorchOn);
                 audioManager.playTorch();
                 torchTimer -= 1f;
+
             }
         }
         //hidden event logic (if the torch is toggled 10 times the flashlight breaks:
