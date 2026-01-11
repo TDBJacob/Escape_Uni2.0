@@ -15,7 +15,7 @@ public class BuildingManagerTest {
 
     public void setup() {
         // Instantiate everything new game
-        game = new Main()
+        game = new Main();
 
     }
 

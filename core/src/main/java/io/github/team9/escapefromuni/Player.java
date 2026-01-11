@@ -33,6 +33,10 @@ public class Player extends SpriteAnimations{
     public boolean hasEnteredLangwith;
     private AudioManager audioManager;
     boolean isFootsteps = false;
+
+    private Fish fish;
+    private float waterTimer = 0f;
+    private float Five_Seconds_In_Water = 5f;
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
@@ -42,6 +46,7 @@ public class Player extends SpriteAnimations{
         this.audioManager = audioManager;
         this.mapLangwithBarriersId = mapLangwithBarriersId;
         this.mapWaterId = waterId;
+        this.fish = new Fish(g);
         game = g;
         // HashMap<String, Integer[]> animationInfo:
         //      key - Name of animation
@@ -66,6 +71,19 @@ public class Player extends SpriteAnimations{
         torch.setRotation(180);
 
 
+    }
+
+    private void updateWaterTimer(float delta) {
+        if (inWater) {
+            waterTimer += delta;
+
+            if (waterTimer >= Five_Seconds_In_Water) {
+                fish.onPlayerInWaterTooLong();
+                waterTimer = 0f; // reset so it can trigger again
+            }
+        } else {
+            waterTimer = 0f; // reset when leaving water
+        }
     }
 
     /**
@@ -154,6 +172,8 @@ public class Player extends SpriteAnimations{
             isFootsteps = false;
             audioManager.stopFootsteps();
         }
+
+        updateWaterTimer(delta);
 
     }
 

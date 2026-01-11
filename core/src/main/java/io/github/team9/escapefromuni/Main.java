@@ -37,6 +37,7 @@ public class Main extends Game{
     public int foundHiddenEvents = 0;
 
     public boolean atePizza;
+
     /**
      * Initialise global game variables
      */
