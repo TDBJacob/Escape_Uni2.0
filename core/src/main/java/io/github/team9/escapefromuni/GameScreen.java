@@ -106,7 +106,9 @@ public class GameScreen implements Screen {
     private boolean guideActive = false;
     private String guideHint = "";
 
-
+    public float torchTimer = 0f;
+    public int torchUseCounter = 0;
+    public boolean torchBroken = false;
 
     /**
      * Initialise the game elements
@@ -273,7 +275,7 @@ public class GameScreen implements Screen {
         int tileW = collisionLayer.getTileWidth();
         int tileH = collisionLayer.getTileHeight();
         trapTexture = new Texture(Gdx.files.internal("Traps/Bear_Trap.png"));
-        
+
         for (int i = 0; i < 9; i++) {
             int tx = 50 + i * 10;
             int ty = 150 - i * 10;
@@ -353,7 +355,7 @@ public class GameScreen implements Screen {
             trap.playerWasInRange = inRange;
 
             trap.update(delta);
-            
+
             if (trap.isActive()) {
                 playerSpeedModifier = trap.getSlowMultiplier();
                 trapped = true;
@@ -801,13 +803,28 @@ public class GameScreen implements Screen {
             isEPressed = true;
         }
 
-
-        // Toggle the torch with click
-        if(Gdx.input.justTouched() && hasTorch){
-            isTorchOn = !isTorchOn;
-            lighting.isVisible("playerTorch", isTorchOn);
-            audioManager.playTorch();
+        if(!torchBroken){
+            //check torch counter
+            if(torchUseCounter >= 10){
+                torchBroken = true;
+            }
+            // Toggle the torch with click
+            if(Gdx.input.justTouched() && hasTorch){
+                isTorchOn = !isTorchOn;
+                lighting.isVisible("playerTorch", isTorchOn);
+                audioManager.playTorch();
+                torchUseCounter += 1;
+            }
+        } else if (torchBroken) {
+            torchTimer += delta;
+            if(torchTimer >= 1f){
+                isTorchOn = !isTorchOn;
+                lighting.isVisible("playerTorch", isTorchOn);
+                audioManager.playTorch();
+                torchTimer -= 1f;
+            }
         }
+        //hidden event logic (if the torch is toggled 10 times the flashlight breaks:
 
     }
 
