@@ -16,6 +16,10 @@ public class AudioManager {
     private final Music music;
     private final Sound noAccess;
     private final Sound collect;
+    public static Sound coin;
+    public static Sound planet;
+    public static Sound essay;
+    public static Sound dean;
 
     /**
      * Initialised audio manager
@@ -29,6 +33,12 @@ public class AudioManager {
         footSteps = createSound("soundEffects/footsteps.mp3");
         noAccess = createSound("soundEffects/wrong.mp3");
         collect = createSound("soundEffects/tap.mp3");
+
+        coin = createSound("soundEffects/coin-drop-422703.mp3");
+        planet = createSound("soundEffects/laser-90052.mp3");
+        essay = createSound("soundEffects/paper-rip-sfx-432494.mp3");
+        dean = createSound("soundEffects/happy-message-ping-351298.mp3");
+
         music = createMusic("soundEffects/music.mp3");
         playMusic();
     }
@@ -51,6 +61,12 @@ public class AudioManager {
         noAccess.play(game.gameVolume);
     }
     public void playCollect(){collect.play(game.gameVolume);}
+
+    public static void playCoinSound(){coin.play();}
+    public static void playPlanetSound(){planet.play();}
+    public static void playEssaySound(){essay.play();}
+    public static void playDeanSound(){dean.play();}
+
     public void loopFootsteps(){
         footSteps.loop(.2f *game.gameVolume);
     }
@@ -75,7 +91,6 @@ public class AudioManager {
 
 
     public void dispose(){
-
         if (torchClick != null) {
             torchClick.dispose();
         }

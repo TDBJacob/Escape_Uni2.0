@@ -17,13 +17,6 @@ public class ExampleTest extends BaseTest { //needed as a base to create other t
         otherNum = 15;
         assertEquals(15, otherNum);
     }
-
-    @Test //marks test code and is needed before every block of test code
-    public void playSoundTest() {
-        int otherNum;
-        otherNum = 15;
-        assertEquals(15, otherNum);
-    }
 }
 
 //If you take the stuff down here, it's a good template

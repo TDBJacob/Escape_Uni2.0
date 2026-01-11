@@ -29,7 +29,8 @@ public class BuildingManager {
     private boolean showEnterPrompt = false;
     private String currentBuilding = "";
     private float lockedOutTime = 0;
-
+    public float originalPlayerX;
+    public float originalPlayerY;
     AudioManager audioManager;
     // ====== Building Trigger Zones ======
     private final Rectangle ronCookeTrigger;
@@ -52,7 +53,6 @@ public class BuildingManager {
         this.player = player;
         this.ronCookeTrigger = new Rectangle(350, 455, 50, 50);
         this.langwithTrigger = new Rectangle(1078, 1215, 50, 50);
-
         this.audioManager = audioManager;
     }
 
@@ -72,11 +72,16 @@ public class BuildingManager {
             // Outside: check if player is near the building
             checkBuildingTrigger();
             if (showEnterPrompt && currentBuilding.equals("Ron Cooke") && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+                //collects entry coordinates to be used when exiting
+                originalPlayerX = Player.getPlayerX();
+                originalPlayerY = Player.getPlayerY();
                 enterRonCooke();
             }
             else if(showEnterPrompt && currentBuilding.equals("Langwith") && Gdx.input.isKeyJustPressed(Input.Keys.G)) {
                 if(gameScreen.items.get("keyCard").playerHas) {
-
+                    //collects entry coordinates to be used when exiting
+                    originalPlayerX = Player.getPlayerX();
+                    originalPlayerY = Player.getPlayerY();
                     gameScreen.items.get("keyCard").playSound();
                     enterLangwith();
                 }
@@ -153,8 +158,11 @@ public class BuildingManager {
     public void exitBuilding() {
         inRonCooke = false;
         inLangwith = false;
+        player.sprite.setScale(1);
+        //return player to the position they entered at
+        Player.setPlayerX(originalPlayerX);
+        Player.setPlayerY(originalPlayerY);
         game.setScreen(gameScreen);
-
     }
 
     /**

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class Player extends SpriteAnimations{
     protected int mapLangwithBarriersId;
     protected int mapWaterId;
 
-    public Sprite sprite;
+    public static Sprite sprite;
     private Texture torchTexture;
     public Image torch;
 
@@ -37,6 +38,14 @@ public class Player extends SpriteAnimations{
     private Fish fish;
     private float waterTimer = 0f;
     private float Five_Seconds_In_Water = 5f;
+
+    public static boolean hasEssay = false;
+    public static float coinCount = 0;
+    public static float itemSpeedBoost = 1;
+
+    public static float oldX;
+    public static float oldY;
+
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
@@ -91,7 +100,7 @@ public class Player extends SpriteAnimations{
      * @param delta time in seconds since last frame
      */
     public void handleInput(float delta, float speedModifier) {
-        float actualSpeed = speed * speedModifier * 150f * delta;
+        float actualSpeed = speed * speedModifier* 200f * delta * itemSpeedBoost;
         if(inWater){actualSpeed /=2;}
         TiledMapTileLayer.Cell cell;
         int x = (int)(sprite.getX()+(sprite.getWidth()/2))/tileDimensions;
@@ -99,6 +108,9 @@ public class Player extends SpriteAnimations{
         int mapWidth = wallsLayer.getWidth();
         int mapHeight = wallsLayer.getHeight();
 
+        //collects coordinates before movement for collision logic
+        oldX = sprite.getX();
+        oldY = sprite.getY();;
 
         isMoving = false;
         isFacingLeft = false;
@@ -266,5 +278,27 @@ public class Player extends SpriteAnimations{
     public void dispose() {
         super.dispose();
         torchTexture.dispose();
+    }
+
+    //the following are mainly for testing but can be used for other purposes where there is a risk of changing coordinates accidentally
+    //getters and setters for other classes to use
+    public static float getPlayerX() {
+        return sprite.getX();
+    }
+
+    public static float getPlayerY() {
+        return sprite.getY();
+    }
+
+    public static void setPlayerX(float newX) {
+        sprite.setX(newX);
+    }
+
+    public static void setPlayerY(float newY) {
+        sprite.setY(newY);
+    }
+
+    public static Rectangle getPlayerBounds() {
+        return new Rectangle(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
     }
 }

@@ -5,8 +5,6 @@ import com.badlogic.gdx.Gdx;
 
 public class BuildingManagerTest {
 
-    private final Main game;
-    private final GameScreen gameScreen;
     private boolean inRonCooke = false;
     private boolean inLangwith = false;
     private boolean showEnterPrompt = false;
@@ -15,7 +13,6 @@ public class BuildingManagerTest {
 
     public void setup() {
         // Instantiate everything new game
-        game = new Main();
 
     }
 
