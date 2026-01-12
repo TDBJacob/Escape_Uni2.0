@@ -123,6 +123,9 @@ public class GameScreen implements Screen {
     public int torchUseCounter = 0;
     public boolean torchBroken = false;
 
+    Slider slidingEnemy = new Slider(95, 20, 150);
+
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -495,6 +498,8 @@ public class GameScreen implements Screen {
                 int[] runCoords = goose.nextRunLocation();
                 goose.moveGoose(stateTime,runCoords[0],runCoords[1],true, false);
                 }
+
+
             // If there are baby geese, they follow the goose directly in front of them
             Goose trail = goose;
             float stateOffset = 0.075f;
@@ -593,6 +598,8 @@ public class GameScreen implements Screen {
             goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
 
         } // End isPaused
+
+        this.slidingEnemy.update(delta, this.player);
 
         // If time up
         if(!gameoverTrigger && game.gameTimer <= 0) {
@@ -705,6 +712,7 @@ public class GameScreen implements Screen {
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
 
+
         // Render positive event guide arrows if active
         if (positiveGuide != null && guideActive && positiveGuide.isActive()) {
             positiveGuide.render(game.batch, camera, player.sprite.getX() + player.sprite.getWidth() / 2f, player.sprite.getY() + player.sprite.getHeight() / 2f);
@@ -812,7 +820,7 @@ public class GameScreen implements Screen {
         if (fishText){
             Fish.renderText(game.batch, game.gameFont);
         }
-
+        this.slidingEnemy.draw(game.batch);
         game.batch.end();
 
         renderUI();
