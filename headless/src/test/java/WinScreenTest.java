@@ -90,11 +90,11 @@ public class WinScreenTest {
         Gdx.input = mockInput;
         Gdx.graphics = mockGraphics;
 
-        // Configure mock game
-        when(mockGame.viewport).thenReturn(mockViewport);
-        when(mockGame.batch).thenReturn(mockBatch);
-        when(mockGame.menuFont).thenReturn(mockFont);
-        when(mockGame.buttonSkin).thenReturn(mockSkin);
+        // Configure mockGame
+        mockGame.viewport = mockViewport;
+        mockGame.batch = mockBatch;
+        mockGame.menuFont = mockFont;
+        mockGame.buttonSkin = mockSkin;
 
         // Configure viewport
         when(mockViewport.getWorldWidth()).thenReturn(800f);
