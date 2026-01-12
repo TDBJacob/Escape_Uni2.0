@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: rgb(27, 37, 64);
+}
+
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 60px auto;
+    background-color: rgb(27, 37, 64);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    padding-bottom: 60px;
+}
+.panel h1 {
+    color: white;
+    text-align: center;
+}
+.panel h2 {
+    color: white;
+    text-align: center;
+}
+.panel {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.old-projects {
+    background-color: rgb(27, 37, 64);
+    border-right: 2px solid rgb(27, 37, 64);
+}
+
+.new-projects {
+    background-color: rgb(27, 37, 64);
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+.links {
+    list-style-type: none;
+    padding: 0;
+}
+
+.links li {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background-color: rgb(59, 68, 94);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.links li a {
+    text-decoration: none;
+    color: rgb(255, 165, 0);
+    display: block;
+    text-align: center;
+}
+
+.links li a:hover {
+    text-decoration: underline;
+    color: white;
+}
+
+.header {
+    max-width: 1200px;
+    margin: 40px auto 20px auto;
+    padding: 20px;
+    background-color: RGB(122, 121, 210);
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    background-color: rgb(27, 37, 64);
+    padding: 10px;
+    color: white;
+    font-size: 14px;
+    z-index: 1;
+}
+
+.extra-links {
+    background-color: rgb(27, 37, 64);
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.extra-links h2 {
+    color: white;
+    margin-bottom: 15px;
+}
+
+.extra-links ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.extra-links li {
+    margin: 10px 0;
+    padding: 8px 12px;
+    background-color: rgb(59, 68, 94);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    max-width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.extra-links li a {
+    text-decoration: none;
+    color: rgb(255, 165, 0);
+    text-align: center;
+}
+
+.extra-links li a:hover {
+    text-decoration: underline;
+    color: white;
+}
