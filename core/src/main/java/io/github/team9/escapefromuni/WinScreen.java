@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -25,6 +26,8 @@ import java.util.Collections;
 public class WinScreen implements Screen {
 
     private final Main game;
+
+    public final String leaderboardFilePath = "leaderboardEntries.txt";
 
     // stage and resources created in show() and disposed in dispose()
     private Stage stage;
@@ -85,6 +88,8 @@ public class WinScreen implements Screen {
         //leaderboardEntries.add(new LeaderboardEntry("i",123));
         //leaderboardEntries.add(new LeaderboardEntry("jjjjj",233));
         //leaderboardEntries.add(new LeaderboardEntry("kkk",320));
+
+        leaderboardEntries = readEntriesFromFile(leaderboardFilePath);
 
         Collections.sort(leaderboardEntries); // sort the entries by score, descending
     }
@@ -176,6 +181,14 @@ public class WinScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 submitName();
             }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                submitButton.setColor(clickColor);
+            }
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                submitButton.setColor(normalColor);
+            }
         });
     }
 
@@ -184,7 +197,9 @@ public class WinScreen implements Screen {
 
         if (name.isEmpty()) return;
 
-        leaderboardEntries.add(new LeaderboardEntry(name, (int)game.score));
+        //leaderboardEntries.add(new LeaderboardEntry(name, (int)game.score));
+
+        writeEntryToFile(leaderboardFilePath, name, (int)game.score);
 
         submitButton.setVisible(false);
         nameField.setVisible(false);
@@ -276,6 +291,49 @@ public class WinScreen implements Screen {
             Gdx.input.setInputProcessor(previousInputProcessor);
             previousInputProcessor = null;
         }
+    }
+
+    /**
+     * append a new leaderboard entry to the leaderboard entries text file
+     * @param filePath the file path of the leaderboard entries text file
+     * @param entryName the name for the entry
+     * @param score the score for the entry
+     */
+    public void writeEntryToFile(String filePath, String entryName, int score) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(entryName + "," + score);
+            writer.newLine();
+        } catch (IOException e) {
+            Gdx.app.error("WinScreen", "Error when writing leaderboard entry", e);
+        }
+    }
+
+    /**
+     * read the leaderboard entries from the leaderboard entries text file
+     * @param filePath the file path of the leaderboard entries text file
+     */
+    public ArrayList<LeaderboardEntry> readEntriesFromFile(String filePath) {
+        ArrayList<LeaderboardEntry> entries = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                // Separate the name and score on each line
+                String[] parts = line.split(",");
+
+                // Check that the entry in the file is a valid pair of name,score
+                if (parts.length == 2) {
+                    String name = parts[0];
+                    int score = Integer.parseInt(parts[1]);
+                    entries.add(new LeaderboardEntry(name, score));
+                }
+            }
+        } catch (IOException e) {
+            Gdx.app.error("WinScreen", "Error when reading leaderboard entries", e);
+        }
+
+        return entries;
     }
 
     @Override
