@@ -28,6 +28,8 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':core')
+  implementation "org.json:json:20231013"
+
 
   // CHANGED: add JUnit 5 and Mockito to the dependencies
   testImplementation platform('org.junit:junit-bom:5.10.0')
