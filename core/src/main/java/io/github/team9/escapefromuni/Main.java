@@ -30,7 +30,7 @@ public class Main extends Game{
 
     public final int totalNegativeEvents = 2;
     public final int totalPositiveEvents = 2;
-    public final int totalHiddenEvents = 1;
+    public final int totalHiddenEvents = 3;
 
     public static int foundNegativeEvents = 0;
     public static int foundPositiveEvents = 0;
