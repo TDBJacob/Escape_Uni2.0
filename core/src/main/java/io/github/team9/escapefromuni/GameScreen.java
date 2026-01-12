@@ -242,7 +242,7 @@ public class GameScreen implements Screen {
         achievements.add(new Achievement("EatPizza", 50,
             new Texture("achievementImages/EatPizza.png")));
         //added for hidden features need to add textures
-//        achievements.add(new Achievement("ItBroke?", 50, new Texture("")));
+        achievements.add(new Achievement("ItBroke", 100, new Texture("achievementImages/ItBreaks.png")));
     }
 
 
@@ -842,7 +842,7 @@ public class GameScreen implements Screen {
             if(torchUseCounter >= 10){
                 torchBroken = true;
                 game.foundHiddenEvents += 1;
-                // jacob: achievements.get(4);
+                achievements.get(3).unlock(game);
             }
             // Toggle the torch with click
             if(Gdx.input.justTouched() && hasTorch){
