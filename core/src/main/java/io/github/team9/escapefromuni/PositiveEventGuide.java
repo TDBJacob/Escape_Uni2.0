@@ -10,6 +10,11 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
 
+/**
+ * NEW CLASS
+ * Represents Guide to Ron Cooke and Langwith Respectively
+ * 
+ */
 public class PositiveEventGuide {
     private final Main game;
     private final Vector2 roncookePos;

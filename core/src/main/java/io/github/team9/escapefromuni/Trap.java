@@ -3,7 +3,13 @@ package io.github.team9.escapefromuni;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
-
+/**
+ * NEW CLASS
+ * Represents a trap that can immobilise the player when activated.
+ * 
+ * 
+ *  
+ */
 public class Trap {
 
     Main game;
