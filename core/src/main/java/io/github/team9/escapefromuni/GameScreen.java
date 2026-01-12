@@ -123,8 +123,6 @@ public class GameScreen implements Screen {
     public int torchUseCounter = 0;
     public boolean torchBroken = false;
 
-    Slider slidingEnemy = new Slider(95, 20, 150);
-
 
     /**
      * Initialise the game elements
@@ -599,7 +597,6 @@ public class GameScreen implements Screen {
 
         } // End isPaused
 
-        this.slidingEnemy.update(delta, this.player);
 
         // If time up
         if(!gameoverTrigger && game.gameTimer <= 0) {
@@ -820,7 +817,6 @@ public class GameScreen implements Screen {
         if (fishText){
             Fish.renderText(game.batch, game.gameFont);
         }
-        this.slidingEnemy.draw(game.batch);
         game.batch.end();
 
         renderUI();
