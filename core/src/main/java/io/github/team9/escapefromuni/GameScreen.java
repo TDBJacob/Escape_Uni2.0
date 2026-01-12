@@ -123,6 +123,7 @@ public class GameScreen implements Screen {
     public int torchUseCounter = 0;
     public boolean torchBroken = false;
 
+
     /**
      * Initialise the game elements
      * @param game - Instance of Main
@@ -242,7 +243,7 @@ public class GameScreen implements Screen {
         achievements.add(new Achievement("EatPizza", 50,
             new Texture("achievementImages/EatPizza.png")));
         //added for hidden features need to add textures
-//        achievements.add(new Achievement("ItBroke?", 50, new Texture("")));
+        achievements.add(new Achievement("ItBroke", 100, new Texture("achievementImages/ItBreaks.png")));
     }
 
 
@@ -495,6 +496,8 @@ public class GameScreen implements Screen {
                 int[] runCoords = goose.nextRunLocation();
                 goose.moveGoose(stateTime,runCoords[0],runCoords[1],true, false);
                 }
+
+
             // If there are baby geese, they follow the goose directly in front of them
             Goose trail = goose;
             float stateOffset = 0.075f;
@@ -593,6 +596,7 @@ public class GameScreen implements Screen {
             goose.y = Math.max(0, Math.min(goose.y, mapHeight - goose.getHeight()));
 
         } // End isPaused
+
 
         // If time up
         if(!gameoverTrigger && game.gameTimer <= 0) {
@@ -705,6 +709,7 @@ public class GameScreen implements Screen {
         game.batch.draw(goose.currentGooseFrame, goose.x, goose.y);
 
 
+
         // Render positive event guide arrows if active
         if (positiveGuide != null && guideActive && positiveGuide.isActive()) {
             positiveGuide.render(game.batch, camera, player.sprite.getX() + player.sprite.getWidth() / 2f, player.sprite.getY() + player.sprite.getHeight() / 2f);
@@ -812,7 +817,6 @@ public class GameScreen implements Screen {
         if (fishText){
             Fish.renderText(game.batch, game.gameFont);
         }
-
         game.batch.end();
 
         renderUI();
@@ -842,7 +846,7 @@ public class GameScreen implements Screen {
             if(torchUseCounter >= 10){
                 torchBroken = true;
                 game.foundHiddenEvents += 1;
-                // jacob: achievements.get(4);
+                achievements.get(3).unlock(game);
             }
             // Toggle the torch with click
             if(Gdx.input.justTouched() && hasTorch){

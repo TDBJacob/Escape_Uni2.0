@@ -15,4 +15,8 @@ public class LeaderboardEntry implements Comparable<LeaderboardEntry> {
         return Integer.compare(b.score, this.score); // descending
     }
 
+    @Override
+    public String toString() {
+        return entryName + "," + score;
+    }
 }

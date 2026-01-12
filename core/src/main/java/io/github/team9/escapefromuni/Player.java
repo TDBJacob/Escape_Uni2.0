@@ -46,6 +46,8 @@ public class Player extends SpriteAnimations{
     public static float oldX;
     public static float oldY;
 
+    public boolean hasKey = false;
+
     /**
      * Initialises the player and its animations
      * @param g current instance of Main
